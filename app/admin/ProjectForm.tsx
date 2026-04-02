@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { saveProject } from '../actions'
+import { saveProject } from './actions'
 import type { Project, ProjectCategory } from '@/lib/types'
 
 interface ProjectFormProps {

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getProjectBySlug } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
 import ProjectForm from '../../ProjectForm'

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getProjects } from '@/lib/supabase'
 import Link from 'next/link'
 import { deleteProject } from './actions'
