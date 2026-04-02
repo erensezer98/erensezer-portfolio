@@ -30,6 +30,8 @@ export async function logoutAdmin() {
   redirect('/admin/login')
 }
 
+import { revalidatePath } from 'next/cache'
+
 // ─── Project Actions ────────────────────────────────────────────────────────
 export async function saveProject(project: Partial<Project>) {
   try {
@@ -43,6 +45,10 @@ export async function saveProject(project: Partial<Project>) {
       console.error('saveProject error:', error)
       return { error: error.message }
     }
+    
+    // Clear all cached routes to show the updated project instantly
+    revalidatePath('/', 'layout')
+    
     return { data }
   } catch (err) {
     console.error('saveProject unexpected error:', err)
