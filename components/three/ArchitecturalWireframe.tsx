@@ -115,13 +115,6 @@ export default function ArchitecturalWireframe() {
       }
     })
 
-    // Side faces — simple diagonal cross-bracing
-    const sideXs: [number, number][] = [[-W / 2, W / 2], [-W / 2, W / 2]]
-    const sideZPairs: [number, number][] = [[D / 2, -D / 2], [-D / 2, D / 2]]
-    ;[0, 1].forEach((side) => {
-      const x = sideXs[side][0] === sideXs[side][1] ? W / 2 : -W / 2
-      void x // unused — below we do proper sides
-    })
 
     // Side face bracing (left & right sides)
     for (let i = 0; i < FLOORS; i += 2) {

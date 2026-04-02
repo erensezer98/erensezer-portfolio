@@ -32,7 +32,6 @@
 }
 
 @layer components {
-  /* ─── Nav link with animated underline ─── */
   .nav-link {
     @apply relative text-sm tracking-widest uppercase text-charcoal/70 hover:text-charcoal transition-colors duration-200;
   }
@@ -48,39 +47,33 @@
     @apply text-charcoal;
   }
 
-  /* ─── Section label ─── */
   .section-label {
     @apply text-xs tracking-widest uppercase text-salmon font-medium;
   }
 
-  /* ─── Page heading ─── */
   .page-heading {
     @apply font-serif text-5xl md:text-7xl font-light tracking-tight text-charcoal leading-none;
   }
 
-  /* ─── Divider ─── */
   .divider {
     @apply w-full h-px bg-border;
   }
 
-  /* ─── Tag pill ─── */
   .tag {
     @apply inline-block text-xs tracking-wider uppercase px-3 py-1 border border-border text-muted;
   }
 
-  /* ─── Project card hover ─── */
   .project-card {
-    @apply group cursor-pointer;
+    @apply cursor-pointer;
   }
   .project-card .card-image {
     @apply overflow-hidden bg-cream;
   }
   .project-card .card-image img {
-    @apply w-full h-full object-cover transition-transform duration-700 ease-expo-out group-hover:scale-105;
+    @apply w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105;
   }
 }
 
-/* ─── Scrollbar ─────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 4px;
 }

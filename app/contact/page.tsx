@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { submitContactMessage } from '@/lib/supabase'
-import type { Metadata } from 'next'
 
 // Note: metadata export doesn't work in client components —
 // see /app/contact/layout.tsx for metadata if needed.
