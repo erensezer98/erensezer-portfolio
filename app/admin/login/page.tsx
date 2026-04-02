@@ -1,22 +1,27 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { loginAdmin } from '../actions'
 
 export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    
+
     const formData = new FormData(e.currentTarget)
     const passcode = formData.get('passcode') as string
-    
+
     const result = await loginAdmin(passcode)
-    if (result?.error) {
+    if (result?.success) {
+      router.push('/admin')
+      router.refresh()
+    } else if (result?.error) {
       setError(result.error)
       setLoading(false)
     }

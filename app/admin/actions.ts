@@ -9,8 +9,13 @@ const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'Megerenas98'
 
 export async function loginAdmin(passcode: string) {
   if (passcode === ADMIN_PASSCODE) {
-    cookies().set('admin_auth', 'authenticated', { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 60 * 60 * 24 * 7 })
-    redirect('/admin')
+    cookies().set('admin_auth', 'authenticated', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    })
+    return { success: true }
   }
   return { error: 'Invalid passcode' }
 }
