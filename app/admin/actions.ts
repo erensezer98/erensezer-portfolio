@@ -22,6 +22,10 @@ export async function logoutAdmin() {
 
 // ─── Project Actions ────────────────────────────────────────────────────────
 export async function saveProject(project: Partial<Project>) {
+  if (!supabaseAdmin) {
+    return { error: 'Supabase Service Role Key is missing. Check your environment variables.' }
+  }
+  
   // Use supabaseAdmin to bypass RLS
   const { data, error } = await supabaseAdmin
     .from('projects')
@@ -36,6 +40,10 @@ export async function saveProject(project: Partial<Project>) {
 }
 
 export async function deleteProject(id: string) {
+  if (!supabaseAdmin) {
+    return { error: 'Supabase Service Role Key is missing.' }
+  }
+
   const { error } = await supabaseAdmin
     .from('projects')
     .delete()

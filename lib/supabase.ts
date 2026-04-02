@@ -9,13 +9,21 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 // ─── Projects ────────────────────────────────────────────────────────────────
 
 export async function getProjects(): Promise<Project[]> {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .order('order_index', { ascending: true })
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .order('order_index', { ascending: true })
 
-  if (error) throw error
-  return data ?? []
+    if (error) {
+      console.error('Error fetching projects:', error.message)
+      return []
+    }
+    return data ?? []
+  } catch (err) {
+    console.error('Unexpected error in getProjects:', err)
+    return []
+  }
 }
 
 export async function getFeaturedProjects(): Promise<Project[]> {
