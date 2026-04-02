@@ -96,7 +96,7 @@ export default function InteractiveRelight() {
 
     // To prevent the light from acting clunky if the mouse moves very fast,
     // we use a target object
-    let targetLightPos = new THREE.Vector3(0, 2, 0)
+    const targetLightPos = new THREE.Vector3(0, 2, 0)
     
     const onMouseMoveSmooth = (e: MouseEvent) => {
       const bounds = el.getBoundingClientRect()
