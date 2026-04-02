@@ -24,8 +24,21 @@ export default async function HomePage() {
   return (
     <>
       {/* ─── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Three.js canvas — right half on desktop, full background on mobile */}
+      <section className="relative min-h-screen flex items-center overflow-hidden bg-white">
+        {/* Subtle grid background */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, #E9E9E9 1px, transparent 1px),
+              linear-gradient(to bottom, #E9E9E9 1px, transparent 1px)
+            `,
+            backgroundSize: '80px 80px',
+            opacity: 0.5,
+          }}
+        />
+
+        {/* Three.js canvas — right half on desktop */}
         <div className="absolute inset-0 md:left-1/2 pointer-events-none">
           <ArchitecturalWireframe />
         </div>
@@ -33,30 +46,36 @@ export default async function HomePage() {
         {/* Text content */}
         <div className="relative z-10 max-w-screen-xl mx-auto px-6 md:px-10 pt-24 pb-16 w-full">
           <div className="max-w-xl">
-            <p className="section-label mb-6">Architectural Portfolio</p>
+            {/* Eyebrow label */}
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-8 h-px bg-accent" />
+              <p className="section-label">Architectural Portfolio</p>
+            </div>
 
-            <h1 className="font-serif text-6xl md:text-8xl font-light tracking-tight text-charcoal leading-none mb-6">
-              Eren
-              <br />
-              <em className="not-italic text-salmon">Sezer</em>
+            <h1 className="font-sans text-7xl md:text-9xl font-bold tracking-tighter text-carbon leading-[0.9] mb-6">
+              Eren<br />
+              <span className="text-accent">Sezer</span>
             </h1>
 
-            <p className="text-base text-muted max-w-sm leading-relaxed mb-10">
-              Architect &amp; digital designer exploring the intersection of
-              spatial design and technology. Master of Building Architecture,
-              Politecnico di Milano.
+            <p className="text-base text-slate max-w-sm leading-relaxed mb-3 font-light">
+              Architect & digital designer exploring the intersection of
+              spatial design and technology.
+            </p>
+            <p className="text-xs font-mono text-slate/70 tracking-wide mb-10">
+              M.Sc. Building Architecture · Politecnico di Milano
             </p>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
               <Link
                 href="/projects"
-                className="inline-flex items-center gap-3 text-sm tracking-widest uppercase border border-charcoal px-6 py-3 hover:bg-charcoal hover:text-white transition-colors duration-300"
+                className="inline-flex items-center gap-3 text-xs tracking-widest uppercase bg-carbon text-white px-7 py-3.5 hover:bg-accent transition-colors duration-300 font-semibold"
               >
                 View Projects
+                <span className="text-lg leading-none">→</span>
               </Link>
               <Link
                 href="/about"
-                className="text-sm tracking-widest uppercase text-muted hover:text-charcoal transition-colors duration-200 underline underline-offset-4 decoration-border"
+                className="text-xs tracking-widest uppercase text-slate hover:text-carbon transition-colors duration-200 font-medium border-b border-light-gray hover:border-accent pb-0.5"
               >
                 About
               </Link>
@@ -65,38 +84,42 @@ export default async function HomePage() {
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
-          <span className="text-xs tracking-widest uppercase">Scroll</span>
-          <div className="w-px h-10 bg-charcoal animate-pulse" />
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30">
+          <span className="text-[10px] tracking-widest uppercase font-mono">Scroll</span>
+          <div className="w-px h-10 bg-carbon animate-pulse" />
         </div>
       </section>
 
       {/* ─── Featured Projects ────────────────────────────────────────────── */}
       {featured.length > 0 && (
-        <section className="max-w-screen-xl mx-auto px-6 md:px-10 py-24">
-          <div className="flex items-end justify-between mb-12">
+        <section className="max-w-screen-xl mx-auto px-6 md:px-10 py-28">
+          <div className="flex items-end justify-between mb-14">
             <div>
-              <p className="section-label mb-2">Selected Work</p>
-              <h2 className="font-serif text-3xl font-light text-charcoal">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-px bg-accent" />
+                <p className="section-label">Selected Work</p>
+              </div>
+              <h2 className="font-sans text-4xl font-bold text-carbon tracking-tight">
                 Featured Projects
               </h2>
             </div>
             <Link
               href="/projects"
-              className="hidden md:inline-flex text-xs tracking-widest uppercase text-muted hover:text-charcoal transition-colors underline underline-offset-4 decoration-border"
+              className="hidden md:inline-flex items-center gap-2 text-xs tracking-widest uppercase text-slate hover:text-accent transition-colors font-medium"
             >
-              All Projects →
+              All Projects
+              <span>→</span>
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {featured.slice(0, 4).map((project) => (
               <Link
                 key={project.id}
                 href={`/projects/${project.slug}`}
                 className="project-card group"
               >
-                <div className="card-image aspect-[4/3] mb-4">
+                <div className="card-image aspect-[4/3] mb-4 rounded-lg">
                   {project.cover_image ? (
                     <Image
                       src={project.cover_image}
@@ -106,8 +129,8 @@ export default async function HomePage() {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="w-full h-full bg-cream flex items-center justify-center">
-                      <span className="text-xs tracking-widest uppercase text-muted">
+                    <div className="w-full h-full bg-off-white flex items-center justify-center">
+                      <span className="text-xs tracking-widest uppercase text-slate/50 font-mono">
                         {project.title}
                       </span>
                     </div>
@@ -115,14 +138,14 @@ export default async function HomePage() {
                 </div>
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-sans font-medium text-charcoal group-hover:text-salmon transition-colors duration-200">
+                    <h3 className="font-semibold text-carbon group-hover:text-accent transition-colors duration-200 tracking-tight">
                       {project.title}
                     </h3>
-                    <p className="text-sm text-muted mt-0.5">
+                    <p className="text-xs text-slate mt-1 font-mono">
                       {project.year} · {project.location}
                     </p>
                   </div>
-                  <span className="tag capitalize mt-0.5">{project.category}</span>
+                  <span className="tag capitalize">{project.category}</span>
                 </div>
               </Link>
             ))}
@@ -130,25 +153,28 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ─── Static fallback grid (shown when Supabase not configured) ────── */}
+      {/* ─── Static fallback grid ────────────────────────────────────────── */}
       {featured.length === 0 && (
-        <section className="max-w-screen-xl mx-auto px-6 md:px-10 py-24">
-          <div className="flex items-end justify-between mb-12">
+        <section className="max-w-screen-xl mx-auto px-6 md:px-10 py-28">
+          <div className="flex items-end justify-between mb-14">
             <div>
-              <p className="section-label mb-2">Selected Work</p>
-              <h2 className="font-serif text-3xl font-light text-charcoal">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-px bg-accent" />
+                <p className="section-label">Selected Work</p>
+              </div>
+              <h2 className="font-sans text-4xl font-bold text-carbon tracking-tight">
                 Featured Projects
               </h2>
             </div>
             <Link
               href="/projects"
-              className="hidden md:inline-flex text-xs tracking-widest uppercase text-muted hover:text-charcoal transition-colors underline underline-offset-4 decoration-border"
+              className="hidden md:inline-flex items-center gap-2 text-xs tracking-widest uppercase text-slate hover:text-accent transition-colors font-medium"
             >
-              All Projects →
+              All Projects <span>→</span>
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               { title: 'The Food Tower', year: 2022, location: 'Milan', category: 'Academic' },
               { title: 'The Log', year: 2021, location: 'Milan', category: 'Academic' },
@@ -156,17 +182,17 @@ export default async function HomePage() {
               { title: 'Hungarian Csarda', year: 2022, location: 'South Korea', category: 'Freelance' },
             ].map((p) => (
               <Link key={p.title} href="/projects" className="project-card group">
-                <div className="card-image aspect-[4/3] mb-4 bg-cream flex items-center justify-center">
-                  <span className="text-xs tracking-widest uppercase text-muted opacity-60">
+                <div className="card-image aspect-[4/3] mb-4 bg-off-white flex items-center justify-center rounded-lg">
+                  <span className="text-xs tracking-widest uppercase text-slate/40 font-mono opacity-60">
                     {p.title}
                   </span>
                 </div>
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-sans font-medium text-charcoal group-hover:text-salmon transition-colors duration-200">
+                    <h3 className="font-semibold text-carbon group-hover:text-accent transition-colors duration-200 tracking-tight">
                       {p.title}
                     </h3>
-                    <p className="text-sm text-muted mt-0.5">
+                    <p className="text-xs text-slate mt-1 font-mono">
                       {p.year} · {p.location}
                     </p>
                   </div>
@@ -179,22 +205,38 @@ export default async function HomePage() {
       )}
 
       {/* ─── Interactive Relight Demo ─────────────────────────────────────── */}
-      <section className="relative w-full h-[60vh] bg-[#111] overflow-hidden">
+      <section className="relative w-full h-[65vh] bg-carbon overflow-hidden">
+        {/* Grid overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none z-[1]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px',
+          }}
+        />
         <div className="absolute inset-0 z-0">
           <InteractiveRelight />
         </div>
         <div className="relative z-10 pointer-events-none w-full h-full flex flex-col items-center justify-center text-center px-6">
-          <h2 className="font-serif text-3xl md:text-5xl font-light text-white/90 mb-4 mix-blend-difference">
-            Interactive Relight
+          <div className="flex items-center gap-3 mb-5 justify-center">
+            <div className="w-8 h-px bg-accent" />
+            <p className="section-label text-accent">Interactive</p>
+            <div className="w-8 h-px bg-accent" />
+          </div>
+          <h2 className="font-sans text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+            Architecture of Light
           </h2>
-          <p className="text-white/60 max-w-md text-sm tracking-wide mix-blend-difference">
-            Move your cursor. Powered by Three.js.
+          <p className="text-white/40 max-w-md text-xs tracking-widest font-mono uppercase">
+            Move your cursor · Real-time Three.js lighting
           </p>
         </div>
       </section>
 
-      {/* ─── Brief intro strip ────────────────────────────────────────────── */}
-      <section className="border-t border-border bg-cream">
+      {/* ─── Info strip ───────────────────────────────────────────────────── */}
+      <section className="border-t border-light-gray bg-off-white">
         <div className="max-w-screen-xl mx-auto px-6 md:px-10 py-16 grid md:grid-cols-3 gap-10">
           {[
             {
@@ -204,7 +246,7 @@ export default async function HomePage() {
             },
             {
               label: 'Focus',
-              value: 'Architecture & Technology',
+              value: 'Architecture × Technology',
               sub: 'Digital design & spatial research',
             },
             {
@@ -214,11 +256,11 @@ export default async function HomePage() {
             },
           ].map((item) => (
             <div key={item.label} className="flex flex-col gap-1">
-              <p className="section-label">{item.label}</p>
-              <p className="font-serif text-xl text-charcoal font-light mt-1">
+              <p className="section-label mb-1">{item.label}</p>
+              <p className="font-bold text-carbon text-lg tracking-tight mt-1">
                 {item.value}
               </p>
-              <p className="text-sm text-muted">{item.sub}</p>
+              <p className="text-xs text-slate font-mono">{item.sub}</p>
             </div>
           ))}
         </div>

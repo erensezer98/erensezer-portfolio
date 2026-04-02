@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-space-grotesk: 'Space Grotesk', system-ui, sans-serif;
-  --font-cormorant: 'Cormorant Garamond', Georgia, serif;
+  --font-inter: 'Inter', system-ui, sans-serif;
+  --font-jetbrains: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 @layer base {
@@ -21,69 +21,78 @@
   }
 
   body {
-    @apply bg-white text-charcoal font-sans;
+    @apply bg-white text-carbon font-sans;
     font-size: 15px;
     line-height: 1.6;
   }
 
   ::selection {
-    @apply bg-salmon-pale text-charcoal;
+    @apply bg-accent/15 text-carbon;
   }
 }
 
 @layer components {
+  /* ─── Navigation ───────────────────────────────────────────── */
   .nav-link {
-    @apply relative text-sm tracking-widest uppercase text-charcoal/70 hover:text-charcoal transition-colors duration-200;
+    @apply relative text-[13px] tracking-wide uppercase text-slate hover:text-carbon transition-colors duration-200 font-medium;
   }
   .nav-link::after {
     content: '';
-    @apply absolute -bottom-0.5 left-0 w-0 h-px bg-salmon transition-all duration-300;
+    @apply absolute -bottom-0.5 left-0 w-0 h-[2px] bg-accent transition-all duration-300;
   }
   .nav-link:hover::after,
   .nav-link.active::after {
     @apply w-full;
   }
   .nav-link.active {
-    @apply text-charcoal;
+    @apply text-carbon;
   }
 
+  /* ─── Typography tokens ──────────────────────────────────── */
   .section-label {
-    @apply text-xs tracking-widest uppercase text-salmon font-medium;
+    @apply text-[11px] tracking-[0.2em] uppercase text-accent font-semibold font-mono;
   }
 
   .page-heading {
-    @apply font-serif text-5xl md:text-7xl font-light tracking-tight text-charcoal leading-none;
+    @apply font-sans text-5xl md:text-7xl font-bold tracking-tight text-carbon leading-[1.05];
   }
 
   .divider {
-    @apply w-full h-px bg-border;
+    @apply w-full h-px bg-light-gray;
   }
 
   .tag {
-    @apply inline-block text-xs tracking-wider uppercase px-3 py-1 border border-border text-muted;
+    @apply inline-block text-[10px] tracking-wider uppercase px-3 py-1 border border-light-gray text-slate font-mono rounded-full;
   }
 
+  /* ─── Project Cards ────────────────────────────────────────── */
   .project-card {
-    @apply cursor-pointer;
+    @apply cursor-pointer relative;
   }
   .project-card .card-image {
-    @apply overflow-hidden bg-cream;
+    @apply overflow-hidden bg-off-white rounded-lg;
   }
   .project-card .card-image img {
-    @apply w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105;
+    @apply w-full h-full object-cover transition-transform duration-700 ease-expo-out group-hover:scale-105;
+  }
+
+  /* ─── Glassmorphism helper ─────────────────────────────────── */
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20;
   }
 }
 
+/* ─── Scrollbar ────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #E8E5E1;
-  border-radius: 2px;
+  background: #D4D4D4;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #C4705A;
+  background: #00C2FF;
 }
