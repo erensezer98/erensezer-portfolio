@@ -1,35 +1,68 @@
-import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import Image from 'next/image'
 import { getProjects } from '@/lib/supabase'
+import type { Project } from '@/lib/types'
 
-const ProjectSphere = dynamic(
-  () => import('@/components/three/ProjectSphere'),
-  { ssr: false }
-)
+const FALLBACK: Project[] = [
+  { id: '1', slug: 'food-tower',        title: 'The Food Tower',       year: 2022, location: 'Milan, Italy',    category: 'academic',  short_description: 'Vertical farm and factory in the MIND district. Shortlisted for Skyhive 2022.', description: '', tags: [], cover_image: null, images: [], featured: true,  order_index: 1, created_at: '' },
+  { id: '2', slug: 'the-log',           title: 'The Log',              year: 2021, location: 'Milan, Italy',    category: 'academic',  short_description: 'Auditorium exploring organic timber form.',                                     description: '', tags: [], cover_image: null, images: [], featured: true,  order_index: 2, created_at: '' },
+  { id: '3', slug: 'halic-co-op',       title: 'Haliç Co-op',          year: 2020, location: 'Istanbul, Turkey',category: 'academic',  short_description: 'Creative Industries Center in Goldenhorn. Published in Mimdap Magazine.',        description: '', tags: [], cover_image: null, images: [], featured: true,  order_index: 3, created_at: '' },
+  { id: '4', slug: 'hungarian-csarda',  title: 'Hungarian Csarda',     year: 2022, location: 'South Korea',     category: 'freelance', short_description: 'Pavilion design for a festival in Saemangeum.',                                  description: '', tags: [], cover_image: null, images: [], featured: true,  order_index: 4, created_at: '' },
+  { id: '5', slug: 'istanbul-a-way-out',title: 'Istanbul: A Way Out',  year: 2023, location: 'Istanbul, Turkey',category: 'academic',  short_description: 'An urban escape strategy — light, shadow, and threshold.',                      description: '', tags: [], cover_image: null, images: [], featured: true,  order_index: 5, created_at: '' },
+]
 
 export default async function HomePage() {
-  let allProjects: Awaited<ReturnType<typeof getProjects>> = []
-  try {
-    allProjects = await getProjects()
-  } catch {
-    // fallback
-  }
-
-  // Fallback data if needed
-  if (allProjects.length === 0) {
-      allProjects = [
-          { id: '1', slug: 'food-tower', title: 'The Food Tower', year: 2022, location: 'Milan', category: 'academic', created_at: '', order_index: 0, featured: true, short_description: '', description: '', tags: [], cover_image: '', images: [] },
-          { id: '2', slug: 'log', title: 'The Log', year: 2021, location: 'Milan', category: 'academic', created_at: '', order_index: 1, featured: true, short_description: '', description: '', tags: [], cover_image: '', images: [] },
-          { id: '3', slug: 'halic', title: 'Haliç Co-op', year: 2020, location: 'Istanbul', category: 'academic', created_at: '', order_index: 2, featured: true, short_description: '', description: '', tags: [], cover_image: '', images: [] },
-          { id: '4', slug: 'csarda', title: 'Hungarian Csarda', year: 2022, location: 'South Korea', category: 'freelance', created_at: '', order_index: 3, featured: true, short_description: '', description: '', tags: [], cover_image: '', images: [] },
-          { id: '5', slug: 'museum', title: 'Modern Museum', year: 2023, location: 'London', category: 'academic', created_at: '', order_index: 4, featured: false, short_description: '', description: '', tags: [], cover_image: '', images: [] },
-          { id: '6', slug: 'villa', title: 'Lakeside Villa', year: 2023, location: 'Como', category: 'freelance', created_at: '', order_index: 5, featured: false, short_description: '', description: '', tags: [], cover_image: '', images: [] },
-          { id: '7', slug: 'istanbul-a-way-out', title: 'Istanbul: A Way Out', year: 2023, location: 'Istanbul, Turkey', category: 'academic', created_at: '', order_index: 6, featured: true, short_description: 'An urban escape strategy for Istanbul — light, shadow, and threshold.', description: '', tags: [], cover_image: '', images: [] },
-      ]
-  }
+  let projects: Project[] = []
+  try { projects = await getProjects() } catch { /* use fallback */ }
+  if (!projects.length) projects = FALLBACK
 
   return (
-    <div className="fixed inset-0 bg-[#0A0A0A]">
-      <ProjectSphere projects={allProjects} />
+    <div className="px-6 md:px-10">
+
+      {/* ── Hero ─────────────────────────────────────────────────── */}
+      <section className="pt-36 pb-20 md:pb-28">
+        <h1 className="text-[clamp(2.6rem,6.5vw,5.5rem)] font-light text-ink leading-[1.08] tracking-tight mb-5">
+          Eren Sezer
+        </h1>
+        <p className="text-muted text-sm max-w-xs leading-relaxed">
+          Architect and digital designer.<br />
+          Master of Building Architecture,<br />
+          Politecnico di Milano.
+        </p>
+      </section>
+
+      {/* ── Projects grid ────────────────────────────────────────── */}
+      <section className="pb-32">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-14">
+          {projects.map((p) => (
+            <Link
+              key={p.id}
+              href={`/projects/${p.slug}`}
+              className="group block"
+            >
+              {/* Image */}
+              <div className="aspect-[4/3] bg-warm overflow-hidden mb-4">
+                {p.cover_image ? (
+                  <Image
+                    src={p.cover_image}
+                    alt={p.title}
+                    width={800}
+                    height={600}
+                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-warm" />
+                )}
+              </div>
+
+              {/* Meta */}
+              <p className="text-[13px] text-ink">{p.title}</p>
+              <p className="text-xs text-muted mt-0.5">{p.year} — {p.location}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
     </div>
   )
 }

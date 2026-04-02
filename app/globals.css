@@ -1,98 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-inter: 'Inter', system-ui, sans-serif;
-  --font-jetbrains: 'JetBrains Mono', ui-monospace, monospace;
-}
-
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
+  *, *::before, *::after { box-sizing: border-box; }
 
   html {
-    scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-white text-carbon font-sans;
-    font-size: 15px;
-    line-height: 1.6;
+    @apply bg-white text-ink font-sans;
+    font-size: 14px;
+    line-height: 1.75;
   }
 
-  ::selection {
-    @apply bg-accent/15 text-carbon;
-  }
+  img { display: block; max-width: 100%; }
+
+  ::selection { background: #e8e2dc; }
 }
 
 @layer components {
-  /* ─── Navigation ───────────────────────────────────────────── */
   .nav-link {
-    @apply relative text-[13px] tracking-wide uppercase text-slate hover:text-carbon transition-colors duration-200 font-medium;
-  }
-  .nav-link::after {
-    content: '';
-    @apply absolute -bottom-0.5 left-0 w-0 h-[2px] bg-accent transition-all duration-300;
-  }
-  .nav-link:hover::after,
-  .nav-link.active::after {
-    @apply w-full;
+    @apply text-[13px] text-muted hover:text-ink transition-colors duration-200;
   }
   .nav-link.active {
-    @apply text-carbon;
+    @apply text-ink;
   }
-
-  /* ─── Typography tokens ──────────────────────────────────── */
-  .section-label {
-    @apply text-[11px] tracking-[0.2em] uppercase text-accent font-semibold font-mono;
-  }
-
-  .page-heading {
-    @apply font-sans text-5xl md:text-7xl font-bold tracking-tight text-carbon leading-[1.05];
-  }
-
-  .divider {
-    @apply w-full h-px bg-light-gray;
-  }
-
-  .tag {
-    @apply inline-block text-[10px] tracking-wider uppercase px-3 py-1 border border-light-gray text-slate font-mono rounded-full;
-  }
-
-  /* ─── Project Cards ────────────────────────────────────────── */
-  .project-card {
-    @apply cursor-pointer relative;
-  }
-  .project-card .card-image {
-    @apply overflow-hidden bg-off-white rounded-lg;
-  }
-  .project-card .card-image img {
-    @apply w-full h-full object-cover transition-transform duration-700 ease-expo-out group-hover:scale-105;
-  }
-
-  /* ─── Glassmorphism helper ─────────────────────────────────── */
-  .glass {
-    @apply bg-white/70 backdrop-blur-xl border border-white/20;
+  .rule {
+    @apply w-full h-px bg-rule;
   }
 }
 
-/* ─── Scrollbar ────────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #D4D4D4;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #00C2FF;
-}
+::-webkit-scrollbar        { width: 3px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: #cfc8c0; border-radius: 2px; }
