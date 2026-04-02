@@ -1,6 +1,12 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export default function Footer() {
+  const pathname = usePathname()
+  if (pathname === '/') return null
+
   return (
     <footer className="border-t border-light-gray mt-24 bg-white">
       <div className="max-w-screen-xl mx-auto px-6 md:px-10 py-12">
