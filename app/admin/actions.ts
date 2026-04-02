@@ -3,9 +3,14 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { supabase } from '@/lib/supabase'
 import type { Project } from '@/lib/types'
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'Megerenas98'
+
+// Use service role client if available, otherwise fall back to anon client
+// RLS policies allow public writes so either client works
+const db = supabaseAdmin ?? supabase
 
 export async function loginAdmin(passcode: string) {
   if (passcode === ADMIN_PASSCODE) {
@@ -27,35 +32,38 @@ export async function logoutAdmin() {
 
 // ─── Project Actions ────────────────────────────────────────────────────────
 export async function saveProject(project: Partial<Project>) {
-  if (!supabaseAdmin) {
-    return { error: 'Supabase Service Role Key is missing. Check your environment variables.' }
-  }
-  
-  // Use supabaseAdmin to bypass RLS
-  const { data, error } = await supabaseAdmin
-    .from('projects')
-    .upsert(project)
-    .select()
-    .single()
+  try {
+    const { data, error } = await db
+      .from('projects')
+      .upsert(project)
+      .select()
+      .single()
 
-  if (error) {
-    return { error: error.message }
+    if (error) {
+      console.error('saveProject error:', error)
+      return { error: error.message }
+    }
+    return { data }
+  } catch (err) {
+    console.error('saveProject unexpected error:', err)
+    return { error: String(err) }
   }
-  return { data }
 }
 
 export async function deleteProject(id: string) {
-  if (!supabaseAdmin) {
-    return { error: 'Supabase Service Role Key is missing.' }
-  }
+  try {
+    const { error } = await db
+      .from('projects')
+      .delete()
+      .eq('id', id)
 
-  const { error } = await supabaseAdmin
-    .from('projects')
-    .delete()
-    .eq('id', id)
-  
-  if (error) {
-    return { error: error.message }
+    if (error) {
+      console.error('deleteProject error:', error)
+      return { error: error.message }
+    }
+    return { success: true }
+  } catch (err) {
+    console.error('deleteProject unexpected error:', err)
+    return { error: String(err) }
   }
-  return { success: true }
 }
