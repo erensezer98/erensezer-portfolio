@@ -84,6 +84,22 @@ const STATIC_PROJECTS: Project[] = [
     order_index: 4,
     created_at: '',
   },
+  {
+    id: '5',
+    title: 'Istanbul: A Way Out',
+    slug: 'istanbul-a-way-out',
+    category: 'academic',
+    short_description: 'An urban escape strategy for Istanbul — light, shadow, and threshold.',
+    description: '',
+    year: 2023,
+    location: 'Istanbul, Turkey',
+    tags: ['urban', 'istanbul', 'light', 'installation'],
+    cover_image: null,
+    images: [],
+    featured: true,
+    order_index: 5,
+    created_at: '',
+  },
 ]
 
 export default async function ProjectsPage({

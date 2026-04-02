@@ -2,6 +2,12 @@ import { getProjectBySlug, getProjects } from '@/lib/supabase'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
+
+const InteractiveRelight = dynamic(
+  () => import('@/components/three/InteractiveRelight'),
+  { ssr: false }
+)
 
 interface Props {
   params: { slug: string }
@@ -47,13 +53,18 @@ export default async function ProjectDetailPage({ params }: Props) {
         >
           ← Back to Projects
         </Link>
-        <div className="max-w-2xl">
+        <div className="max-w-2xl mb-16">
           <p className="section-label mb-4">Project</p>
           <h1 className="page-heading mb-6 capitalize">{params.slug.replace(/-/g, ' ')}</h1>
           <p className="text-muted text-sm">
             Connect Supabase and add your project content to see the full detail view.
           </p>
         </div>
+        {params.slug === 'istanbul-a-way-out' && (
+          <div className="w-full aspect-[16/7] overflow-hidden bg-black">
+            <InteractiveRelight />
+          </div>
+        )}
       </div>
     )
   }
@@ -95,6 +106,13 @@ export default async function ProjectDetailPage({ params }: Props) {
           </p>
         </div>
       </div>
+
+      {/* Interactive light scene — Istanbul: A Way Out */}
+      {params.slug === 'istanbul-a-way-out' && (
+        <div className="w-full aspect-[16/7] mb-4 overflow-hidden bg-black">
+          <InteractiveRelight />
+        </div>
+      )}
 
       {/* Cover image */}
       {project.cover_image && (
