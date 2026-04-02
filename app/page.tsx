@@ -23,11 +23,12 @@ export default async function HomePage() {
           { id: '4', slug: 'csarda', title: 'Hungarian Csarda', year: 2022, location: 'South Korea', category: 'freelance', created_at: '', order_index: 3, featured: true, short_description: '', description: '', tags: [], cover_image: '', images: [] },
           { id: '5', slug: 'museum', title: 'Modern Museum', year: 2023, location: 'London', category: 'academic', created_at: '', order_index: 4, featured: false, short_description: '', description: '', tags: [], cover_image: '', images: [] },
           { id: '6', slug: 'villa', title: 'Lakeside Villa', year: 2023, location: 'Como', category: 'freelance', created_at: '', order_index: 5, featured: false, short_description: '', description: '', tags: [], cover_image: '', images: [] },
+          { id: '7', slug: 'istanbul-a-way-out', title: 'Istanbul: A Way Out', year: 2023, location: 'Istanbul, Turkey', category: 'academic', created_at: '', order_index: 6, featured: true, short_description: 'An urban escape strategy for Istanbul — light, shadow, and threshold.', description: '', tags: [], cover_image: '', images: [] },
       ]
   }
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[#0A0A0A]">
+    <div className="fixed inset-0 bg-[#0A0A0A]">
       <ProjectSphere projects={allProjects} />
     </div>
   )
