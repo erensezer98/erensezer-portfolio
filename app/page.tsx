@@ -8,6 +8,10 @@ const ArchitecturalWireframe = dynamic(
   () => import('@/components/three/ArchitecturalWireframe'),
   { ssr: false }
 )
+const InteractiveRelight = dynamic(
+  () => import('@/components/three/InteractiveRelight'),
+  { ssr: false }
+)
 
 export default async function HomePage() {
   let featured: Awaited<ReturnType<typeof getFeaturedProjects>> = []
@@ -173,6 +177,21 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ─── Interactive Relight Demo ─────────────────────────────────────── */}
+      <section className="relative w-full h-[60vh] bg-[#111] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <InteractiveRelight />
+        </div>
+        <div className="relative z-10 pointer-events-none w-full h-full flex flex-col items-center justify-center text-center px-6">
+          <h2 className="font-serif text-3xl md:text-5xl font-light text-white/90 mb-4 mix-blend-difference">
+            Interactive Relight
+          </h2>
+          <p className="text-white/60 max-w-md text-sm tracking-wide mix-blend-difference">
+            Move your cursor. Powered by Three.js.
+          </p>
+        </div>
+      </section>
 
       {/* ─── Brief intro strip ────────────────────────────────────────────── */}
       <section className="border-t border-border bg-cream">
