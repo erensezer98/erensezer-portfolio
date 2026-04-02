@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import type { Project } from '@/lib/types'
 
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'admin123'
+const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'Megerenas98'
 
 export async function loginAdmin(passcode: string) {
   if (passcode === ADMIN_PASSCODE) {
