@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { supabase } from '@/lib/supabase'
-import type { Project } from '@/lib/types'
+import type { Project, Award, Publication } from '@/lib/types'
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'Megerenas98'
 
@@ -70,6 +70,84 @@ export async function deleteProject(id: string) {
     return { success: true }
   } catch (err) {
     console.error('deleteProject unexpected error:', err)
+    return { error: String(err) }
+  }
+}
+
+// ─── Awards ──────────────────────────────────────────────────────────────────
+export async function saveAward(award: Partial<Award>) {
+  try {
+    const { data, error } = await db.from('awards').upsert(award).select().single()
+    if (error) {
+      console.error('saveAward error:', error)
+      return { error: error.message }
+    }
+    revalidatePath('/', 'layout')
+    return { data }
+  } catch (err) {
+    console.error('saveAward unexpected error:', err)
+    return { error: String(err) }
+  }
+}
+
+export async function deleteAward(id: string) {
+  try {
+    const { error } = await db.from('awards').delete().eq('id', id)
+    if (error) {
+      console.error('deleteAward error:', error)
+      return { error: error.message }
+    }
+    revalidatePath('/', 'layout')
+    return { success: true }
+  } catch (err) {
+    console.error('deleteAward unexpected error:', err)
+    return { error: String(err) }
+  }
+}
+
+// ─── Publications ────────────────────────────────────────────────────────────
+export async function savePublication(publication: Partial<Publication>) {
+  try {
+    const { data, error } = await db.from('publications').upsert(publication).select().single()
+    if (error) {
+      console.error('savePublication error:', error)
+      return { error: error.message }
+    }
+    revalidatePath('/', 'layout')
+    return { data }
+  } catch (err) {
+    console.error('savePublication unexpected error:', err)
+    return { error: String(err) }
+  }
+}
+
+export async function deletePublication(id: string) {
+  try {
+    const { error } = await db.from('publications').delete().eq('id', id)
+    if (error) {
+      console.error('deletePublication error:', error)
+      return { error: error.message }
+    }
+    revalidatePath('/', 'layout')
+    return { success: true }
+  } catch (err) {
+    console.error('deletePublication unexpected error:', err)
+    return { error: String(err) }
+  }
+}
+
+// ─── Messages ────────────────────────────────────────────────────────────────
+export async function deleteMessage(id: string) {
+  try {
+    const { error } = await db.from('contact_messages').delete().eq('id', id)
+    if (error) {
+      console.error('deleteMessage error:', error)
+      return { error: error.message }
+    }
+    revalidatePath('/', 'layout')
+    return { success: true }
+  } catch (err) {
+    console.error('deleteMessage unexpected error:', err)
     return { error: String(err) }
   }
 }

@@ -119,3 +119,22 @@ export async function submitContactMessage(
     console.error('Unexpected error in submitContactMessage:', err)
   }
 }
+
+export async function getContactMessages(): Promise<ContactMessage[]> {
+  try {
+    const { data, error } = await supabase
+      .from('contact_messages')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching contact messages:', error.message)
+      return []
+    }
+    return data ?? []
+  } catch (err) {
+    console.error('Unexpected error in getContactMessages:', err)
+    return []
+  }
+}
+
