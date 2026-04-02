@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-space-grotesk: 'Space Grotesk', system-ui, sans-serif;
+  --font-cormorant: 'Cormorant Garamond', Georgia, serif;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-white text-charcoal font-sans;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  ::selection {
+    @apply bg-salmon-pale text-charcoal;
+  }
+}
+
+@layer components {
+  /* ─── Nav link with animated underline ─── */
+  .nav-link {
+    @apply relative text-sm tracking-widest uppercase text-charcoal/70 hover:text-charcoal transition-colors duration-200;
+  }
+  .nav-link::after {
+    content: '';
+    @apply absolute -bottom-0.5 left-0 w-0 h-px bg-salmon transition-all duration-300;
+  }
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    @apply w-full;
+  }
+  .nav-link.active {
+    @apply text-charcoal;
+  }
+
+  /* ─── Section label ─── */
+  .section-label {
+    @apply text-xs tracking-widest uppercase text-salmon font-medium;
+  }
+
+  /* ─── Page heading ─── */
+  .page-heading {
+    @apply font-serif text-5xl md:text-7xl font-light tracking-tight text-charcoal leading-none;
+  }
+
+  /* ─── Divider ─── */
+  .divider {
+    @apply w-full h-px bg-border;
+  }
+
+  /* ─── Tag pill ─── */
+  .tag {
+    @apply inline-block text-xs tracking-wider uppercase px-3 py-1 border border-border text-muted;
+  }
+
+  /* ─── Project card hover ─── */
+  .project-card {
+    @apply group cursor-pointer;
+  }
+  .project-card .card-image {
+    @apply overflow-hidden bg-cream;
+  }
+  .project-card .card-image img {
+    @apply w-full h-full object-cover transition-transform duration-700 ease-expo-out group-hover:scale-105;
+  }
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E8E5E1;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C4705A;
+}
