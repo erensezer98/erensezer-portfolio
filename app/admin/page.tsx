@@ -4,6 +4,7 @@ import { getProjects } from '@/lib/supabase'
 import Link from 'next/link'
 import { deleteProject } from './actions'
 import { revalidatePath } from 'next/cache'
+import DeleteButton from './DeleteButton'
 
 export default async function AdminDashboard() {
   const projects = await getProjects()
@@ -66,20 +67,7 @@ export default async function AdminDashboard() {
                     >
                       Edit
                     </Link>
-                    <form action={handleDelete}>
-                      <input type="hidden" name="id" value={project.id} />
-                      <button 
-                        type="submit" 
-                        className="text-[10px] tracking-widest uppercase text-muted hover:text-red-500 transition-colors"
-                        onClick={(e) => {
-                          if (!confirm('Are you sure you want to delete this project?')) {
-                            e.preventDefault();
-                          }
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </form>
+                    <DeleteButton id={project.id} action={handleDelete} />
                   </div>
                 </td>
               </tr>
