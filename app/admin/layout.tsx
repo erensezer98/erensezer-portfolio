@@ -21,7 +21,9 @@ export default function AdminLayout({
               <Link href="/admin/awards"             className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors">Awards</Link>
               <Link href="/admin/publications"       className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors">Publications</Link>
               <Link href="/admin/messages"           className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors">Messages</Link>
-              <Link href="/admin/layout-settings"   className="text-xs tracking-widest uppercase text-ink hover:text-muted transition-colors">Layouts</Link>
+              <Link href="/admin/page-editor"        className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors">Editor</Link>
+              <Link href="/admin/text-styles"        className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors">Styles</Link>
+              <Link href="/admin/layout-settings"    className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors">Layouts</Link>
               <Link href="/" className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors ml-4 border-l border-rule pl-4">
                 View Site ↗
               </Link>

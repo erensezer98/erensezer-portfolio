@@ -72,3 +72,86 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   about_bio_cols: 2,
   project_show_tags: true,
 }
+
+// ─── Text Styles ──────────────────────────────────────────────────────────────
+
+export interface TextStyle {
+  id: string
+  name: string
+  font_size: string
+  font_weight: string
+  color: string
+  letter_spacing: string
+  line_height: string
+  text_transform: string
+  font_style: string
+  margin_bottom: string
+  created_at: string
+}
+
+// ─── Page Editor / Blocks ─────────────────────────────────────────────────────
+
+export type BlockType = 'text' | 'image' | 'threejs' | 'spacer'
+
+export interface TextBlockProps {
+  content: string
+  styleId: string | null
+  alignment: 'left' | 'center' | 'right'
+}
+
+export interface ImageBlockProps {
+  src: string
+  alt: string
+  aspectRatio: string       // e.g. "4/3", "16/9", "1/1"
+  objectFit: 'cover' | 'contain'
+}
+
+export interface ThreeJSBlockProps {
+  component: 'ArchitecturalWireframe' | 'InteractiveRelight' | 'ProjectSphere'
+  height: string            // e.g. "400px"
+}
+
+export interface SpacerBlockProps {
+  height: string            // e.g. "4rem"
+}
+
+export interface BlockLayout {
+  width: 'full' | 'wide' | 'half' | 'third'
+  marginTop: string
+  marginBottom: string
+  paddingX: string
+}
+
+export interface PageBlock {
+  id: string
+  type: BlockType
+  order: number
+  props: TextBlockProps | ImageBlockProps | ThreeJSBlockProps | SpacerBlockProps
+  layout: BlockLayout
+}
+
+export interface PageContent {
+  id: string
+  page_slug: string
+  blocks: PageBlock[]
+  updated_at: string
+}
+
+export const DEFAULT_BLOCK_LAYOUT: BlockLayout = {
+  width: 'full',
+  marginTop: '0',
+  marginBottom: '1rem',
+  paddingX: '0',
+}
+
+export const EDITABLE_PAGES = [
+  { slug: 'home', label: 'Homepage' },
+  { slug: 'about', label: 'About' },
+  { slug: 'contact', label: 'Contact' },
+] as const
+
+export const THREEJS_COMPONENTS = [
+  { value: 'ArchitecturalWireframe', label: 'Architectural Wireframe' },
+  { value: 'InteractiveRelight', label: 'Interactive Relight' },
+  { value: 'ProjectSphere', label: 'Project Sphere' },
+] as const

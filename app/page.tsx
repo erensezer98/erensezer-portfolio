@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { getProjects, getSiteSettings } from '@/lib/supabase'
+import { getProjects, getSiteSettings, getPageContent, getTextStyles } from '@/lib/supabase'
 import type { Project } from '@/lib/types'
+import PageRenderer from '@/components/page-renderer/PageRenderer'
 
 const FALLBACK: Project[] = [
   { id: '1', slug: 'food-tower',        title: 'The Food Tower',       year: 2022, location: 'Milan, Italy',    category: 'academic',  short_description: 'Vertical farm and factory in the MIND district. Shortlisted for Skyhive 2022.', description: '', tags: [], cover_image: null, images: [], featured: true,  order_index: 1, created_at: '' },
@@ -12,11 +13,24 @@ const FALLBACK: Project[] = [
 ]
 
 export default async function HomePage() {
+  const [settings, pageContent, textStyles] = await Promise.all([
+    getSiteSettings(),
+    getPageContent('home'),
+    getTextStyles(),
+  ])
+
+  // If there's custom block content from the page editor, render that exclusively
+  if (pageContent?.blocks?.length) {
+    return (
+      <div className="pt-24 pb-32 flex flex-col items-center">
+        <PageRenderer blocks={pageContent.blocks} textStyles={textStyles} />
+      </div>
+    )
+  }
+
   let projects: Project[] = []
   try { projects = await getProjects() } catch { /* use fallback */ }
   if (!projects.length) projects = FALLBACK
-
-  const settings = await getSiteSettings()
 
   const heroPadding  = settings.home_hero_size === 'large' ? 'pt-36 pb-28' : 'pt-24 pb-16'
   const gridCols     = settings.home_grid_cols === 1

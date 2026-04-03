@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Project, Award, Publication, ContactMessage, SiteSettings } from './types'
+import type { Project, Award, Publication, ContactMessage, SiteSettings, TextStyle, PageContent } from './types'
 import { DEFAULT_SETTINGS } from './types'
 
 // Provide dummy values to prevent 'supabaseKey is required' crash on importing this file server-side when env vars leak
@@ -161,6 +161,50 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     return { ...DEFAULT_SETTINGS, ...(parsed as Partial<SiteSettings>) }
   } catch {
     return DEFAULT_SETTINGS
+  }
+}
+
+// ─── Text Styles ──────────────────────────────────────────────────────────────
+
+export async function getTextStyles(): Promise<TextStyle[]> {
+  try {
+    const { data, error } = await supabase
+      .from('text_styles')
+      .select('*')
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching text styles:', error.message)
+      return []
+    }
+    return data ?? []
+  } catch (err) {
+    console.error('Unexpected error in getTextStyles:', err)
+    return []
+  }
+}
+
+// ─── Page Content ─────────────────────────────────────────────────────────────
+
+export async function getPageContent(pageSlug: string): Promise<PageContent | null> {
+  try {
+    const { data, error } = await supabase
+      .from('page_content')
+      .select('*')
+      .eq('page_slug', pageSlug)
+      .single()
+
+    if (error) {
+      // PGRST116 = no rows found, which is normal for a new page
+      if (error.code !== 'PGRST116') {
+        console.error('Error fetching page content:', error.message)
+      }
+      return null
+    }
+    return data
+  } catch (err) {
+    console.error('Unexpected error in getPageContent:', err)
+    return null
   }
 }
 
