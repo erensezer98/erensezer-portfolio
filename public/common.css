@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: #282420;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.75;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+img { display: block; max-width: 100%; }
+
+::selection { background: #e8e2dc; }
+
+/* Navbar */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  background: white;
+  border-bottom: 1px solid #e8e2dc;
+}
+.nav-inner {
+  padding: 0 40px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-logo {
+  font-size: 13px;
+  color: #282420;
+  text-decoration: none;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+  margin: 0; padding: 0;
+}
+.nav-links a {
+  font-size: 13px;
+  color: #8c8278;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover, .nav-links a.active {
+  color: #282420;
+}
+
+/* Main */
+main {
+  flex: 1;
+}
+
+/* Footer */
+footer {
+  padding: 48px 40px;
+  border-top: 1px solid #e8e2dc;
+  margin-top: 96px;
+}
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-copy {
+  font-size: 12px;
+  color: #8c8278;
+}
+.footer-nav {
+  display: flex;
+  gap: 28px;
+}
+.footer-nav a {
+  font-size: 12px;
+  color: #8c8278;
+  text-decoration: none;
+}
+.footer-nav a:hover { color: #282420; }
+
+/* Project page */
+.project-content {
+  padding: 112px 40px 128px;
+}
+.back-link {
+  font-size: 12px;
+  color: #8c8278;
+  text-decoration: none;
+  display: inline-block;
+  margin-bottom: 48px;
+}
+.back-link:hover { color: #282420; }
+
+.project-category {
+  font-size: 12px;
+  color: #8c8278;
+  text-transform: capitalize;
+  margin: 0 0 12px;
+  letter-spacing: 0.02em;
+}
+.project-title {
+  font-size: 40px;
+  font-weight: 300;
+  color: #282420;
+  line-height: 1.2;
+  margin: 0 0 16px;
+}
+.project-meta {
+  font-size: 12px;
+  color: #8c8278;
+  margin: 0 0 24px;
+}
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+.project-tag {
+  font-size: 11px;
+  color: #8c8278;
+  border: 1px solid #e8e2dc;
+  padding: 4px 12px;
+}
+.project-description {
+  font-size: 14px;
+  color: #282420;
+  line-height: 1.75;
+}
+.coming-soon {
+  font-size: 14px;
+  color: #8c8278;
+  margin-bottom: 64px;
+}
+.project-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 64px;
+}
+
+/* Placeholder for 3D canvas */
+.canvas-placeholder {
+  width: 100%;
+  aspect-ratio: 16/7;
+  background: #f5f2ef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 64px;
+  overflow: hidden;
+  position: relative;
+}
+.canvas-placeholder-dark {
+  background: #0a0a0a;
+}
+
+/* Footer nav on project page */
+.project-footer-nav {
+  border-top: 1px solid #e8e2dc;
+  margin-top: 80px;
+  padding-top: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.project-footer-nav a {
+  font-size: 12px;
+  color: #8c8278;
+  text-decoration: none;
+}
+.project-footer-nav a:hover { color: #282420; }
+
+/* Cover image placeholder */
+.cover-placeholder {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #f5f2ef;
+  margin-bottom: 12px;
+}
+
+/* Wireframe grid lines (decorative) */
+.wireframe-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  opacity: 0.15;
+}
+.wireframe-grid-line-v {
+  border-right: 1px solid #282420;
+  height: 100%;
+}
+.wireframe-grid-line-h {
+  border-bottom: 1px solid #282420;
+  width: 100%;
+}
+.wireframe-label {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #8c8278;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

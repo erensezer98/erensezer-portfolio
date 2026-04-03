@@ -67,8 +67,8 @@ const STATIC_PROJECTS = [
     context: 'The Golden Horn has long been Istanbul\'s industrial spine. As the area transitions toward cultural and creative uses, Haliç Co-op proposes a building that retains the industrial scale and character of its context while introducing new programs: studios, workshops, galleries, and shared amenities open to the public.',
   },
   {
-    slug: 'csarda',
-    title: 'Csarda',
+    slug: 'hungarian-csarda',
+    title: 'Hungarian Csarda',
     year: 2022,
     location: 'Saemangeum, South Korea',
     category: 'freelance',
@@ -77,9 +77,9 @@ const STATIC_PROJECTS = [
     program: 'Temporary Pavilion / Exhibition',
     area: '320 m²',
     status: 'Completed',
-    client: 'Cultural Institute',
-    overview: 'Csarda is a temporary pavilion designed for the Saemangeum World Scout Jamboree. Drawing on the vernacular tradition of the countryside inn, the structure reinterprets the csárda typology through lightweight timber construction — an ephemeral gathering place in an unfamiliar landscape.',
-    context: 'The pavilion serves as a cultural ambassador, introducing folk traditions — music, cuisine, and craft — to an international audience. The design balances cultural legibility with structural efficiency, using a modular timber system that could be assembled and disassembled without specialist labor.',
+    client: 'Hungarian Cultural Institute',
+    overview: 'The Hungarian Csarda is a temporary pavilion designed for the Saemangeum World Scout Jamboree. Drawing on the vernacular tradition of the Hungarian countryside inn, the structure reinterprets the csárda typology through lightweight timber construction — an ephemeral gathering place in an unfamiliar landscape.',
+    context: 'The pavilion serves as a cultural ambassador, introducing Hungarian folk traditions — music, cuisine, and craft — to an international audience. The design balances cultural legibility with structural efficiency, using a modular timber system that could be assembled and disassembled without specialist labor.',
   },
   {
     slug: 'istanbul-a-way-out',
@@ -265,12 +265,23 @@ function PlaceholderProjectPage({
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
+// Always pre-render these slugs — DB slugs are merged in at build time
+const KNOWN_SLUGS = [
+  'food-tower',
+  'the-log',
+  'halic-co-op',
+  'hungarian-csarda',
+  'istanbul-a-way-out',
+]
+
 export async function generateStaticParams() {
   try {
     const projects = await getProjects()
-    return projects.map((p) => ({ slug: p.slug }))
+    const dbSlugs = projects.map((p) => p.slug)
+    const allSlugs = Array.from(new Set([...KNOWN_SLUGS, ...dbSlugs]))
+    return allSlugs.map((slug) => ({ slug }))
   } catch {
-    return []
+    return KNOWN_SLUGS.map((slug) => ({ slug }))
   }
 }
 
@@ -295,26 +306,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProjectDetailPage({ params }: Props) {
-  let project = null
-  try { project = await getProjectBySlug(params.slug) } catch { /* no db */ }
+  let dbProject = null
+  try { dbProject = await getProjectBySlug(params.slug) } catch { /* no db */ }
+
+  const staticEnrichment = STATIC_PROJECTS.find((p) => p.slug === params.slug)
+  const settings = await getSiteSettings()
+
+  // Determine what to display by merging DB data with Static metadata
+  // We prioritize DB title/category if it exists, but fallback to rich static overview/info
+  const title    = dbProject?.title || staticEnrichment?.title || params.slug.replace(/-/g, ' ')
+  const category = dbProject?.category || staticEnrichment?.category || '—'
+  const year     = dbProject?.year || staticEnrichment?.year || '—'
+  const location = dbProject?.location || staticEnrichment?.location || '—'
+  
+  const overview = staticEnrichment?.overview || dbProject?.description || dbProject?.short_description || 'Project details coming soon.'
+  const context  = staticEnrichment?.context || ''
+  
+  const tags     = dbProject?.tags?.length ? dbProject.tags : (staticEnrichment?.tags || [])
+  
+  // Extra Info (Signature Projects only)
+  const program  = staticEnrichment?.program || '—'
+  const area     = staticEnrichment?.area || '—'
+  const status   = staticEnrichment?.status || '—'
+  const client   = staticEnrichment?.client || '—'
 
   const isIstanbul = params.slug === 'istanbul-a-way-out'
   const isFoodTower = params.slug === 'food-tower'
-  const settings = await getSiteSettings()
 
-  if (!project) {
-    return (
-      <PlaceholderProjectPage
-        slug={params.slug}
-        isFoodTower={isFoodTower}
-        isIstanbul={isIstanbul}
-      />
-    )
-  }
+  // Images priority: DB images > Static placeholders
+  const coverImage = dbProject?.cover_image || null
+  const galleryImages = dbProject?.images || []
 
   return (
     <article className="px-6 md:px-10 pt-28 pb-32">
-
       {/* Back */}
       <Link href="/projects" className="text-xs text-muted hover:text-ink transition-colors inline-block mb-14">
         ← projects
@@ -323,16 +347,16 @@ export default async function ProjectDetailPage({ params }: Props) {
       {/* Header */}
       <div className="grid md:grid-cols-2 gap-12 mb-16">
         <div>
-          <p className="text-xs text-muted capitalize mb-3">{project.category}</p>
+          <p className="text-xs text-muted capitalize mb-3">{category}</p>
           <h1 className="text-3xl md:text-5xl font-light text-ink leading-tight mb-4">
-            {project.title}
+            {title}
           </h1>
-          <p className="text-xs text-muted">
-            {project.year} — {project.location}
+          <p className="text-xs text-muted mb-6">
+            {year} — {location}
           </p>
-          {settings.project_show_tags && project.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-6">
-              {project.tags.map((tag) => (
+          {settings.project_show_tags && tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => (
                 <span key={tag} className="text-[11px] text-muted border border-rule px-3 py-1">
                   {tag}
                 </span>
@@ -342,12 +366,19 @@ export default async function ProjectDetailPage({ params }: Props) {
         </div>
         <div>
           <p className="text-sm text-ink leading-relaxed">
-            {project.description || project.short_description}
+            {overview}
           </p>
         </div>
       </div>
 
-      {/* Interactive scene for Istanbul project */}
+      {/* Interactive scene — Food Tower */}
+      {isFoodTower && (
+        <div className="w-full aspect-[16/7] overflow-hidden bg-white mb-4 border border-rule/30">
+          <ArchitecturalWireframe />
+        </div>
+      )}
+
+      {/* Interactive scene — Istanbul */}
       {isIstanbul && (
         <div className="w-full aspect-[16/7] mb-4 overflow-hidden bg-black">
           <InteractiveRelight />
@@ -355,33 +386,75 @@ export default async function ProjectDetailPage({ params }: Props) {
       )}
 
       {/* Cover image */}
-      {project.cover_image && (
+      {coverImage ? (
         <div className="aspect-[16/9] overflow-hidden bg-warm mb-3">
           <Image
-            src={project.cover_image}
-            alt={project.title}
+            src={coverImage}
+            alt={title}
             width={1600}
             height={900}
             className="w-full h-full object-cover"
             priority
           />
         </div>
+      ) : (
+        <PlaceholderImage aspect="aspect-[16/9]" label="cover image" className="mb-3" />
       )}
 
+      {/* Overview + Project info */}
+      <div className="grid md:grid-cols-[1fr_280px] gap-x-16 gap-y-12 mt-16 mb-16">
+        <div>
+          <p className="text-[11px] text-muted tracking-widest uppercase mb-6">Overview</p>
+          <p className="text-sm text-ink leading-relaxed mb-5">
+            {overview}
+          </p>
+          {context && (
+            <p className="text-sm text-ink leading-relaxed">
+              {context}
+            </p>
+          )}
+        </div>
+
+        {/* Project details table */}
+        <div>
+          <p className="text-[11px] text-muted tracking-widest uppercase mb-6">Project Info</p>
+          <div className="border-t border-rule">
+            {[
+              { label: 'Program', value: program },
+              { label: 'Year', value: String(year) },
+              { label: 'Location', value: location },
+              { label: 'Area', value: area },
+              { label: 'Status', value: status },
+              { label: 'Client', value: client },
+            ].map(({ label, value }) => (
+              <div key={label} className="flex justify-between items-baseline border-b border-rule py-3">
+                <span className="text-[11px] text-muted">{label}</span>
+                <span className="text-[11px] text-ink text-right max-w-[60%]">{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Image gallery */}
-      {project.images.length > 0 && (
+      {galleryImages.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-          {project.images.map((src, i) => (
+          {galleryImages.map((src, i) => (
             <div key={i} className="aspect-[4/3] overflow-hidden bg-warm">
               <Image
                 src={src}
-                alt={`${project.title} — ${i + 1}`}
+                alt={`${title} — ${i + 1}`}
                 width={800}
                 height={600}
                 className="w-full h-full object-cover"
               />
             </div>
           ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <PlaceholderImage aspect="aspect-[4/3]" label="image 01" />
+          <PlaceholderImage aspect="aspect-[4/3]" label="image 02" />
         </div>
       )}
 
@@ -394,7 +467,6 @@ export default async function ProjectDetailPage({ params }: Props) {
           get in touch →
         </Link>
       </div>
-
     </article>
   )
 }
