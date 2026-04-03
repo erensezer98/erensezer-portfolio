@@ -219,5 +219,5 @@ export default function ArchitecturalWireframe() {
     }
   }, [])
 
-  return <div ref={mountRef} className="w-full h-full" />
+  return <div ref={mountRef} className="w-auto h-auto flex-grow-0 min-h-0 mx-auto pl-[299px] pb-[2px]" />
 }
