@@ -29,8 +29,13 @@ export default async function HomePage() {
     }
   })
   
-  // Final list
-  projects = mergedProjects.sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
+  // Final list: Sorted by Year DESC, then Order Index DESC (Newest first)
+  projects = mergedProjects.sort((a, b) => {
+    if ((b.year ?? 0) !== (a.year ?? 0)) {
+      return (b.year ?? 0) - (a.year ?? 0)
+    }
+    return (b.order_index ?? 0) - (a.order_index ?? 0)
+  })
 
   const settings = await getSiteSettings()
 
