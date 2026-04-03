@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-import { getSiteSettings, getPageContent, getTextStyles } from '@/lib/supabase'
-import PageRenderer from '@/components/page-renderer/PageRenderer'
+import { getSiteSettings } from '@/lib/supabase'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -27,19 +26,7 @@ const languages = [
 ]
 
 export default async function AboutPage() {
-  const [settings, pageContent, textStyles] = await Promise.all([
-    getSiteSettings(),
-    getPageContent('about'),
-    getTextStyles()
-  ])
-
-  if (pageContent?.blocks?.length) {
-    return (
-      <div className="px-6 md:px-10 pt-28 pb-32 max-w-screen-xl mx-auto flex flex-col items-center">
-        <PageRenderer blocks={pageContent.blocks} textStyles={textStyles} />
-      </div>
-    )
-  }
+  const settings = await getSiteSettings()
 
   const bioGrid = settings.about_bio_cols === 2
     ? 'grid md:grid-cols-2 gap-16'
