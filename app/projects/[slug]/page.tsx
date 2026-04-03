@@ -122,17 +122,15 @@ function PlaceholderImage({
 
 // Always pre-render these slugs — DB slugs are merged in at build time
 const KNOWN_SLUGS = [
-  'food-tower',
   'the-log',
   'halic-co-op',
-  'hungarian-csarda',
   'istanbul-a-way-out',
 ]
 
 export async function generateStaticParams() {
   try {
     const projects = await getProjects()
-    const dbSlugs = projects.map((p) => p.slug).filter(s => s !== 'awayout')
+    const dbSlugs = projects.map((p) => p.slug).filter(s => !['awayout', 'food-tower', 'hungarian-csarda'].includes(s))
     const allSlugs = Array.from(new Set([...KNOWN_SLUGS, ...dbSlugs]))
     return allSlugs.map((slug) => ({ slug }))
   } catch {
