@@ -9,6 +9,11 @@ const InteractiveRelight = dynamic(
   { ssr: false }
 )
 
+const TheLogScene = dynamic(
+  () => import('@/components/three/TheLogScene'),
+  { ssr: false }
+)
+
 const ArchitecturalWireframe = dynamic(
   () => import('@/components/three/ArchitecturalWireframe'),
   { ssr: false }
@@ -185,6 +190,7 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   const isIstanbul = params.slug === 'istanbul-a-way-out'
   const isFoodTower = params.slug === 'food-tower'
+  const isTheLog = params.slug === 'the-log'
 
   // Theme definition
   const theme = isIstanbul ? {
@@ -245,6 +251,13 @@ export default async function ProjectDetailPage({ params }: Props) {
       {isFoodTower && (
         <div className={`w-full aspect-[16/7] overflow-hidden bg-white mb-4 border ${theme.border}/30`}>
           <ArchitecturalWireframe />
+        </div>
+      )}
+
+      {/* Interactive scene — The Log */}
+      {isTheLog && (
+        <div className={`w-full aspect-[16/7] mb-8 overflow-hidden bg-[#faf5f0] border ${theme.border}/30`}>
+          <TheLogScene />
         </div>
       )}
 
