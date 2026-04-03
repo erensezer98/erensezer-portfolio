@@ -14,8 +14,8 @@ const TheLogScene = dynamic(
   { ssr: false }
 )
 
-const ExplodedAxonometry = dynamic(
-  () => import('@/components/three/ExplodedAxonometry'),
+const FoodTowerExplosion = dynamic(
+  () => import('@/components/three/FoodTowerExplosion'),
   { ssr: false }
 )
 
@@ -247,10 +247,10 @@ export default async function ProjectDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Interactive scene — Food Tower (Exploded Axo) */}
+      {/* Interactive scene — Food Tower (Exploded Program) */}
       {isFoodTower && (
-        <div className={`w-full aspect-[16/7] overflow-hidden bg-white mb-8 border ${theme.border}/30`}>
-          <ExplodedAxonometry />
+        <div className="w-full mb-16">
+          <FoodTowerExplosion />
         </div>
       )}
 
