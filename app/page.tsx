@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import Image from 'next/image'
 import { getProjects, getSiteSettings } from '@/lib/supabase'
 import type { Project } from '@/lib/types'
@@ -12,8 +13,25 @@ const FALLBACK: Project[] = [
 
 export default async function HomePage() {
   let projects: Project[] = []
-  try { projects = await getProjects() } catch { /* use fallback */ }
-  if (!projects.length) projects = FALLBACK
+  try { 
+    const dbProjects = await getProjects()
+    // Remove the unwanted "awayout" project
+    projects = dbProjects.filter(p => p.slug !== 'awayout')
+  } catch {
+    console.warn('Failed to fetch home projects, using fallbacks')
+  }
+
+  // Ensure our high-quality static projects are always present and not duplicated
+  const mergedProjects = [...projects]
+  FALLBACK.forEach(staticProj => {
+    const exists = mergedProjects.some(p => p.slug === staticProj.slug)
+    if (!exists) {
+      mergedProjects.push(staticProj)
+    }
+  })
+  
+  // Final list
+  projects = mergedProjects.sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
 
   const settings = await getSiteSettings()
 
@@ -40,8 +58,9 @@ export default async function HomePage() {
       <section className="pb-32">
         <div className={`grid ${gridCols} gap-x-8 gap-y-14`}>
           {projects.map((p) => (
-            <div
+            <Link
               key={p.id}
+              href={`/projects/${p.slug}`}
               className="group block"
             >
               {/* Image */}
@@ -52,7 +71,7 @@ export default async function HomePage() {
                     alt={p.title}
                     width={800}
                     height={600}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                   />
                 ) : (
                   <div className="w-full h-full bg-warm" />
@@ -62,7 +81,7 @@ export default async function HomePage() {
               {/* Meta */}
               <p className="text-[13px] text-ink">{p.title}</p>
               <p className="text-xs text-muted mt-0.5">{p.year} — {p.location}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

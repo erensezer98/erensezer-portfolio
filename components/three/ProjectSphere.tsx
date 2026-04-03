@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react'
 import * as THREE from 'three'
+import { useRouter } from 'next/navigation'
 import type { Project } from '@/lib/types'
 
 type Phase = 'sphere' | 'main' | 'projects'
@@ -23,6 +24,7 @@ function goldenPoints(n: number, r: number): THREE.Vector3[] {
 
 export default function ProjectSphere({ projects }: { projects: Project[] }) {
   const mountRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
   const [phase, setPhase] = useState<Phase>('sphere')
   const [hovered, setHovered] = useState<Project | null>(null)
   const phaseRef = useRef<Phase>('sphere')
@@ -225,7 +227,7 @@ export default function ProjectSphere({ projects }: { projects: Project[] }) {
         rc.setFromCamera(mouse, cam)
         const hits = rc.intersectObjects(hitMeshes)
         if (hits.length) {
-          // Project detail pages have been removed
+          router.push(`/projects/${(hits[0].object as THREE.Mesh).userData.proj.slug}`)
         }
       }
     }
@@ -249,7 +251,7 @@ export default function ProjectSphere({ projects }: { projects: Project[] }) {
       textures.forEach(t => t?.dispose())
       if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement)
     }
-  }, [projects, toPhase])
+  }, [projects, router, toPhase])
 
   return (
     <div className="fixed inset-0 bg-[#0a0a0a]">
@@ -334,8 +336,9 @@ export default function ProjectSphere({ projects }: { projects: Project[] }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {projects.slice(0, 4).map(proj => (
-              <div
+              <button
                 key={proj.id}
+                onClick={() => router.push(`/projects/${proj.slug}`)}
                 className="group text-left"
               >
                 <div className="aspect-[3/2] bg-white/[0.04] border border-white/[0.07] overflow-hidden mb-4">
@@ -357,7 +360,7 @@ export default function ProjectSphere({ projects }: { projects: Project[] }) {
                 <p className="text-white/25 text-xs font-mono mt-1">
                   {proj.year} · {proj.location}
                 </p>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -399,7 +402,7 @@ export default function ProjectSphere({ projects }: { projects: Project[] }) {
             <div className="text-center">
               <p className="text-white text-lg font-extralight tracking-wide">{hovered.title}</p>
               <p className="text-white/30 text-[10px] font-mono tracking-[0.3em] uppercase mt-1">
-                {hovered.year} · {hovered.location}
+                {hovered.year} · {hovered.location} · click to view
               </p>
             </div>
           </div>

@@ -18,8 +18,25 @@ const STATIC_PROJECTS: Project[] = [
 
 export default async function ProjectsPage() {
   let projects: Project[] = []
-  try { projects = await getProjects() } catch { /* use fallback */ }
-  if (!projects.length) projects = STATIC_PROJECTS
+  try { 
+    const dbProjects = await getProjects()
+    // Remove the unwanted "awayout" project
+    projects = dbProjects.filter(p => p.slug !== 'awayout')
+  } catch {
+    console.error('Failed to fetch projects, using fallbacks')
+  }
+
+  // Ensure our high-quality static projects are always present and not duplicated
+  const mergedProjects = [...projects]
+  STATIC_PROJECTS.forEach(staticProj => {
+    const exists = mergedProjects.some(p => p.slug === staticProj.slug)
+    if (!exists) {
+      mergedProjects.push(staticProj)
+    }
+  })
+  
+  // Final list
+  projects = mergedProjects.sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
 
   const settings = await getSiteSettings()
 
