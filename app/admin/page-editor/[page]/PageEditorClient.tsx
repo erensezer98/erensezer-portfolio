@@ -16,7 +16,7 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -28,6 +28,7 @@ import type {
   ImageBlockProps,
   ThreeJSBlockProps,
   SpacerBlockProps,
+  SlideshowBlockProps,
   TextStyle,
   BlockLayout,
 } from '@/lib/types'
@@ -58,7 +59,44 @@ function createBlock(type: BlockType): PageBlock {
       return { ...base, props: { component: 'ArchitecturalWireframe', height: '400px' } as ThreeJSBlockProps }
     case 'spacer':
       return { ...base, props: { height: '4rem' } as SpacerBlockProps }
+    case 'slideshow':
+      return { ...base, props: { images: [], aspectRatio: '16/9', delay: 3000 } as SlideshowBlockProps }
   }
+}
+
+// ─── default blank templates for each page ───────────────────────────────────
+// This helps the user "start from the existing page" 
+function getDefaultLayout(slug: string): PageBlock[] {
+  let layout: Partial<PageBlock>[] = []
+  if (slug === 'home') {
+    layout = [
+      { type: 'spacer', props: { height: '6rem' } },
+      { type: 'text', props: { content: 'Eren Sezer', styleId: null, alignment: 'left' }, layout: { ...DEFAULT_LAYOUT, marginBottom: '0.2rem' } },
+      { type: 'text', props: { content: 'Architect and digital designer.\nMaster of Building Architecture,\nPolitecnico di Milano.', styleId: null, alignment: 'left' } },
+      { type: 'spacer', props: { height: '4rem' } },
+      // Projects would be below this normally
+    ]
+  } else if (slug === 'about') {
+    layout = [
+      { type: 'spacer', props: { height: '8rem' } },
+      { type: 'text', props: { content: 'about', styleId: null, alignment: 'left' } },
+      { type: 'spacer', props: { height: '4rem' } },
+      { type: 'text', layout: { ...DEFAULT_LAYOUT, width: 'half', paddingX: '1rem' }, props: { content: 'I am an architect with a deep interest in digital technologies and how they reshape the way we conceive space.\n\nMy work spans academic research projects, competition entries, and freelance commissions.', styleId: null, alignment: 'left' } },
+      { type: 'image', layout: { ...DEFAULT_LAYOUT, width: 'half' }, props: { src: '', alt: 'Profile', aspectRatio: '3/4', objectFit: 'cover' } },
+    ]
+  } else if (slug === 'contact') {
+    layout = [
+      { type: 'spacer', props: { height: '8rem' } },
+      { type: 'text', props: { content: 'contact', styleId: null, alignment: 'left' } },
+    ]
+  }
+  return layout.map((b, i) => ({
+    id: uid(),
+    type: b.type as BlockType,
+    order: i,
+    props: b.props,
+    layout: b.layout || { ...DEFAULT_LAYOUT },
+  } as PageBlock))
 }
 
 // ─── block type metadata ─────────────────────────────────────────────────────
@@ -66,9 +104,18 @@ function createBlock(type: BlockType): PageBlock {
 const BLOCK_TYPES: { type: BlockType; label: string; icon: string; desc: string }[] = [
   { type: 'text', label: 'Text', icon: 'T', desc: 'Text with predefined style' },
   { type: 'image', label: 'Image', icon: '◻', desc: 'Image container' },
+  { type: 'slideshow', label: 'Slideshow', icon: '◫', desc: 'Image carousel' },
   { type: 'threejs', label: 'Three.js', icon: '△', desc: '3D scene placeholder' },
   { type: 'spacer', label: 'Spacer', icon: '↕', desc: 'Vertical spacing' },
 ]
+
+function widthClassStr(width: string) {
+  if (width === 'full') return 'w-full'
+  if (width === 'wide') return 'w-[85%]'
+  if (width === 'half') return 'w-1/2'
+  if (width === 'third') return 'w-1/3'
+  return 'w-full'
+}
 
 // ─── Sortable Block wrapper ──────────────────────────────────────────────────
 
@@ -100,12 +147,14 @@ function SortableBlock({
     opacity: isDragging ? 0.4 : 1,
   }
 
+  const wClass = widthClassStr(block.layout.width)
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative group border-2 transition-colors duration-150 ${
-        isSelected ? 'border-ink' : 'border-transparent hover:border-rule'
+      className={`relative group border-2 transition-colors flex-shrink-0 ${wClass} ${
+        isSelected ? 'border-ink/50' : 'border-transparent hover:border-rule'
       }`}
       onClick={(e) => {
         e.stopPropagation()
@@ -113,18 +162,18 @@ function SortableBlock({
       }}
     >
       {/* Drag handle + type badge */}
-      <div className="absolute -left-10 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute left-2 top-2 z-20 flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           {...attributes}
           {...listeners}
-          className="w-7 h-7 flex items-center justify-center bg-white border border-rule text-muted hover:text-ink hover:border-ink transition-colors cursor-grab active:cursor-grabbing text-xs"
+          className="w-7 h-7 flex items-center justify-center bg-white border border-rule text-muted hover:text-ink hover:border-ink transition-colors cursor-grab active:cursor-grabbing text-xs shadow-sm"
           title="Drag to reorder"
         >
           ⠿
         </button>
         <button
           onClick={(e) => { e.stopPropagation(); onDelete() }}
-          className="w-7 h-7 flex items-center justify-center bg-white border border-rule text-muted hover:text-red-500 hover:border-red-300 transition-colors text-xs"
+          className="w-7 h-7 flex items-center justify-center bg-white border border-rule text-muted hover:text-red-500 hover:border-red-300 transition-colors text-xs shadow-sm"
           title="Delete block"
         >
           ✕
@@ -132,14 +181,14 @@ function SortableBlock({
       </div>
 
       {/* Type badge */}
-      <div className="absolute -right-2 -top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-        <span className="text-[9px] uppercase tracking-wider bg-ink text-white px-2 py-0.5">
+      <div className="absolute right-2 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-[9px] uppercase tracking-wider bg-ink text-white px-2 py-0.5 shadow-sm">
           {block.type}
         </span>
       </div>
 
       {/* Block preview */}
-      <BlockPreview block={block} textStyles={textStyles} />
+      <BlockPreview block={block} textStyles={textStyles} insideWrapper={true} />
     </div>
   )
 }
@@ -149,16 +198,13 @@ function SortableBlock({
 function BlockPreview({
   block,
   textStyles,
+  insideWrapper = false,
 }: {
   block: PageBlock
   textStyles: TextStyle[]
+  insideWrapper?: boolean
 }) {
-  const widthClass =
-    block.layout.width === 'full' ? 'w-full'
-    : block.layout.width === 'wide' ? 'w-[85%]'
-    : block.layout.width === 'half' ? 'w-1/2'
-    : 'w-1/3'
-
+  const wClass = insideWrapper ? 'w-full' : widthClassStr(block.layout.width)
   const wrapStyle: React.CSSProperties = {
     marginTop: block.layout.marginTop,
     marginBottom: block.layout.marginBottom,
@@ -184,14 +230,20 @@ function BlockPreview({
         : { textAlign: props.alignment }
 
       return (
-        <div className={widthClass} style={wrapStyle}>
-          <div className="bg-white p-4 min-h-[3rem]">
+        <div className={wClass} style={wrapStyle}>
+          <div className="p-2 min-h-[3rem] w-full break-words">
             {style && (
               <span className="text-[9px] uppercase tracking-wider text-muted bg-warm px-1.5 py-0.5 mb-2 inline-block">
                 {style.name}
               </span>
             )}
-            <p style={textStyle}>{props.content || 'Empty text block'}</p>
+            {props.content ? (
+              props.content.split('\n').map((line, i) => (
+                 <p key={i} style={textStyle}>{line || '\u00A0'}</p>
+              ))
+            ) : (
+               <p style={textStyle}>Empty text block</p>
+            )}
           </div>
         </div>
       )
@@ -200,9 +252,9 @@ function BlockPreview({
     case 'image': {
       const props = block.props as ImageBlockProps
       return (
-        <div className={widthClass} style={wrapStyle}>
+        <div className={wClass} style={wrapStyle}>
           <div
-            className="bg-warm border border-rule flex items-center justify-center overflow-hidden"
+            className="bg-warm border border-rule flex items-center justify-center overflow-hidden w-full"
             style={{ aspectRatio: props.aspectRatio }}
           >
             {props.src ? (
@@ -225,12 +277,42 @@ function BlockPreview({
       )
     }
 
+    case 'slideshow': {
+      const props = block.props as SlideshowBlockProps
+      const count = props.images?.length || 0
+      return (
+        <div className={wClass} style={wrapStyle}>
+          <div
+            className="bg-warm border border-rule flex items-center justify-center overflow-hidden w-full relative"
+            style={{ aspectRatio: props.aspectRatio }}
+          >
+            {count > 0 ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={props.images[0].src} alt="" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                  <p className="text-white text-[11px] tracking-wider uppercase drop-shadow-md">
+                    +{count} Images
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="text-center text-muted">
+                <p className="text-2xl mb-1">◫</p>
+                <p className="text-[10px] uppercase tracking-wider">Slideshow</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )
+    }
+
     case 'threejs': {
       const props = block.props as ThreeJSBlockProps
       return (
-        <div className={widthClass} style={wrapStyle}>
+        <div className={wClass} style={wrapStyle}>
           <div
-            className="bg-ink/5 border border-dashed border-muted flex items-center justify-center"
+            className="bg-ink/5 border border-dashed border-muted flex items-center justify-center w-full"
             style={{ height: props.height }}
           >
             <div className="text-center text-muted">
@@ -246,9 +328,9 @@ function BlockPreview({
     case 'spacer': {
       const props = block.props as SpacerBlockProps
       return (
-        <div className={widthClass} style={wrapStyle}>
+        <div className={wClass} style={wrapStyle}>
           <div
-            className="bg-warm/50 border border-dashed border-rule flex items-center justify-center"
+            className="bg-warm/50 border border-dashed border-rule flex items-center justify-center w-full"
             style={{ height: props.height }}
           >
             <span className="text-[10px] uppercase tracking-wider text-muted">
@@ -355,7 +437,7 @@ function PropertiesPanel({
       {/* ── Type-specific props ─── */}
       <div>
         <p className="text-[10px] uppercase tracking-widest text-muted mb-3 border-b border-rule pb-2">
-          {block.type === 'text' ? 'Text' : block.type === 'image' ? 'Image' : block.type === 'threejs' ? 'Three.js' : 'Spacer'} Properties
+          {block.type === 'text' ? 'Text' : block.type === 'image' ? 'Image' : block.type === 'slideshow' ? 'Slideshow' : block.type === 'threejs' ? 'Three.js' : 'Spacer'} Properties
         </p>
 
         {block.type === 'text' && (
@@ -369,6 +451,13 @@ function PropertiesPanel({
         {block.type === 'image' && (
           <ImageProperties
             props={block.props as ImageBlockProps}
+            onChange={updateProps}
+          />
+        )}
+
+        {block.type === 'slideshow' && (
+          <SlideshowProperties
+            props={block.props as SlideshowBlockProps}
             onChange={updateProps}
           />
         )}
@@ -532,6 +621,82 @@ function ImageProperties({
   )
 }
 
+function SlideshowProperties({
+  props,
+  onChange,
+}: {
+  props: SlideshowBlockProps
+  onChange: (p: Record<string, unknown>) => void
+}) {
+  const addImage = () => {
+    onChange({ images: [...(props.images || []), { src: '', alt: '' }] })
+  }
+  const updateImage = (index: number, src: string) => {
+    const newImgs = [...(props.images || [])]
+    newImgs[index] = { ...newImgs[index], src }
+    onChange({ images: newImgs })
+  }
+  const removeImage = (index: number) => {
+    const newImgs = [...(props.images || [])]
+    newImgs.splice(index, 1)
+    onChange({ images: newImgs })
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="text-[11px] uppercase tracking-wider text-muted block mb-1.5">Aspect Ratio</label>
+        <div className="flex gap-1 flex-wrap">
+          {['1/1', '4/3', '3/2', '16/9', '21/9'].map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => onChange({ aspectRatio: r })}
+              className={`px-2.5 py-1 text-[10px] border transition-colors ${
+                props.aspectRatio === r
+                  ? 'border-ink bg-ink text-white'
+                  : 'border-rule text-muted hover:border-muted'
+              }`}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div>
+        <label className="text-[11px] uppercase tracking-wider text-muted block mb-2">Images in Slider</label>
+        <div className="space-y-2">
+          {props.images?.map((img, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={img.src}
+                onChange={(e) => updateImage(i, e.target.value)}
+                className="flex-1 border border-rule px-2 text-xs py-1"
+                placeholder="Image Source URL"
+              />
+              <button 
+                type="button" 
+                onClick={() => removeImage(i)}
+                className="text-red-500 hover:text-red-700 w-5 flex-shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={addImage}
+          className="mt-2 text-[10px] px-2 py-1 border border-rule hover:border-ink w-full"
+        >
+          + Add Image
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function ThreeJSProperties({
   props,
   onChange,
@@ -621,7 +786,11 @@ export default function PageEditorClient({
   initialBlocks,
   textStyles,
 }: Props) {
-  const [blocks, setBlocks] = useState<PageBlock[]>(initialBlocks)
+  const hasBlocks = initialBlocks && initialBlocks.length > 0;
+  
+  const [blocks, setBlocks] = useState<PageBlock[]>(
+    hasBlocks ? initialBlocks : getDefaultLayout(pageSlug)
+  )
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -688,7 +857,7 @@ export default function PageEditorClient({
     setStatus('idle')
   }
 
-  // ── Save ──
+  // ── Save/Revert ──
 
   function handleSave() {
     startTransition(async () => {
@@ -706,6 +875,22 @@ export default function PageEditorClient({
     })
   }
 
+  function revertToSaved() {
+    if (window.confirm("Are you sure you want to revert to the last saved DB state?")) {
+      setBlocks(initialBlocks)
+      setSelectedId(null)
+      setStatus('idle')
+    }
+  }
+
+  function revertToDefault() {
+    if (window.confirm("Are you sure you want to revert to the default template design? This will replace all your changes.")) {
+      setBlocks(getDefaultLayout(pageSlug))
+      setSelectedId(null)
+      setStatus('idle')
+    }
+  }
+
   // ── Render ──
 
   return (
@@ -721,6 +906,14 @@ export default function PageEditorClient({
           </h1>
         </div>
         <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-1 items-end mr-4 border-r border-rule pr-4 text-left">
+             <button onClick={revertToSaved} disabled={!hasBlocks} className="text-[10px] text-muted hover:text-ink disabled:opacity-30">
+               ↺ Revert to Last Save
+             </button>
+             <button onClick={revertToDefault} className="text-[10px] text-muted hover:text-ink">
+               ↶ Revert to Default Template
+             </button>
+          </div>
           {status === 'saved' && <p className="text-xs text-muted">Saved ✓</p>}
           {status === 'error' && <p className="text-xs text-red-500">Save failed</p>}
           <button
@@ -793,9 +986,9 @@ export default function PageEditorClient({
             >
               <SortableContext
                 items={blocks.map((b) => b.id)}
-                strategy={verticalListSortingStrategy}
+                strategy={rectSortingStrategy}
               >
-                <div className="space-y-2 pl-10">
+                <div className="flex flex-wrap items-start w-full gap-y-4">
                   {blocks.map((block) => (
                     <SortableBlock
                       key={block.id}
@@ -811,7 +1004,7 @@ export default function PageEditorClient({
 
               <DragOverlay>
                 {activeId ? (
-                  <div className="opacity-80 rotate-1 shadow-lg">
+                  <div className="opacity-80 rotate-1 shadow-lg bg-white">
                     <BlockPreview
                       block={blocks.find((b) => b.id === activeId)!}
                       textStyles={textStyles}

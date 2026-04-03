@@ -91,7 +91,7 @@ export interface TextStyle {
 
 // ─── Page Editor / Blocks ─────────────────────────────────────────────────────
 
-export type BlockType = 'text' | 'image' | 'threejs' | 'spacer'
+export type BlockType = 'text' | 'image' | 'threejs' | 'spacer' | 'slideshow'
 
 export interface TextBlockProps {
   content: string
@@ -115,6 +115,17 @@ export interface SpacerBlockProps {
   height: string            // e.g. "4rem"
 }
 
+export interface SlideshowImage {
+  src: string
+  alt: string
+}
+
+export interface SlideshowBlockProps {
+  images: SlideshowImage[]
+  aspectRatio: string
+  delay: number             // duration in ms
+}
+
 export interface BlockLayout {
   width: 'full' | 'wide' | 'half' | 'third'
   marginTop: string
@@ -126,7 +137,7 @@ export interface PageBlock {
   id: string
   type: BlockType
   order: number
-  props: TextBlockProps | ImageBlockProps | ThreeJSBlockProps | SpacerBlockProps
+  props: TextBlockProps | ImageBlockProps | ThreeJSBlockProps | SpacerBlockProps | SlideshowBlockProps
   layout: BlockLayout
 }
 

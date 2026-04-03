@@ -183,6 +183,67 @@ function SpacerBlock({
   )
 }
 
+import { useState, useEffect } from 'react'
+
+function SlideshowBlock({
+  props,
+  layout,
+}: {
+  props: import('@/lib/types').SlideshowBlockProps
+  layout: PageBlock['layout']
+}) {
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  useEffect(() => {
+    if (!props.images || props.images.length === 0) return
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % props.images.length)
+    }, props.delay || 3000)
+    return () => clearInterval(timer)
+  }, [props.images, props.delay])
+
+  if (!props.images || props.images.length === 0) return null
+
+  return (
+    <div
+      className={widthClass(layout.width)}
+      style={{
+        marginTop: layout.marginTop,
+        marginBottom: layout.marginBottom,
+        paddingLeft: layout.paddingX,
+        paddingRight: layout.paddingX,
+      }}
+    >
+      <div style={{ aspectRatio: props.aspectRatio }} className="overflow-hidden relative bg-warm">
+        {props.images.map((img, i) => (
+          <Image
+            key={i}
+            src={img.src}
+            alt={img.alt || ''}
+            fill
+            className={`object-cover transition-opacity duration-1000 ${
+              i === currentIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        ))}
+
+        {/* Indicators */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+          {props.images.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentIndex(i)}
+              className={`w-2 h-2 rounded-full transition-colors ${
+                i === currentIndex ? 'bg-white' : 'bg-white/40 hover:bg-white/70'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main Renderer ───────────────────────────────────────────────────────────
 
 export default function PageRenderer({
@@ -197,7 +258,7 @@ export default function PageRenderer({
   const sorted = [...blocks].sort((a, b) => a.order - b.order)
 
   return (
-    <div className="page-renderer">
+    <div className="page-renderer flex flex-wrap w-full items-start">
       {sorted.map((block) => {
         switch (block.type) {
           case 'text': {
@@ -235,6 +296,14 @@ export default function PageRenderer({
               <SpacerBlock
                 key={block.id}
                 props={block.props as SpacerBlockProps}
+                layout={block.layout}
+              />
+            )
+          case 'slideshow':
+            return (
+              <SlideshowBlock
+                key={block.id}
+                props={block.props as import('@/lib/types').SlideshowBlockProps}
                 layout={block.layout}
               />
             )
