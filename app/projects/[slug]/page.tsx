@@ -1,4 +1,4 @@
-import { getProjectBySlug, getProjects } from '@/lib/supabase'
+import { getProjectBySlug, getProjects, getSiteSettings } from '@/lib/supabase'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -37,6 +37,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   try { project = await getProjectBySlug(params.slug) } catch { /* no db */ }
 
   const isIstanbul = params.slug === 'istanbul-a-way-out'
+  const settings = await getSiteSettings()
 
   if (!project) {
     return (
@@ -77,7 +78,7 @@ export default async function ProjectDetailPage({ params }: Props) {
           <p className="text-xs text-muted">
             {project.year} — {project.location}
           </p>
-          {project.tags.length > 0 && (
+          {settings.project_show_tags && project.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-6">
               {project.tags.map((tag) => (
                 <span key={tag} className="text-[11px] text-muted border border-rule px-3 py-1">

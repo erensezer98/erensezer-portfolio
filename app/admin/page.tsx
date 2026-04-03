@@ -20,50 +20,50 @@ export default async function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-12">
-      <div className="flex items-center justify-between">
+    <div className="space-y-10">
+      <div className="flex items-end justify-between gap-6">
         <div>
-          <p className="section-label mb-2">Backstage</p>
-          <h1 className="font-serif text-5xl font-light">Content Manager</h1>
+          <p className="text-xs tracking-widest uppercase text-muted mb-2">admin / projects</p>
+          <h1 className="text-4xl font-light text-ink">Content Manager</h1>
         </div>
-        <Link 
-          href="/admin/new" 
-          className="text-xs tracking-widest uppercase border border-charcoal bg-charcoal text-white px-8 py-3 hover:bg-white hover:text-charcoal transition-colors duration-300"
+        <Link
+          href="/admin/new"
+          className="text-xs tracking-widest uppercase border border-ink bg-ink text-white px-6 py-2.5 hover:bg-white hover:text-ink transition-colors duration-200"
         >
           Add Project
         </Link>
       </div>
 
-      <div className="bg-white border border-border shadow-sm overflow-hidden">
+      <div className="bg-white border border-rule overflow-hidden">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-border bg- cream/30">
-              <th className="px-6 py-4 text-xs tracking-widest uppercase text-muted font-medium">Project</th>
-              <th className="px-6 py-4 text-xs tracking-widest uppercase text-muted font-medium">Category</th>
-              <th className="px-6 py-4 text-xs tracking-widest uppercase text-muted font-medium">Year</th>
-              <th className="px-6 py-4 text-xs tracking-widest uppercase text-muted font-medium text-right">Actions</th>
+            <tr className="border-b border-rule bg-warm/40">
+              <th className="px-6 py-4 text-xs tracking-widest uppercase text-muted font-normal">Project</th>
+              <th className="px-6 py-4 text-xs tracking-widest uppercase text-muted font-normal">Category</th>
+              <th className="px-6 py-4 text-xs tracking-widest uppercase text-muted font-normal">Year</th>
+              <th className="px-6 py-4 text-xs tracking-widest uppercase text-muted font-normal text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-y divide-rule">
             {projects.map((project) => (
-              <tr key={project.id} className="hover:bg-cream/20 transition-colors group">
+              <tr key={project.id} className="hover:bg-warm/30 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium text-charcoal">{project.title}</span>
+                    <span className="text-[13px] text-ink">{project.title}</span>
                     <span className="text-[10px] text-muted tracking-tight">/{project.slug}</span>
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="inline-block text-[10px] tracking-widest uppercase px-2 py-0.5 border border-border text-muted">
+                  <span className="inline-block text-[10px] tracking-widest uppercase px-2 py-0.5 border border-rule text-muted">
                     {project.category}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm text-muted">{project.year}</td>
+                <td className="px-6 py-4 text-xs text-muted">{project.year}</td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-4">
-                    <Link 
+                    <Link
                       href={`/admin/edit/${project.slug}`}
-                      className="text-[10px] tracking-widest uppercase text-charcoal hover:text-salmon transition-colors"
+                      className="text-[10px] tracking-widest uppercase text-muted hover:text-ink transition-colors"
                     >
                       Edit
                     </Link>
@@ -74,8 +74,8 @@ export default async function AdminDashboard() {
             ))}
             {projects.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-muted text-sm italic">
-                  No projects found. Add your first one to get started.
+                <td colSpan={4} className="px-6 py-12 text-center text-muted text-sm">
+                  No projects yet. Add your first one above.
                 </td>
               </tr>
             )}

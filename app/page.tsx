@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { getProjects } from '@/lib/supabase'
+import { getProjects, getSiteSettings } from '@/lib/supabase'
 import type { Project } from '@/lib/types'
 
 const FALLBACK: Project[] = [
@@ -16,11 +16,18 @@ export default async function HomePage() {
   try { projects = await getProjects() } catch { /* use fallback */ }
   if (!projects.length) projects = FALLBACK
 
+  const settings = await getSiteSettings()
+
+  const heroPadding  = settings.home_hero_size === 'large' ? 'pt-36 pb-28' : 'pt-24 pb-16'
+  const gridCols     = settings.home_grid_cols === 1
+    ? 'grid-cols-1'
+    : 'grid-cols-1 md:grid-cols-2'
+
   return (
     <div className="px-6 md:px-10">
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <section className="pt-36 pb-20 md:pb-28">
+      <section className={`${heroPadding}`}>
         <h1 className="text-[clamp(2.6rem,6.5vw,5.5rem)] font-light text-ink leading-[1.08] tracking-tight mb-5">
           Eren Sezer
         </h1>
@@ -33,7 +40,7 @@ export default async function HomePage() {
 
       {/* ── Projects grid ────────────────────────────────────────── */}
       <section className="pb-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-14">
+        <div className={`grid ${gridCols} gap-x-8 gap-y-14`}>
           {projects.map((p) => (
             <Link
               key={p.id}

@@ -45,3 +45,30 @@ export interface ContactMessage {
   message: string
   created_at: string
 }
+
+// ─── Site / Layout Settings ───────────────────────────────────────────────────
+
+export interface SiteSettings {
+  // Homepage
+  home_hero_size: 'large' | 'compact'
+  home_grid_cols: 1 | 2
+
+  // Projects listing
+  projects_grid_cols: 2 | 3
+
+  // About page
+  about_show_photo: boolean
+  about_bio_cols: 1 | 2
+
+  // Project detail
+  project_show_tags: boolean
+}
+
+export const DEFAULT_SETTINGS: SiteSettings = {
+  home_hero_size: 'large',
+  home_grid_cols: 2,
+  projects_grid_cols: 3,
+  about_show_photo: true,
+  about_bio_cols: 2,
+  project_show_tags: true,
+}

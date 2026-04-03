@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Project, Award, Publication, ContactMessage } from './types'
+import type { Project, Award, Publication, ContactMessage, SiteSettings } from './types'
+import { DEFAULT_SETTINGS } from './types'
 
 // Provide dummy values to prevent 'supabaseKey is required' crash on importing this file server-side when env vars leak
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy.supabase.co'
@@ -135,6 +136,31 @@ export async function getContactMessages(): Promise<ContactMessage[]> {
   } catch (err) {
     console.error('Unexpected error in getContactMessages:', err)
     return []
+  }
+}
+
+// ─── Site Settings ────────────────────────────────────────────────────────────
+
+export async function getSiteSettings(): Promise<SiteSettings> {
+  try {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('key, value')
+
+    if (error || !data) return DEFAULT_SETTINGS
+
+    const parsed: Record<string, unknown> = {}
+    for (const row of data) {
+      const v = row.value
+      if (v === 'true')       parsed[row.key] = true
+      else if (v === 'false') parsed[row.key] = false
+      else if (!isNaN(Number(v)) && v !== '') parsed[row.key] = Number(v)
+      else                    parsed[row.key] = v
+    }
+
+    return { ...DEFAULT_SETTINGS, ...(parsed as Partial<SiteSettings>) }
+  } catch {
+    return DEFAULT_SETTINGS
   }
 }
 

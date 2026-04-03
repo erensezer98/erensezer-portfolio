@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getSiteSettings } from '@/lib/supabase'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -24,14 +25,20 @@ const languages = [
   { name: 'Italian',  level: 'B1 Beginner' },
 ]
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const settings = await getSiteSettings()
+
+  const bioGrid = settings.about_bio_cols === 2
+    ? 'grid md:grid-cols-2 gap-16'
+    : 'max-w-2xl'
+
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
 
       <p className="text-[13px] text-muted mb-16">about</p>
 
       {/* Bio */}
-      <div className="grid md:grid-cols-2 gap-16 mb-24">
+      <div className={`${bioGrid} mb-24`}>
         <div className="space-y-5 text-sm text-ink leading-relaxed">
           <p>
             I am an architect with a deep interest in digital technologies and how
@@ -50,7 +57,9 @@ export default function AboutPage() {
             and exploring new tools at the boundary of architecture and computation.
           </p>
         </div>
-        <div className="aspect-[3/4] bg-warm" />
+        {settings.about_show_photo && settings.about_bio_cols === 2 && (
+          <div className="aspect-[3/4] bg-warm" />
+        )}
       </div>
 
       {/* Experience */}

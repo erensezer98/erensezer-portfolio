@@ -1,4 +1,4 @@
-import { getProjects } from '@/lib/supabase'
+import { getProjects, getSiteSettings } from '@/lib/supabase'
 import ProjectCard from '@/components/projects/ProjectCard'
 import type { Metadata } from 'next'
 import type { Project } from '@/lib/types'
@@ -21,11 +21,17 @@ export default async function ProjectsPage() {
   try { projects = await getProjects() } catch { /* use fallback */ }
   if (!projects.length) projects = STATIC_PROJECTS
 
+  const settings = await getSiteSettings()
+
+  const gridCols = settings.projects_grid_cols === 2
+    ? 'grid-cols-1 sm:grid-cols-2'
+    : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
       <p className="text-[13px] text-muted mb-16">projects</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+      <div className={`grid ${gridCols} gap-x-8 gap-y-14`}>
         {projects.map((project) => (
           <ProjectCard key={project.id} project={project} />
         ))}
