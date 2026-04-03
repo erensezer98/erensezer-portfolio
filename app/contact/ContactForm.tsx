@@ -29,8 +29,8 @@ export default function ContactForm() {
     <div className="max-w-lg">
       <p className="text-sm text-ink leading-relaxed mb-12">
         Interested in collaborating or have a project in mind?{' '}
-        <a href="mailto:eren@maestro-tech.com" className="underline underline-offset-4 decoration-rule hover:text-muted transition-colors">
-          eren@maestro-tech.com
+        <a href="mailto:eren.sezer@hotmail.com" className="underline underline-offset-4 decoration-rule hover:text-muted transition-colors">
+          eren.sezer@hotmail.com
         </a>
       </p>
 
