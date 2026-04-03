@@ -27,12 +27,12 @@ export default function TheLogScene() {
     // ─── Background Texture ───────────────────────────────────────────────────
     const texLoader = new THREE.TextureLoader()
     texLoader.load('/three/garden_bg.png', (tex) => {
-        // We use it as a large plane in the very back to allow for some parallax/blur control
         const bgPlane = new THREE.Mesh(
             new THREE.PlaneGeometry(30, 20),
-            new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.9 })
+            new THREE.MeshBasicMaterial({ map: tex }) // Opaque so it shows through transmission
         )
         bgPlane.position.z = -8
+        bgPlane.renderOrder = -2 // Render first
         scene.add(bgPlane)
     })
 
@@ -43,7 +43,8 @@ export default function TheLogScene() {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(w, h)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    // Physical lighting
+    
+    // PHYSICAL LIGHTING
     renderer.toneMapping = THREE.ACESFilmicToneMapping
     renderer.outputColorSpace = THREE.SRGBColorSpace
     el.appendChild(renderer.domElement)
@@ -84,6 +85,7 @@ export default function TheLogScene() {
     })
     const textPlane = new THREE.Mesh(new THREE.PlaneGeometry(8, 4), textMat)
     textPlane.position.z = 0.5 // In front of the reeded plane
+    textPlane.renderOrder = 1 // Render AFTER the glass
     scene.add(textPlane)
 
     // ─── Reeded Translucent Plane ─────────────────────────────────────────────
@@ -103,20 +105,22 @@ export default function TheLogScene() {
     normalTex.repeat.set(10, 1)
 
     const glassMat = new THREE.MeshPhysicalMaterial({
-      transmission: 0.95,
-      thickness: 1.5,
-      roughness: 0.15,
-      ior: 1.45,
+      transmission: 1.0,      // Full transmission
+      thickness: 0.5,         // Thinner glass for better clarity
+      roughness: 0.1,
+      ior: 1.5,
       attenuationDistance: 1,
-      attenuationColor: new THREE.Color('#faf5f0'),
+      attenuationColor: new THREE.Color('#ffffff'),
       color: '#ffffff',
       metalness: 0,
       normalMap: normalTex,
-      transparent: true,
+      transparent: true,     // Physical transparency
+      opacity: 1,
     })
 
     const glassPlane = new THREE.Mesh(new THREE.PlaneGeometry(15, 10), glassMat)
     glassPlane.position.z = 0
+    glassPlane.renderOrder = 0
     scene.add(glassPlane)
 
     // ─── Woody Triangular Fragments (Instanced) ────────────────────────────────
@@ -142,6 +146,7 @@ export default function TheLogScene() {
     }))
 
     fragData.forEach((d, i) => instancedMesh.setColorAt(i, d.color))
+    instancedMesh.renderOrder = -1 // Render before the glass
     scene.add(instancedMesh)
 
     // ─── Interaction ──────────────────────────────────────────────────────────
