@@ -186,31 +186,48 @@ export default async function ProjectDetailPage({ params }: Props) {
   const isIstanbul = params.slug === 'istanbul-a-way-out'
   const isFoodTower = params.slug === 'food-tower'
 
+  // Theme definition
+  const theme = isIstanbul ? {
+    bg: 'bg-black',
+    text: 'text-white',
+    muted: 'text-zinc-500',
+    border: 'border-zinc-800',
+    ink: 'text-zinc-100',
+    hover: 'hover:text-white'
+  } : {
+    bg: 'bg-white',
+    text: 'text-ink',
+    muted: 'text-muted',
+    border: 'border-rule',
+    ink: 'text-ink',
+    hover: 'hover:text-ink'
+  }
+
   // Images priority: DB images > Static placeholders
   const coverImage = dbProject?.cover_image || null
   const galleryImages = dbProject?.images || []
 
   return (
-    <article className="px-6 md:px-10 pt-28 pb-32">
+    <article className={`px-6 md:px-10 pt-28 pb-32 transition-colors duration-700 ${theme.bg} min-h-screen`}>
       {/* Back */}
-      <Link href="/projects" className="text-xs text-muted hover:text-ink transition-colors inline-block mb-14">
+      <Link href="/projects" className={`text-xs ${theme.muted} ${theme.hover} transition-colors inline-block mb-14`}>
         ← projects
       </Link>
 
       {/* Header */}
       <div className="grid md:grid-cols-2 gap-12 mb-16">
         <div>
-          <p className="text-xs text-muted capitalize mb-3">{category}</p>
-          <h1 className="text-3xl md:text-5xl font-light text-ink leading-tight mb-4">
+          <p className={`text-xs ${theme.muted} capitalize mb-3`}>{category}</p>
+          <h1 className={`text-3xl md:text-5xl font-light ${theme.text} leading-tight mb-4`}>
             {title}
           </h1>
-          <p className="text-xs text-muted mb-6">
+          <p className={`text-xs ${theme.muted} mb-6`}>
             {year} — {location}
           </p>
           {settings.project_show_tags && tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
-                <span key={tag} className="text-[11px] text-muted border border-rule px-3 py-1">
+                <span key={tag} className={`text-[11px] ${theme.muted} border ${theme.border} px-3 py-1`}>
                   {tag}
                 </span>
               ))}
@@ -218,7 +235,7 @@ export default async function ProjectDetailPage({ params }: Props) {
           )}
         </div>
         <div>
-          <p className="text-sm text-ink leading-relaxed">
+          <p className={`text-sm ${theme.ink} leading-relaxed`}>
             {overview}
           </p>
         </div>
@@ -226,21 +243,21 @@ export default async function ProjectDetailPage({ params }: Props) {
 
       {/* Interactive scene — Food Tower */}
       {isFoodTower && (
-        <div className="w-full aspect-[16/7] overflow-hidden bg-white mb-4 border border-rule/30">
+        <div className={`w-full aspect-[16/7] overflow-hidden bg-white mb-4 border ${theme.border}/30`}>
           <ArchitecturalWireframe />
         </div>
       )}
 
       {/* Interactive scene — Istanbul */}
       {isIstanbul && (
-        <div className="w-full aspect-[16/7] mb-4 overflow-hidden bg-black">
+        <div className="w-full aspect-[16/7] mb-4 overflow-hidden bg-black outline outline-1 outline-zinc-900">
           <InteractiveRelight />
         </div>
       )}
 
       {/* Cover image */}
       {coverImage ? (
-        <div className="aspect-[16/9] overflow-hidden bg-warm mb-3">
+        <div className={`aspect-[16/9] overflow-hidden ${isIstanbul ? 'bg-zinc-900' : 'bg-warm'} mb-3`}>
           <Image
             src={coverImage}
             alt={title}
@@ -251,18 +268,22 @@ export default async function ProjectDetailPage({ params }: Props) {
           />
         </div>
       ) : (
-        <PlaceholderImage aspect="aspect-[16/9]" label="cover image" className="mb-3" />
+        <PlaceholderImage 
+          aspect="aspect-[16/9]" 
+          label="cover image" 
+          className={`mb-3 ${isIstanbul ? 'bg-zinc-900 text-zinc-700' : ''}`} 
+        />
       )}
 
       {/* Overview + Project info */}
       <div className="grid md:grid-cols-[1fr_280px] gap-x-16 gap-y-12 mt-16 mb-16">
         <div>
-          <p className="text-[11px] text-muted tracking-widest uppercase mb-6">Overview</p>
-          <p className="text-sm text-ink leading-relaxed mb-5">
+          <p className={`text-[11px] ${theme.muted} tracking-widest uppercase mb-6`}>Overview</p>
+          <p className={`text-sm ${theme.text} leading-relaxed mb-5`}>
             {overview}
           </p>
           {context && (
-            <p className="text-sm text-ink leading-relaxed">
+            <p className={`text-sm ${theme.text} leading-relaxed`}>
               {context}
             </p>
           )}
@@ -270,8 +291,8 @@ export default async function ProjectDetailPage({ params }: Props) {
 
         {/* Project details table */}
         <div>
-          <p className="text-[11px] text-muted tracking-widest uppercase mb-6">Project Info</p>
-          <div className="border-t border-rule">
+          <p className={`text-[11px] ${theme.muted} tracking-widest uppercase mb-6`}>Project Info</p>
+          <div className={`border-t ${theme.border}`}>
             {[
               { label: 'Program', value: program },
               { label: 'Year', value: String(year) },
@@ -280,9 +301,9 @@ export default async function ProjectDetailPage({ params }: Props) {
               { label: 'Status', value: status },
               { label: 'Client', value: client },
             ].map(({ label, value }) => (
-              <div key={label} className="flex justify-between items-baseline border-b border-rule py-3">
-                <span className="text-[11px] text-muted">{label}</span>
-                <span className="text-[11px] text-ink text-right max-w-[60%]">{value}</span>
+              <div key={label} className={`flex justify-between items-baseline border-b ${theme.border} py-3`}>
+                <span className={`text-[11px] ${theme.muted}`}>{label}</span>
+                <span className={`text-[11px] ${theme.text} text-right max-w-[60%]`}>{value}</span>
               </div>
             ))}
           </div>
@@ -293,7 +314,7 @@ export default async function ProjectDetailPage({ params }: Props) {
       {galleryImages.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
           {galleryImages.map((src, i) => (
-            <div key={i} className="aspect-[4/3] overflow-hidden bg-warm">
+            <div key={i} className={`aspect-[4/3] overflow-hidden ${isIstanbul ? 'bg-zinc-900' : 'bg-warm'}`}>
               <Image
                 src={src}
                 alt={`${title} — ${i + 1}`}
@@ -306,17 +327,25 @@ export default async function ProjectDetailPage({ params }: Props) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <PlaceholderImage aspect="aspect-[4/3]" label="image 01" />
-          <PlaceholderImage aspect="aspect-[4/3]" label="image 02" />
+          <PlaceholderImage 
+            aspect="aspect-[4/3]" 
+            label="image 01" 
+            className={isIstanbul ? 'bg-zinc-900 text-zinc-700' : ''} 
+          />
+          <PlaceholderImage 
+            aspect="aspect-[4/3]" 
+            label="image 02" 
+            className={isIstanbul ? 'bg-zinc-900 text-zinc-700' : ''} 
+          />
         </div>
       )}
 
       {/* Footer nav */}
-      <div className="border-t border-rule mt-20 pt-10 flex justify-between items-center">
-        <Link href="/projects" className="text-xs text-muted hover:text-ink transition-colors">
+      <div className={`border-t ${theme.border} mt-20 pt-10 flex justify-between items-center`}>
+        <Link href="/projects" className={`text-xs ${theme.muted} ${theme.hover} transition-colors`}>
           ← all projects
         </Link>
-        <Link href="/contact" className="text-xs text-muted hover:text-ink transition-colors">
+        <Link href="/contact" className={`text-xs ${theme.muted} ${theme.hover} transition-colors`}>
           get in touch →
         </Link>
       </div>

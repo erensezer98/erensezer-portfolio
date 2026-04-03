@@ -25,16 +25,22 @@ export default function Navbar() {
 
   useEffect(() => setMenuOpen(false), [pathname])
 
+  const isDark = pathname === '/projects/istanbul-a-way-out'
+
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
-        scrolled ? 'bg-white border-b border-rule' : 'bg-transparent'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
+        scrolled 
+          ? (isDark ? 'bg-black/80 backdrop-blur-md border-b border-zinc-800' : 'bg-white border-b border-rule') 
+          : 'bg-transparent'
       }`}
     >
       <div className="px-6 md:px-10 h-12 flex items-center justify-between">
         <Link
           href="/"
-          className="text-[13px] text-ink hover:text-muted transition-colors duration-200"
+          className={`text-[13px] transition-colors duration-200 ${
+            isDark ? 'text-zinc-100 hover:text-zinc-500' : 'text-ink hover:text-muted'
+          }`}
         >
           eren sezer
         </Link>
@@ -45,7 +51,11 @@ export default function Navbar() {
             <Link
               key={href}
               href={href}
-              className={`nav-link ${pathname.startsWith(href) ? 'active' : ''}`}
+              className={`text-[13px] transition-colors duration-200 ${
+                pathname.startsWith(href)
+                  ? (isDark ? 'text-white' : 'text-ink')
+                  : (isDark ? 'text-zinc-500 hover:text-white' : 'text-muted hover:text-ink')
+              }`}
             >
               {label}
             </Link>
