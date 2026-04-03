@@ -41,9 +41,8 @@ export default async function HomePage() {
       <section className="pb-32">
         <div className={`grid ${gridCols} gap-x-8 gap-y-14`}>
           {projects.map((p) => (
-            <Link
+            <div
               key={p.id}
-              href={`/projects/${p.slug}`}
               className="group block"
             >
               {/* Image */}
@@ -54,7 +53,7 @@ export default async function HomePage() {
                     alt={p.title}
                     width={800}
                     height={600}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full bg-warm" />
@@ -64,7 +63,7 @@ export default async function HomePage() {
               {/* Meta */}
               <p className="text-[13px] text-ink">{p.title}</p>
               <p className="text-xs text-muted mt-0.5">{p.year} — {p.location}</p>
-            </Link>
+            </div>
           ))}
         </div>
       </section>
