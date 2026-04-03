@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import Image from 'next/image'
 import { getProjects, getSiteSettings } from '@/lib/supabase'
 import type { Project } from '@/lib/types'
