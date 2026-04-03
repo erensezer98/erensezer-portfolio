@@ -9,6 +9,11 @@ const InteractiveRelight = dynamic(
   { ssr: false }
 )
 
+const ArchitecturalWireframe = dynamic(
+  () => import('@/components/three/ArchitecturalWireframe'),
+  { ssr: false }
+)
+
 interface Props {
   params: { slug: string }
 }
@@ -40,6 +45,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   const settings = await getSiteSettings()
 
   if (!project) {
+    const isFoodTower = params.slug === 'food-tower'
     return (
       <div className="px-6 md:px-10 pt-28 pb-32">
         <Link href="/projects" className="text-xs text-muted hover:text-ink transition-colors inline-block mb-12">
@@ -48,9 +54,15 @@ export default async function ProjectDetailPage({ params }: Props) {
         <h1 className="text-2xl md:text-4xl font-light text-ink mb-4 capitalize">
           {params.slug.replace(/-/g, ' ')}
         </h1>
-        <p className="text-sm text-muted mb-16">
-          Project content coming soon.
-        </p>
+        {isFoodTower ? (
+          <div className="w-full aspect-[16/7] overflow-hidden bg-white mb-16">
+            <ArchitecturalWireframe />
+          </div>
+        ) : (
+          <p className="text-sm text-muted mb-16">
+            Project content coming soon.
+          </p>
+        )}
         {isIstanbul && (
           <div className="w-full aspect-[16/7] overflow-hidden bg-black">
             <InteractiveRelight />

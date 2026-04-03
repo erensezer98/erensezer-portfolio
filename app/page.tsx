@@ -29,12 +29,11 @@ export default async function HomePage() {
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className={`${heroPadding}`}>
         <h1 className="text-[clamp(2.6rem,6.5vw,5.5rem)] font-light text-ink leading-[1.08] tracking-tight mb-5">
-          Eren Sezer
+          eren sezer
         </h1>
         <p className="text-muted text-sm max-w-xs leading-relaxed">
-          Architect and digital designer.<br />
-          Master of Building Architecture,<br />
-          Politecnico di Milano.
+          Architect and designer.<br />
+          Based in Torino, Italy
         </p>
       </section>
 
