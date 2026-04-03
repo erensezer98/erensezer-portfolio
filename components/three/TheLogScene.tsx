@@ -23,7 +23,18 @@ export default function TheLogScene() {
 
     // ─── Scene & Camera ───────────────────────────────────────────────────────
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color('#faf5f0') // Very light cream/peach
+    
+    // ─── Background Texture ───────────────────────────────────────────────────
+    const texLoader = new THREE.TextureLoader()
+    texLoader.load('/three/garden_bg.png', (tex) => {
+        // We use it as a large plane in the very back to allow for some parallax/blur control
+        const bgPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(30, 20),
+            new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.9 })
+        )
+        bgPlane.position.z = -8
+        scene.add(bgPlane)
+    })
 
     const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000)
     camera.position.set(0, 0, 10)
@@ -38,16 +49,17 @@ export default function TheLogScene() {
     el.appendChild(renderer.domElement)
 
     // ─── Environment & Lighting ───────────────────────────────────────────────
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
     scene.add(ambientLight)
 
-    const spotLight = new THREE.SpotLight(0xffffff, 50)
-    spotLight.position.set(5, 5, 10)
-    scene.add(spotLight)
+    // Sunlight from Top Left
+    const sunLight = new THREE.DirectionalLight('#fff5e6', 5)
+    sunLight.position.set(-10, 10, 5)
+    scene.add(sunLight)
     
-    const pointLight = new THREE.PointLight('#ff8c69', 30) // Salmon accent
-    pointLight.position.set(-5, -5, 5)
-    scene.add(pointLight)
+    const fillLight = new THREE.PointLight('#ff8c69', 15) // Salmon accent
+    fillLight.position.set(5, -5, 5)
+    scene.add(fillLight)
 
     // ─── Text Texture ─────────────────────────────────────────────────────────
     const canvas = document.createElement('canvas')
