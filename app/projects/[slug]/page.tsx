@@ -135,7 +135,7 @@ const KNOWN_SLUGS = [
 export async function generateStaticParams() {
   try {
     const projects = await getProjects()
-    const dbSlugs = projects.map((p) => p.slug).filter(s => !['awayout', 'food-tower', 'hungarian-csarda'].includes(s))
+    const dbSlugs = projects.map((p) => p.slug).filter(s => !['awayout', 'hungarian-csarda'].includes(s))
     const allSlugs = Array.from(new Set([...KNOWN_SLUGS, ...dbSlugs]))
     return allSlugs.map((slug) => ({ slug }))
   } catch {

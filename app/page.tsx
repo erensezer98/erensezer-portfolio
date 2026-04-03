@@ -4,6 +4,7 @@ import { getProjects, getSiteSettings } from '@/lib/supabase'
 import type { Project } from '@/lib/types'
 
 const FALLBACK: Project[] = [
+  { id: '1', slug: 'food-tower',          title: 'The Food Tower',       year: 2022, location: 'Milan, Italy',    category: 'academic',  short_description: 'Vertical farm and factory in the MIND district, Milan. Shortlisted for Skyhive Challenge.',      description: '', tags: [], cover_image: null, images: [], featured: true,  order_index: 1, created_at: '' },
   { id: '2', slug: 'the-log',           title: 'The Log',              year: 2021, location: 'Milan, Italy',    category: 'academic',  short_description: 'Auditorium exploring organic timber form.',                                     description: '', tags: [], cover_image: null, images: [], featured: true,  order_index: 2, created_at: '' },
   { id: '3', slug: 'halic-co-op',       title: 'Haliç Co-op',          year: 2020, location: 'Istanbul, Turkey',category: 'academic',  short_description: 'Creative Industries Center in Goldenhorn. Published in Mimdap Magazine.',        description: '', tags: [], cover_image: null, images: [], featured: true,  order_index: 3, created_at: '' },
   { id: '5', slug: 'istanbul-a-way-out',title: 'Istanbul: A Way Out',  year: 2023, location: 'Istanbul, Turkey',category: 'academic',  short_description: 'An urban escape strategy — light, shadow, and threshold.',                      description: '', tags: [], cover_image: null, images: [], featured: true,  order_index: 5, created_at: '' },
@@ -14,7 +15,7 @@ export default async function HomePage() {
   try { 
     const dbProjects = await getProjects()
     // Remove the unwanted projects
-    const EXCLUDED_SLUGS = ['awayout', 'food-tower', 'hungarian-csarda']
+    const EXCLUDED_SLUGS = ['awayout', 'hungarian-csarda']
     projects = dbProjects.filter(p => !EXCLUDED_SLUGS.includes(p.slug))
   } catch {
     console.warn('Failed to fetch home projects, using fallbacks')
