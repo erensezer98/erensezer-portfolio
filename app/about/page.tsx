@@ -39,28 +39,32 @@ export default async function AboutPage() {
       <div className={`${bioGrid} mb-24`}>
         <div className="space-y-5 text-sm text-ink leading-relaxed">
           <p>
-            Born in Istanbul in 1998, I am an architect, researcher, and technologist who
-            uses the built environment as a framework to explore the future of design. I operate
-            at the intersection of{' '}<em>intuitive technocracy</em>{' '}and traditional craftsmanship,
-            constantly searching to detect and rationalize the inherent{' '}
-            <em>&ldquo;quality without a name&rdquo;</em>{' '}of spaces, as defined by architectural
-            theorist Christopher Alexander.
+            Born in Istanbul in 1998, Eren Sezer is an architect, researcher, and technologist
+            who uses the built environment as a framework to explore the future of design. He
+            operates at the intersection of &ldquo;intuitive technocracy&rdquo; and traditional
+            craftsmanship, constantly searching to detect and rationalize the inherent &ldquo;quality
+            without a name&rdquo; of spaces, as defined by architectural theorist Christopher Alexander.
           </p>
           <p>
             Holding a Master&rsquo;s degree in Building Architecture from Politecnico di Milano,
-            I have an obsession for the integration of advanced technologies into the
-            architect&rsquo;s design process. After my studies, I collaborated with MIT Senseable
-            City Lab Director Carlo Ratti to witness the limits of architectural tech. This work
-            transitioned into my current role as Project Manager at the startup Maestro
-            Technologies in Carlo Ratti Group, where I help lead a team committed to pioneering
+            Eren has an obsession for the integration of advanced technologies into the
+            architect&rsquo;s design process. After his studies, he collaborated with MIT Senseable
+            City Lab Director Carlo Ratti, to witness the limits of architectural tech. This work
+            transitioned into his current role as a Project Manager at the startup Maestro
+            Technologies in Carlo Ratti Group, where he helps lead a team committed to pioneering
             entirely new ways to design and build.
           </p>
+          <p>Eren&rsquo;s work has been recognized in:</p>
           <p>
-            My work has been recognised on the world&rsquo;s most prominent stages — from
-            representing the Italian Ministry of External Affairs at COP30&rsquo;s Italian
-            Pavilion <em>Aquapraca</em>, to exhibiting at the 2025 Venice Architectural Biennale
-            and the STRAND International Architecture Exhibition with the collective{' '}
-            <em>Cumba</em>, co-founded in 2023.
+            <strong>Global Climate Action:</strong> In 2025, he was selected as a representative
+            architect for the Italian Ministry of External Affairs at the UN Climate Change Summit
+            (COP30) for the Italian Pavilion, Aquapraca.
+          </p>
+          <p>
+            <strong>International Exhibitions:</strong> As the co-founder of the architectural
+            collective Cumba (est. 2023), Eren and the team secured spots at the STRAND
+            International Architecture Exhibition and the 2025 Venice Architectural Biennale
+            with their acclaimed project, Istanbul A Way Out.
           </p>
         </div>
         {settings.about_show_photo && settings.about_bio_cols === 2 && (
