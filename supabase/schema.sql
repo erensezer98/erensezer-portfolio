@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS projects (
   year          INTEGER,
   location      TEXT,
   tags          TEXT[]      DEFAULT '{}',
-  cover_image   TEXT,           -- Supabase Storage public URL
+  cover_image   TEXT,           -- Image URL (Google Drive: https://drive.google.com/uc?export=view&id=FILE_ID, or any public URL)
   images        TEXT[]      DEFAULT '{}',
   featured      BOOLEAN     DEFAULT false,
   order_index   INTEGER     DEFAULT 0,
@@ -87,13 +87,21 @@ CREATE POLICY "Public insert"    ON contact_messages FOR INSERT WITH CHECK (true
 
 
 -- ─── Storage bucket for project images ───────────────────────────────────────
--- Run this in the Supabase Dashboard → Storage, or via the API:
+-- Images are now served from Google Drive (see lib/gdrive.ts for URL helpers).
+-- The Supabase storage bucket below is kept for backwards compatibility with
+-- any existing images that were uploaded before the migration.
 -- INSERT INTO storage.buckets (id, name, public) VALUES ('project-images', 'project-images', true);
 
 
 -- ─── Seed data ────────────────────────────────────────────────────────────────
+-- Image URLs use Google Drive. To replace placeholders:
+--   1. Upload each image to Google Drive and set sharing to "Anyone with the link".
+--   2. Copy the file ID from the share URL: https://drive.google.com/file/d/FILE_ID/view
+--   3. Replace the FILE_ID placeholder below with the real ID.
+--   4. The URL format is: https://drive.google.com/uc?export=view&id=FILE_ID
+--   Alternatively, use lib/gdrive.ts helpers in the Next.js app to build these URLs.
 
-INSERT INTO projects (title, slug, category, short_description, description, year, location, tags, featured, order_index) VALUES
+INSERT INTO projects (title, slug, category, short_description, description, year, location, tags, cover_image, images, featured, order_index) VALUES
 (
   'The Food Tower',
   'food-tower',
@@ -103,6 +111,11 @@ INSERT INTO projects (title, slug, category, short_description, description, yea
   2022,
   'Milan, Italy',
   ARRAY['vertical farm', 'skyscraper', 'timber structure', 'sustainable', 'MIND Milano'],
+  'https://drive.google.com/uc?export=view&id=PLACEHOLDER_FOOD_TOWER_COVER',
+  ARRAY[
+    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_FOOD_TOWER_1',
+    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_FOOD_TOWER_2'
+  ],
   true,
   1
 ),
@@ -115,6 +128,11 @@ INSERT INTO projects (title, slug, category, short_description, description, yea
   2021,
   'Milan, Italy',
   ARRAY['auditorium', 'timber', 'acoustics', 'structure'],
+  'https://drive.google.com/uc?export=view&id=PLACEHOLDER_THE_LOG_COVER',
+  ARRAY[
+    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_THE_LOG_1',
+    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_THE_LOG_2'
+  ],
   true,
   2
 ),
@@ -127,6 +145,11 @@ INSERT INTO projects (title, slug, category, short_description, description, yea
   2020,
   'Istanbul, Turkey',
   ARRAY['cultural', 'creative hub', 'istanbul', 'adaptive reuse'],
+  'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HALIC_COOP_COVER',
+  ARRAY[
+    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HALIC_COOP_1',
+    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HALIC_COOP_2'
+  ],
   true,
   3
 ),
@@ -139,6 +162,11 @@ INSERT INTO projects (title, slug, category, short_description, description, yea
   2022,
   'Saemangeum, South Korea',
   ARRAY['pavilion', 'festival', 'temporary', 'folded plate'],
+  'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HUNGARIAN_CSARDA_COVER',
+  ARRAY[
+    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HUNGARIAN_CSARDA_1',
+    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HUNGARIAN_CSARDA_2'
+  ],
   true,
   4
 );

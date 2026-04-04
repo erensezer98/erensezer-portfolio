@@ -103,12 +103,13 @@ export default function ProjectForm({ project }: ProjectFormProps) {
         {/* Images & Tags */}
         <div className="space-y-2">
           <label className="block text-[10px] tracking-widest uppercase text-muted">Cover Image URL</label>
-          <input name="cover_image" defaultValue={project?.cover_image || ''} placeholder="https://..." className="w-full border border-border bg-transparent px-4 py-3 text-sm text-charcoal focus:outline-none focus:border-charcoal transition-colors" />
+          <input name="cover_image" defaultValue={project?.cover_image || ''} placeholder="https://drive.google.com/uc?export=view&id=FILE_ID" className="w-full border border-border bg-transparent px-4 py-3 text-sm text-charcoal focus:outline-none focus:border-charcoal transition-colors" />
+          <p className="text-[10px] text-muted">Google Drive: share the file publicly, then use https://drive.google.com/uc?export=view&id=FILE_ID — or paste any direct image URL.</p>
         </div>
 
         <div className="space-y-2">
           <label className="block text-[10px] tracking-widest uppercase text-muted">Project Gallery Images (comma separated URLs)</label>
-          <textarea rows={2} name="images" defaultValue={project?.images.join(', ')} placeholder="https://..., https://..." className="w-full border border-border bg-transparent px-4 py-3 text-sm text-charcoal focus:outline-none focus:border-charcoal transition-colors resize-none" />
+          <textarea rows={2} name="images" defaultValue={project?.images.join(', ')} placeholder="https://drive.google.com/uc?export=view&id=FILE_ID_1, https://drive.google.com/uc?export=view&id=FILE_ID_2" className="w-full border border-border bg-transparent px-4 py-3 text-sm text-charcoal focus:outline-none focus:border-charcoal transition-colors resize-none" />
         </div>
 
         <div className="space-y-2">
