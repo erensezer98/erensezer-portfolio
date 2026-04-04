@@ -19,6 +19,11 @@ const FoodTowerExplosion = dynamic(
   { ssr: false }
 )
 
+const ToorToorScene = dynamic(
+  () => import('@/components/three/ToorToorScene'),
+  { ssr: false }
+)
+
 interface Props {
   params: { slug: string }
 }
@@ -87,6 +92,21 @@ const STATIC_PROJECTS = [
     context: 'The pavilion operates as a cultural meeting point within the Jamboree grounds, bringing together music, food, and craft for an international audience of scouts. The design balances cultural legibility with structural efficiency, using a modular timber system that could be assembled and disassembled without specialist labor.',
   },
   {
+    slug: 'toor-toor-school',
+    title: 'Tóor-Tóor School',
+    year: 2023,
+    location: 'Senegal',
+    category: 'academic',
+    short_description: 'A flexible community school drawn from Senegalese vernacular tradition — six classroom modules radiate around a shared outdoor playground, serving students and community alike.',
+    tags: ['education', 'rammed earth', 'circular plan', 'community'],
+    program: 'Educational / Community',
+    area: '—',
+    status: 'Academic Project',
+    client: '—',
+    overview: 'Tóor-Tóor — meaning "Flower" in Wolof — draws from the traditional Senegalese arrangement of scattered houses gathered around a communal centre. Six classroom modules radiate outward from a shared outdoor playground, separated by flexible program spaces that serve the school during the day and open to the wider community after hours.',
+    context: 'The design prioritises the child\'s perspective: curved elements encourage playfulness, vibrant colours stimulate creativity, and the circular plan keeps the outdoor playground at the heart of school life. Each classroom module connects via a flexible space — laboratory, canteen, offices, sickroom, or bathrooms — fitted with an inclined roof, foldable bamboo panels, and operable windows. Built from rammed earth and local timber, the school is both rooted in its landscape and open to the community.',
+  },
+  {
     slug: 'istanbul-a-way-out',
     title: 'Istanbul: A Way Out',
     year: 2023,
@@ -130,6 +150,7 @@ const KNOWN_SLUGS = [
   'the-log',
   'halic-co-op',
   'istanbul-a-way-out',
+  'toor-toor-school',
 ]
 
 export async function generateStaticParams() {
@@ -191,6 +212,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   const isIstanbul = params.slug === 'istanbul-a-way-out'
   const isFoodTower = params.slug === 'food-tower'
   const isTheLog = params.slug === 'the-log'
+  const isToorToor = params.slug === 'toor-toor-school'
 
   // Theme definition
   const theme = isIstanbul ? {
@@ -246,6 +268,13 @@ export default async function ProjectDetailPage({ params }: Props) {
           </p>
         </div>
       </div>
+
+      {/* Interactive scene — Tóor-Tóor School (Circular plan explorer) */}
+      {isToorToor && (
+        <div className="w-full mb-16">
+          <ToorToorScene />
+        </div>
+      )}
 
       {/* Interactive scene — Food Tower (Exploded Program) */}
       {isFoodTower && (
