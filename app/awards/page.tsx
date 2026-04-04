@@ -1,6 +1,7 @@
 import { getAwards } from '@/lib/supabase'
 import type { Award } from '@/lib/types'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: 'Awards',
@@ -33,23 +34,38 @@ export default async function AwardsPage() {
 
       <p className="text-[13px] text-muted mb-16">awards</p>
 
-      <div className="max-w-2xl">
-        {years.map((year) => (
-          <div key={year} className="grid md:grid-cols-4 gap-4 mb-0">
-            <p className="text-xs text-muted pt-7">{year}</p>
-            <div className="md:col-span-3">
-              {byYear[year].map((award) => (
-                <div key={award.id} className="border-t border-rule py-7 last:border-b">
-                  <p className="text-[13px] text-ink leading-snug">{award.title}</p>
-                  <p className="text-xs text-muted mt-1">{award.organization}</p>
-                  {award.description && (
-                    <p className="text-xs text-muted/70 mt-1">{award.description}</p>
-                  )}
-                </div>
-              ))}
+      <div className="grid md:grid-cols-2 gap-16">
+        <div>
+          {years.map((year) => (
+            <div key={year} className="grid md:grid-cols-4 gap-4 mb-0">
+              <p className="text-xs text-muted pt-7">{year}</p>
+              <div className="md:col-span-3">
+                {byYear[year].map((award) => (
+                  <div key={award.id} className="border-t border-rule py-7 last:border-b">
+                    <p className="text-[13px] text-ink leading-snug">{award.title}</p>
+                    <p className="text-xs text-muted mt-1">{award.organization}</p>
+                    {award.description && (
+                      <p className="text-xs text-muted/70 mt-1">{award.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
+          ))}
+        </div>
+
+        <div className="flex justify-start">
+          <div className="relative w-3/4 aspect-[3/4]">
+            <Image
+              src="https://lh3.googleusercontent.com/d/17MQfO_SoqA_jkgDO2LiyNMMuNAe8tVyJ"
+              alt="Eren Sezer"
+              fill
+              sizes="(max-width: 768px) 75vw, 37vw"
+              className="object-cover"
+              quality={90}
+            />
           </div>
-        ))}
+        </div>
       </div>
 
     </div>

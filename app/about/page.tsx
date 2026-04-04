@@ -34,7 +34,7 @@ export default async function AboutPage() {
       <p className="text-[13px] text-muted mb-16">about</p>
 
       {/* Bio */}
-      <div className="grid md:grid-cols-2 gap-16 mb-24">
+      <div className="mb-24 max-w-2xl">
         <div className="space-y-5 text-sm text-ink leading-relaxed">
           <p>
             Born in Istanbul in 1998, Eren Sezer is an architect, researcher, and technologist
@@ -65,18 +65,6 @@ export default async function AboutPage() {
             Istanbul A Way Out.
           </p>
         </div>
-        {settings.about_show_photo && (
-          <div className="relative w-full aspect-[3/4]">
-            <Image
-              src="https://lh3.googleusercontent.com/d/17MQfO_SoqA_jkgDO2LiyNMMuNAe8tVyJ"
-              alt="Eren Sezer"
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-              quality={90}
-            />
-          </div>
-        )}
       </div>
 
       {/* Work Experience */}
