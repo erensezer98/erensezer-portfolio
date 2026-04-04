@@ -1,6 +1,4 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
-import { getSiteSettings } from '@/lib/supabase'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -25,9 +23,7 @@ const education = [
 
 const languages = ['Turkish', 'English', 'Italian']
 
-export default async function AboutPage() {
-  const settings = await getSiteSettings()
-
+export default function AboutPage() {
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
 
