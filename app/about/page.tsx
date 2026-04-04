@@ -66,7 +66,7 @@ export default async function AboutPage() {
           </p>
         </div>
         {settings.about_show_photo && (
-          <div className="shrink-0 self-start w-40 md:w-48">
+          <div className="shrink-0 self-start w-56 md:w-72">
             <Image
               src="https://lh3.googleusercontent.com/d/17MQfO_SoqA_jkgDO2LiyNMMuNAe8tVyJ"
               alt="Eren Sezer"
