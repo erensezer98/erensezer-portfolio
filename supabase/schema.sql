@@ -94,12 +94,13 @@ CREATE POLICY "Public insert"    ON contact_messages FOR INSERT WITH CHECK (true
 
 
 -- ─── Seed data ────────────────────────────────────────────────────────────────
--- Image URLs use Google Drive. To replace placeholders:
---   1. Upload each image to Google Drive and set sharing to "Anyone with the link".
---   2. Copy the file ID from the share URL: https://drive.google.com/file/d/FILE_ID/view
---   3. Replace the FILE_ID placeholder below with the real ID.
---   4. The URL format is: https://drive.google.com/uc?export=view&id=FILE_ID
---   Alternatively, use lib/gdrive.ts helpers in the Next.js app to build these URLs.
+-- Image URLs use Google Drive (lh3 CDN format: https://lh3.googleusercontent.com/d/FILE_ID).
+-- Folder IDs are in lib/project-images.ts for reference. To fill in real images:
+--   1. Upload the image to the matching Drive subfolder (Cover/, Gallery/, etc.).
+--   2. Right-click → "Get link" → set to "Anyone with the link".
+--   3. Copy the FILE_ID from: https://drive.google.com/file/d/FILE_ID/view
+--   4. Replace the matching PLACEHOLDER_* below with that FILE_ID.
+--   See lib/project-images.ts for the full folder→subfolder mapping.
 
 INSERT INTO projects (title, slug, category, short_description, description, year, location, tags, cover_image, images, featured, order_index) VALUES
 (
@@ -111,13 +112,34 @@ INSERT INTO projects (title, slug, category, short_description, description, yea
   2022,
   'Milan, Italy',
   ARRAY['vertical farm', 'skyscraper', 'timber structure', 'sustainable', 'MIND Milano'],
-  'https://drive.google.com/uc?export=view&id=PLACEHOLDER_FOOD_TOWER_COVER',
+  -- Cover/ folder: 1ljdHLS_rgnSdmZjeQo-UE2ElKeqaP8ND
+  'https://lh3.googleusercontent.com/d/PLACEHOLDER_FOOD_TOWER_COVER',
   ARRAY[
-    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_FOOD_TOWER_1',
-    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_FOOD_TOWER_2'
+    -- Gallery/ folder: 1vVqV0-Yq3yGZMcZm1yRQFEmmGyZ88mou
+    'https://lh3.googleusercontent.com/d/PLACEHOLDER_FOOD_TOWER_GALLERY_1',
+    'https://lh3.googleusercontent.com/d/PLACEHOLDER_FOOD_TOWER_GALLERY_2'
   ],
   true,
   1
+),
+(
+  'Istanbul: A Way Out',
+  'istanbul-a-way-out',
+  'academic',
+  '',
+  '',
+  2021,
+  'Istanbul, Turkey',
+  ARRAY[],
+  -- Cover/ folder: 1U4aOqHbrSbRLy5Usgm56RT1j-uMq6z7b
+  'https://lh3.googleusercontent.com/d/PLACEHOLDER_ISTANBUL_COVER',
+  ARRAY[
+    -- Gallery/ folder: 1ABcdVmJEyhgyf7JzcYKSbcm5xoxLIHAL
+    'https://lh3.googleusercontent.com/d/PLACEHOLDER_ISTANBUL_GALLERY_1',
+    'https://lh3.googleusercontent.com/d/PLACEHOLDER_ISTANBUL_GALLERY_2'
+  ],
+  false,
+  5
 ),
 (
   'The Log',
@@ -128,10 +150,12 @@ INSERT INTO projects (title, slug, category, short_description, description, yea
   2021,
   'Milan, Italy',
   ARRAY['auditorium', 'timber', 'acoustics', 'structure'],
-  'https://drive.google.com/uc?export=view&id=PLACEHOLDER_THE_LOG_COVER',
+  -- Cover/ folder: 1gyy9k3PrJviqumemgYfI2jFyTsytQqsb
+  'https://lh3.googleusercontent.com/d/PLACEHOLDER_THE_LOG_COVER',
   ARRAY[
-    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_THE_LOG_1',
-    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_THE_LOG_2'
+    -- Gallery/ folder: 1Z22HbiZ9T2gvIimEFsZA4swUHSqvV2aq
+    'https://lh3.googleusercontent.com/d/PLACEHOLDER_THE_LOG_GALLERY_1',
+    'https://lh3.googleusercontent.com/d/PLACEHOLDER_THE_LOG_GALLERY_2'
   ],
   true,
   2
@@ -145,10 +169,12 @@ INSERT INTO projects (title, slug, category, short_description, description, yea
   2020,
   'Istanbul, Turkey',
   ARRAY['cultural', 'creative hub', 'istanbul', 'adaptive reuse'],
-  'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HALIC_COOP_COVER',
+  -- Cover/ folder: 1LNibehFc2ES03OP8dBzPz3HNF5G5SP1h
+  'https://lh3.googleusercontent.com/d/PLACEHOLDER_HALIC_COVER',
   ARRAY[
-    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HALIC_COOP_1',
-    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HALIC_COOP_2'
+    -- Gallery/ folder: 1GDmxo4sBO8sxmo44KM8CYv_gMOUXgPzH
+    'https://lh3.googleusercontent.com/d/PLACEHOLDER_HALIC_GALLERY_1',
+    'https://lh3.googleusercontent.com/d/PLACEHOLDER_HALIC_GALLERY_2'
   ],
   true,
   3
@@ -162,10 +188,12 @@ INSERT INTO projects (title, slug, category, short_description, description, yea
   2022,
   'Saemangeum, South Korea',
   ARRAY['pavilion', 'festival', 'temporary', 'folded plate'],
-  'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HUNGARIAN_CSARDA_COVER',
+  -- Cover/ folder: 12yBl4l0DFEbBmpldmPnxsjIlSPQ3J3n9
+  'https://lh3.googleusercontent.com/d/PLACEHOLDER_CSARDA_COVER',
   ARRAY[
-    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HUNGARIAN_CSARDA_1',
-    'https://drive.google.com/uc?export=view&id=PLACEHOLDER_HUNGARIAN_CSARDA_2'
+    -- Gallery/ folder: 1qFWHoUyXdqvzqIyBxcS1v-MjdmUfhBjY
+    'https://lh3.googleusercontent.com/d/PLACEHOLDER_CSARDA_GALLERY_1',
+    'https://lh3.googleusercontent.com/d/PLACEHOLDER_CSARDA_GALLERY_2'
   ],
   true,
   4
