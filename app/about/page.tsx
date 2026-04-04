@@ -57,15 +57,15 @@ export default async function AboutPage() {
           </p>
           <p>Eren&rsquo;s work has been recognized in:</p>
           <p>
-            <strong>Global Climate Action:</strong> In 2025, he was selected as a representative
-            architect for the Italian Ministry of External Affairs at the UN Climate Change Summit
-            (COP30) for the Italian Pavilion, Aquapraca.
+            Global Climate Action: In 2025, he was selected as a representative architect for
+            the Italian Ministry of External Affairs at the UN Climate Change Summit (COP30),
+            as a part of Carlo Ratti Group&rsquo;s project Aquapraca.
           </p>
           <p>
-            <strong>International Exhibitions:</strong> As the co-founder of the architectural
-            collective Cumba (est. 2023), Eren and the team secured spots at the STRAND
-            International Architecture Exhibition and the 2025 Venice Architectural Biennale
-            with their acclaimed project, Istanbul A Way Out.
+            International Exhibitions: As the co-founder of the architectural collective Cumba
+            (est. 2023), Eren and the team secured spots at the STRAND International Architecture
+            Exhibition and the 2025 Venice Architectural Biennale with their acclaimed project,
+            Istanbul A Way Out.
           </p>
         </div>
         {settings.about_show_photo && settings.about_bio_cols === 2 && (
