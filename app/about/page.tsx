@@ -34,8 +34,8 @@ export default async function AboutPage() {
       <p className="text-[13px] text-muted mb-16">about</p>
 
       {/* Bio */}
-      <div className="flex flex-col md:flex-row gap-12 mb-24 max-w-2xl">
-        <div className="flex-1 space-y-5 text-sm text-ink leading-relaxed">
+      <div className="grid md:grid-cols-2 gap-16 mb-24">
+        <div className="space-y-5 text-sm text-ink leading-relaxed">
           <p>
             Born in Istanbul in 1998, Eren Sezer is an architect, researcher, and technologist
             who uses the built environment as a framework to explore the future of design. He
@@ -66,13 +66,14 @@ export default async function AboutPage() {
           </p>
         </div>
         {settings.about_show_photo && (
-          <div className="shrink-0 self-start w-56 md:w-72">
+          <div className="relative w-full aspect-[3/4]">
             <Image
               src="https://lh3.googleusercontent.com/d/17MQfO_SoqA_jkgDO2LiyNMMuNAe8tVyJ"
               alt="Eren Sezer"
-              width={192}
-              height={256}
-              className="w-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+              quality={90}
             />
           </div>
         )}
