@@ -72,8 +72,8 @@ const STATIC_PROJECTS = [
     context: 'The Golden Horn has long been Istanbul\'s industrial spine. As the area transitions toward cultural and creative uses, Haliç Co-op proposes a building that retains the industrial scale and character of its context while introducing new programs: studios, workshops, galleries, and shared amenities open to the public.',
   },
   {
-    slug: 'hungarian-csarda',
-    title: 'Hungarian Csarda',
+    slug: 'csarda',
+    title: 'Csarda',
     year: 2022,
     location: 'Saemangeum, South Korea',
     category: 'freelance',
@@ -82,9 +82,9 @@ const STATIC_PROJECTS = [
     program: 'Temporary Pavilion / Exhibition',
     area: '320 m²',
     status: 'Completed',
-    client: 'Hungarian Cultural Institute',
-    overview: 'The Hungarian Csarda is a temporary pavilion designed for the Saemangeum World Scout Jamboree. Drawing on the vernacular tradition of the Hungarian countryside inn, the structure reinterprets the csárda typology through lightweight timber construction — an ephemeral gathering place in an unfamiliar landscape.',
-    context: 'The pavilion serves as a cultural ambassador, introducing Hungarian folk traditions — music, cuisine, and craft — to an international audience. The design balances cultural legibility with structural efficiency, using a modular timber system that could be assembled and disassembled without specialist labor.',
+    client: 'Freelance Commission',
+    overview: 'Csarda is a temporary pavilion designed for the Saemangeum World Scout Jamboree. The structure reinterprets the csárda typology — the vernacular countryside inn — through lightweight timber construction, creating an ephemeral gathering place that anchors a cultural presence within the temporary landscape of a global festival.',
+    context: 'The pavilion operates as a cultural meeting point within the Jamboree grounds, bringing together music, food, and craft for an international audience of scouts. The design balances cultural legibility with structural efficiency, using a modular timber system that could be assembled and disassembled without specialist labor.',
   },
   {
     slug: 'istanbul-a-way-out',
@@ -135,7 +135,7 @@ const KNOWN_SLUGS = [
 export async function generateStaticParams() {
   try {
     const projects = await getProjects()
-    const dbSlugs = projects.map((p) => p.slug).filter(s => !['awayout', 'hungarian-csarda'].includes(s))
+    const dbSlugs = projects.map((p) => p.slug).filter(s => !['awayout', 'csarda'].includes(s))
     const allSlugs = Array.from(new Set([...KNOWN_SLUGS, ...dbSlugs]))
     return allSlugs.map((slug) => ({ slug }))
   } catch {

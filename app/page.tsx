@@ -15,7 +15,7 @@ export default async function HomePage() {
   try { 
     const dbProjects = await getProjects()
     // Remove the unwanted projects
-    const EXCLUDED_SLUGS = ['awayout', 'hungarian-csarda']
+    const EXCLUDED_SLUGS = ['awayout', 'csarda']
     projects = dbProjects.filter(p => !EXCLUDED_SLUGS.includes(p.slug))
   } catch {
     console.warn('Failed to fetch home projects, using fallbacks')

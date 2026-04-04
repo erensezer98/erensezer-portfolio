@@ -66,7 +66,7 @@ export const DRIVE_FOLDERS = {
     process:            '1rE_aJ-QePhE4AH4MDY2nF9SYd0EZ9fm1',
     wide:               '161jvhj43umRdkrc88_Ms49Am6s1uSiIr',
   },
-  'hungarian-csarda': {
+  'csarda': {
     folder:             '1VgIxTWOf6c9xTFkslWi5lYxvaAdcK6Sn',
     cover:              '12yBl4l0DFEbBmpldmPnxsjIlSPQ3J3n9',
     gallery:            '1qFWHoUyXdqvzqIyBxcS1v-MjdmUfhBjY',
@@ -153,7 +153,7 @@ export const PROJECT_IMAGE_IDS = {
     ],
   },
 
-  'hungarian-csarda': {
+  'csarda': {
     // Cover/ subfolder → https://drive.google.com/drive/folders/12yBl4l0DFEbBmpldmPnxsjIlSPQ3J3n9
     cover:   'PLACEHOLDER_CSARDA_COVER',
     // Gallery/ subfolder → https://drive.google.com/drive/folders/1qFWHoUyXdqvzqIyBxcS1v-MjdmUfhBjY

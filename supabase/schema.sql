@@ -180,11 +180,11 @@ INSERT INTO projects (title, slug, category, short_description, description, yea
   3
 ),
 (
-  'Hungarian Csarda',
-  'hungarian-csarda',
+  'Csarda',
+  'csarda',
   'freelance',
-  'Pavilion design for a festival in Saemangeum, South Korea.',
-  'A freelance pavilion design for the Hungarian cultural festival in Saemangeum, South Korea. The structure uses a series of folded triangular panels to create a canopy that references traditional Hungarian folk patterns while remaining lightweight and adaptable.',
+  'Pavilion design for the World Scout Jamboree in Saemangeum, South Korea.',
+  'A freelance pavilion design for the Saemangeum World Scout Jamboree. The structure reinterprets the csárda typology — the vernacular countryside inn — through lightweight timber construction, using folded triangular panels to create a canopy that is both culturally legible and structurally efficient.',
   2022,
   'Saemangeum, South Korea',
   ARRAY['pavilion', 'festival', 'temporary', 'folded plate'],
