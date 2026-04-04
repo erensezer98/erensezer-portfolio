@@ -7,12 +7,13 @@ export const metadata: Metadata = {
 }
 
 const work = [
-  { role: 'Project Manager',    org: 'Maestro Technologies',                             period: 'Mar 2025 – present', note: 'Pioneering entirely new ways to design and build — Turin, Italy' },
-  { role: 'Architect',          org: 'Maestro Technologies & CRA-Carlo Ratti Associati', period: 'Feb 2024 – Mar 2025', note: 'Digital innovation at the intersection of design and construction — Turin, Italy' },
-  { role: 'Co-founder',         org: 'Cumba Architectural Collective',                   period: '2023 – present',      note: 'STRAND International Architecture Exhibition; 2025 Venice Architectural Biennale' },
-  { role: 'Architectural Intern', org: 'CRA-Carlo Ratti Associati',                      period: 'Nov 2023 – Feb 2024', note: 'Turin, Italy' },
-  { role: 'Site Architect',     org: 'Ağaoğlu Şirketler Grubu',                          period: 'Dec 2020 – May 2021', note: 'Facade systems — Istanbul' },
-  { role: 'Design Intern',      org: 'TAGO Architects',                                  period: '2019',                note: 'Interior design, housing & renovation — Istanbul' },
+  { role: 'Project Manager',      org: 'Maestro Technologies',          period: 'Mar 2025 – present',  note: 'Pioneering entirely new ways to design and build — Turin, Italy' },
+  { role: 'Architect',            org: 'CRA-Carlo Ratti Associati',     period: 'Feb 2024 – present',  note: 'Turin, Italy' },
+  { role: 'Architect',            org: 'Maestro Technologies',          period: 'Feb 2024 – Mar 2025', note: 'Turin, Italy' },
+  { role: 'Co-founder',           org: 'Cumba Architectural Collective', period: '2023 – present',     note: 'STRAND International Architecture Exhibition; 2025 Venice Architectural Biennale' },
+  { role: 'Architectural Intern', org: 'CRA-Carlo Ratti Associati',     period: 'Nov 2023 – Feb 2024', note: 'Turin, Italy' },
+  { role: 'Site Architect',       org: 'Ağaoğlu Şirketler Grubu',       period: 'Dec 2020 – May 2021', note: 'Facade systems — Istanbul' },
+  { role: 'Design Intern',        org: 'TAGO Architects',               period: '2019',                note: 'Interior design, housing & renovation — Istanbul' },
 ]
 
 const education = [
