@@ -73,6 +73,20 @@ export const DRIVE_FOLDERS = {
     process:            '1XYhYHFb52KNa7lwo0D_n9MqCYANtbxxQ',
     wide:               '1O7o0XxyM1R6EQggEes2c6_a8Wn2ApSQF',
   },
+  'unfolding-landscapes': {
+    folder:             'PLACEHOLDER_UNFOLDING_LANDSCAPES_FOLDER',
+    cover:              'PLACEHOLDER_UNFOLDING_LANDSCAPES_COVER_FOLDER',
+    gallery:            'PLACEHOLDER_UNFOLDING_LANDSCAPES_GALLERY_FOLDER',
+    process:            'PLACEHOLDER_UNFOLDING_LANDSCAPES_PROCESS_FOLDER',
+    wide:               'PLACEHOLDER_UNFOLDING_LANDSCAPES_WIDE_FOLDER',
+  },
+  'toor-toor-school': {
+    folder:             'PLACEHOLDER_TOOR_TOOR_FOLDER',
+    cover:              'PLACEHOLDER_TOOR_TOOR_COVER_FOLDER',
+    gallery:            'PLACEHOLDER_TOOR_TOOR_GALLERY_FOLDER',
+    process:            'PLACEHOLDER_TOOR_TOOR_PROCESS_FOLDER',
+    wide:               'PLACEHOLDER_TOOR_TOOR_WIDE_FOLDER',
+  },
 } as const
 
 // ─── Image file IDs ───────────────────────────────────────────────────────────
@@ -168,6 +182,46 @@ export const PROJECT_IMAGE_IDS = {
     // Process/ subfolder → https://drive.google.com/drive/folders/1XYhYHFb52KNa7lwo0D_n9MqCYANtbxxQ
     process: [
       'PLACEHOLDER_CSARDA_PROCESS_1',
+    ],
+  },
+
+  'unfolding-landscapes': {
+    // Cover/ subfolder → (create folder in Drive and replace PLACEHOLDER with the folder ID)
+    cover:   'PLACEHOLDER_UNFOLDING_COVER',
+    // Gallery/ subfolder
+    gallery: [
+      'PLACEHOLDER_UNFOLDING_GALLERY_1',
+      'PLACEHOLDER_UNFOLDING_GALLERY_2',
+      'PLACEHOLDER_UNFOLDING_GALLERY_3',
+    ],
+    // Wide/ subfolder
+    wide: [
+      'PLACEHOLDER_UNFOLDING_WIDE_1',
+    ],
+    // Process/ subfolder
+    process: [
+      'PLACEHOLDER_UNFOLDING_PROCESS_1',
+      'PLACEHOLDER_UNFOLDING_PROCESS_2',
+    ],
+  },
+
+  'toor-toor-school': {
+    // Cover/ subfolder → (create folder in Drive and replace PLACEHOLDER with the folder ID)
+    cover:   'PLACEHOLDER_TOOR_TOOR_COVER',
+    // Gallery/ subfolder
+    gallery: [
+      'PLACEHOLDER_TOOR_TOOR_GALLERY_1',
+      'PLACEHOLDER_TOOR_TOOR_GALLERY_2',
+      'PLACEHOLDER_TOOR_TOOR_GALLERY_3',
+    ],
+    // Wide/ subfolder
+    wide: [
+      'PLACEHOLDER_TOOR_TOOR_WIDE_1',
+    ],
+    // Process/ subfolder
+    process: [
+      'PLACEHOLDER_TOOR_TOOR_PROCESS_1',
+      'PLACEHOLDER_TOOR_TOOR_PROCESS_2',
     ],
   },
 }
