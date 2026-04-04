@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { getSiteSettings } from '@/lib/supabase'
 
 export const metadata: Metadata = {
@@ -27,18 +28,14 @@ const languages = ['Turkish', 'English', 'Italian']
 export default async function AboutPage() {
   const settings = await getSiteSettings()
 
-  const bioGrid = settings.about_bio_cols === 2
-    ? 'grid md:grid-cols-2 gap-16'
-    : 'max-w-2xl'
-
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
 
       <p className="text-[13px] text-muted mb-16">about</p>
 
       {/* Bio */}
-      <div className={`${bioGrid} mb-24`}>
-        <div className="space-y-5 text-sm text-ink leading-relaxed">
+      <div className="flex flex-col md:flex-row gap-12 mb-24 max-w-2xl">
+        <div className="flex-1 space-y-5 text-sm text-ink leading-relaxed">
           <p>
             Born in Istanbul in 1998, Eren Sezer is an architect, researcher, and technologist
             who uses the built environment as a framework to explore the future of design. He
@@ -68,8 +65,16 @@ export default async function AboutPage() {
             Istanbul A Way Out.
           </p>
         </div>
-        {settings.about_show_photo && settings.about_bio_cols === 2 && (
-          <div className="aspect-[3/4] bg-warm" />
+        {settings.about_show_photo && (
+          <div className="shrink-0 self-start w-40 md:w-48">
+            <Image
+              src="https://lh3.googleusercontent.com/d/17MQfO_SoqA_jkgDO2LiyNMMuNAe8tVyJ"
+              alt="Eren Sezer"
+              width={192}
+              height={256}
+              className="w-full object-cover"
+            />
+          </div>
         )}
       </div>
 
