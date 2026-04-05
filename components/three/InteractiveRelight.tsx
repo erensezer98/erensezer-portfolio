@@ -2,6 +2,8 @@
 
 import { useRef, useEffect } from 'react'
 import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 
 export default function InteractiveRelight() {
   const mountRef = useRef<HTMLDivElement>(null)
@@ -23,7 +25,7 @@ export default function InteractiveRelight() {
     renderer.setSize(w, h)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setClearColor(0x000000, 0) // transparent background
-    
+
     // Enable shadows for the dramatic relight effect
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -35,7 +37,7 @@ export default function InteractiveRelight() {
     scene.add(ambientLight)
 
     // The magical point light that follows the mouse
-    const pointLight = new THREE.PointLight(0xffffff, 150, 50)
+    const pointLight = new THREE.PointLight(0xffffff, 60, 50)
     pointLight.position.set(0, 2, 0)
     pointLight.castShadow = true
     pointLight.shadow.bias = -0.001
@@ -43,61 +45,144 @@ export default function InteractiveRelight() {
     pointLight.shadow.mapSize.height = 1024
     scene.add(pointLight)
 
-    // ─── Geometry: Abstract Architectural Grid / Topography ───────────────────
-    const group = new THREE.Group()
-    
-    // Create a dark matte material
+    // ─── Dark matte material (same as original) ───────────────────────────────
     const material = new THREE.MeshStandardMaterial({
       color: 0x222222,
       roughness: 0.8,
       metalness: 0.2,
     })
 
-    const size = 15
-    const segments = 30
-    const step = size / segments
+    // ─── Road material — low emissive glow ───────────────────────────────────
+    const roadMaterial = new THREE.MeshStandardMaterial({
+      color: 0x333333,
+      roughness: 0.9,
+      metalness: 0.0,
+      emissive: new THREE.Color(0x333333),
+      emissiveIntensity: 0.25,
+    })
 
-    // Create a base plane that receives shadows
-    const planeGeo = new THREE.PlaneGeometry(size, size)
+    // ─── Base plane that receives shadows ─────────────────────────────────────
+    const planeGeo = new THREE.PlaneGeometry(30, 30)
     const planeMenu = new THREE.Mesh(planeGeo, material)
     planeMenu.rotation.x = -Math.PI / 2
     planeMenu.position.y = -0.5
     planeMenu.receiveShadow = true
     scene.add(planeMenu)
 
-    // Create a grid of extruded blocks creating an abstract "cityscape"
-    for (let x = -size/2; x < size/2; x += step) {
-      for (let z = -size/2; z < size/2; z += step) {
-        // Pseudo-random height based on position
-        const noise = Math.sin(x * 1.5) * Math.cos(z * 1.5) * 0.5 + 
-                      Math.sin(x * 0.5 + z * 0.5) * 0.8
-        
-        if (noise > 0.2) {
-          const height = noise * 1.5
-          const boxGeo = new THREE.BoxGeometry(step * 0.8, height, step * 0.8)
-          const mesh = new THREE.Mesh(boxGeo, material)
-          mesh.position.set(x + step/2, height/2 - 0.5, z + step/2)
-          mesh.castShadow = true
-          mesh.receiveShadow = true
-          group.add(mesh)
-        }
-      }
-    }
-    
+    // ─── Group (for slow rotation animation) ──────────────────────────────────
+    const group = new THREE.Group()
     scene.add(group)
+
+    // ─── Catch plane for mouse → light position ───────────────────────────────
+    // Will be updated after model loads; default at y=2
+    const catchPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -2)
+
+    // ─── Load GLB ─────────────────────────────────────────────────────────────
+    const dracoLoader = new DRACOLoader()
+    dracoLoader.setDecoderPath('/draco/')
+    const loader = new GLTFLoader()
+    loader.setDRACOLoader(dracoLoader)
+    loader.load(
+      '/models/awayout.glb',
+      (gltf) => {
+        const model = gltf.scene
+
+        // First pass: find the largest flat mesh (the road)
+        let largestArea = 0
+        let roadMesh: THREE.Mesh | null = null
+        model.traverse((child) => {
+          const asMesh = child as THREE.Mesh
+          if (asMesh.isMesh) {
+            asMesh.geometry.computeBoundingBox()
+            const box = asMesh.geometry.boundingBox!
+            const sx = box.max.x - box.min.x
+            const sz = box.max.z - box.min.z
+            const sy = box.max.y - box.min.y
+            // Road is large in XZ and flat in Y
+            const area = sx * sz
+            if (area > largestArea && sy < Math.max(sx, sz) * 0.1) {
+              largestArea = area
+              roadMesh = asMesh
+            }
+          }
+        })
+
+        const edgeColors = [0xff00ff, 0x00ff00, 0xff0000, 0x0000ff, 0xff8800, 0xffff00, 0x00ffff,
+                            0xff66cc, 0x66ff66, 0xff4444, 0x4444ff, 0xffaa44, 0xffffaa, 0x44ffff]
+
+        // Count non-emissive meshes for band sizing
+        let totalMeshes = 0
+        model.traverse((child) => {
+          const asMesh = child as THREE.Mesh
+          if (asMesh.isMesh) {
+            const origMat = asMesh.material as THREE.MeshStandardMaterial
+            const emissiveSum = (origMat?.emissive?.r ?? 0) + (origMat?.emissive?.g ?? 0) + (origMat?.emissive?.b ?? 0)
+            const hasEmissive = emissiveSum > 0.3 && (origMat?.emissiveIntensity ?? 0) > 0.1
+            if (!hasEmissive) totalMeshes++
+          }
+        })
+        const bandSize = Math.max(1, Math.floor(totalMeshes / edgeColors.length))
+        let meshIndex = 0
+
+        // Second pass: apply materials + shadows + colored edges
+        model.traverse((child) => {
+          const asMesh = child as THREE.Mesh
+          if (asMesh.isMesh) {
+            const origMat = asMesh.material as THREE.MeshStandardMaterial
+            const emissiveSum = (origMat?.emissive?.r ?? 0) + (origMat?.emissive?.g ?? 0) + (origMat?.emissive?.b ?? 0)
+            const hasEmissive = emissiveSum > 0.3 && (origMat?.emissiveIntensity ?? 0) > 0.1
+            if (hasEmissive) {
+              origMat.roughness = Math.max(origMat.roughness ?? 0.9, 0.5)
+              origMat.needsUpdate = true
+            } else {
+              asMesh.material = asMesh === roadMesh ? roadMaterial : material
+
+              const edgeColor = edgeColors[Math.floor(meshIndex / bandSize) % edgeColors.length]
+              meshIndex++
+              const edges = new THREE.EdgesGeometry(asMesh.geometry, 30)
+              const lineMat = new THREE.LineBasicMaterial({ color: edgeColor })
+              const edgeLines = new THREE.LineSegments(edges, lineMat)
+              edgeLines.position.copy(asMesh.position)
+              edgeLines.rotation.copy(asMesh.rotation)
+              edgeLines.scale.copy(asMesh.scale)
+              asMesh.parent?.add(edgeLines)
+            }
+            asMesh.castShadow = true
+            asMesh.receiveShadow = true
+          }
+        })
+
+        // Auto-fit: center + scale to view
+        const box = new THREE.Box3().setFromObject(model)
+        const center = box.getCenter(new THREE.Vector3())
+        const size = box.getSize(new THREE.Vector3())
+        const maxDim = Math.max(size.x, size.y, size.z)
+        const scale = 15 / maxDim
+
+        model.scale.setScalar(scale)
+        model.position.sub(center.multiplyScalar(scale))
+
+        // Sit flush on ground at y=-0.5 (matching base plane)
+        const box2 = new THREE.Box3().setFromObject(model)
+        model.position.y -= box2.min.y + 0.5
+
+        group.add(model)
+
+        // Set catch plane to mid-height of the fitted model
+        const box3 = new THREE.Box3().setFromObject(model)
+        const midY = (box3.min.y + box3.max.y) / 2
+        catchPlane.constant = -midY
+      },
+      undefined,
+      (err) => console.error('GLB load error:', err)
+    )
 
     // ─── Interaction (Mouse tracking) ─────────────────────────────────────────
     const raycaster = new THREE.Raycaster()
     const mouse = new THREE.Vector2()
-    
-    // An invisible plane exactly at y=2 to catch the mouse intersection for the light
-    const catchPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -2)
 
-
-    // To prevent the light from acting clunky if the mouse moves very fast,
-    // we use a target object
     const targetLightPos = new THREE.Vector3(0, 2, 0)
-    
+
     const onMouseMoveSmooth = (e: MouseEvent) => {
       const bounds = el.getBoundingClientRect()
       mouse.x = ((e.clientX - bounds.left) / w) * 2 - 1
