@@ -7,7 +7,6 @@ import { revalidatePath } from 'next/cache'
 import DeleteButton from './DeleteButton'
 import { DRIVE_FOLDERS } from '@/lib/project-images'
 import type { Project } from '@/lib/types'
-import type { Project } from '@/lib/types'
 
 const STATIC_ADMIN_PROJECTS: Project[] = [
   {
