@@ -121,6 +121,22 @@ const STATIC_PROJECTS = [
     overview: 'Istanbul: A Way Out is an urban research project that maps the thresholds between the city\'s formal and informal fabrics — the passages, courtyards, and light-filled voids that constitute an alternative urban geography. The project proposes a series of spatial interventions that amplify these in-between conditions.',
     context: 'Istanbul\'s urban tissue is characterised by a continuous negotiation between public and private, ancient and contemporary. By tracing the city\'s light patterns across the day and season, the project reveals a hidden network of spaces that resist conventional categorisation — neither street nor building, neither public nor private.',
   },
+  {
+    slug: 'unfolding-landscapes',
+    title: 'Unfolding Landscapes',
+    year: 2024,
+    location: 'Reuse of the Thermae, Italy',
+    category: 'competition',
+    short_description: 'Reactivating the Thermae of Curiga through layered topography and cultural programming.',
+    tags: ['adaptive reuse', 'landscape', 'heritage', 'public'],
+    program: 'Landscape / Cultural Reuse',
+    area: 'Thermae site at Curiga',
+    status: 'Competition Entry',
+    client: 'Reuse Italy / Thérmae Project',
+    overview: 'Unfolding Landscapes reimagines the Thermae of Curiga as an open, flowing topography that folds over the archaeological remnants, animating old terraces with new public routes, cultural pavilions, and pergola-covered gathering spaces.',
+    context: 'The proposal embeds the Thermae within a landscaped campus of olive groves and terraced paths, protecting the ruins while creating a vivid narrative of healing and ritual. The lifted bridges and canopies frame views over the excavations, while discrete new volumes house exhibitions, workshops, and community facilities.',
+    cover_image: 'https://lh3.googleusercontent.com/d/USERFILE',
+  },
 ]
 
 // ─── Placeholder image component ─────────────────────────────────────────────
@@ -150,6 +166,7 @@ const KNOWN_SLUGS = [
   'the-log',
   'halic-co-op',
   'istanbul-a-way-out',
+  'unfolding-landscapes',
   'toor-toor-school',
 ]
 

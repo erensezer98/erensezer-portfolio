@@ -16,9 +16,9 @@ export default function InteractiveRelight() {
     const scene = new THREE.Scene()
     const w = el.clientWidth
     const h = el.clientHeight
-    const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000)
-    camera.position.set(0, 5, 8)
-    camera.lookAt(0, 0, 0)
+    const camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 1000)
+    camera.position.set(0, 4, 6)
+    camera.lookAt(0, 1, 0)
 
     // ─── Renderer ─────────────────────────────────────────────────────────────
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
@@ -107,24 +107,7 @@ export default function InteractiveRelight() {
           }
         })
 
-        const edgeColors = [0xff00ff, 0x00ff00, 0xff0000, 0x0000ff, 0xff8800, 0xffff00, 0x00ffff,
-                            0xff66cc, 0x66ff66, 0xff4444, 0x4444ff, 0xffaa44, 0xffffaa, 0x44ffff]
-
-        // Count non-emissive meshes for band sizing
-        let totalMeshes = 0
-        model.traverse((child) => {
-          const asMesh = child as THREE.Mesh
-          if (asMesh.isMesh) {
-            const origMat = asMesh.material as THREE.MeshStandardMaterial
-            const emissiveSum = (origMat?.emissive?.r ?? 0) + (origMat?.emissive?.g ?? 0) + (origMat?.emissive?.b ?? 0)
-            const hasEmissive = emissiveSum > 0.3 && (origMat?.emissiveIntensity ?? 0) > 0.1
-            if (!hasEmissive) totalMeshes++
-          }
-        })
-        const bandSize = Math.max(1, Math.floor(totalMeshes / edgeColors.length))
-        let meshIndex = 0
-
-        // Second pass: apply materials + shadows + colored edges
+        // Second pass: apply materials + shadows
         model.traverse((child) => {
           const asMesh = child as THREE.Mesh
           if (asMesh.isMesh) {
@@ -137,15 +120,9 @@ export default function InteractiveRelight() {
             } else {
               asMesh.material = asMesh === roadMesh ? roadMaterial : material
 
-              const edgeColor = edgeColors[Math.floor(meshIndex / bandSize) % edgeColors.length]
-              meshIndex++
-              const edges = new THREE.EdgesGeometry(asMesh.geometry, 30)
-              const lineMat = new THREE.LineBasicMaterial({ color: edgeColor })
-              const edgeLines = new THREE.LineSegments(edges, lineMat)
-              edgeLines.position.copy(asMesh.position)
-              edgeLines.rotation.copy(asMesh.rotation)
-              edgeLines.scale.copy(asMesh.scale)
-              asMesh.parent?.add(edgeLines)
+            }
+            if (!asMesh.geometry.boundingSphere) {
+              asMesh.geometry.computeBoundingSphere()
             }
             asMesh.castShadow = true
             asMesh.receiveShadow = true
@@ -208,6 +185,9 @@ export default function InteractiveRelight() {
     // ─── Animation loop ───────────────────────────────────────────────────────
     let animId: number
     const clock = new THREE.Clock()
+    const frustum = new THREE.Frustum()
+    const projScreenMatrix = new THREE.Matrix4()
+    const cullingSphere = new THREE.Sphere()
 
     const animate = () => {
       animId = requestAnimationFrame(animate)
@@ -221,6 +201,18 @@ export default function InteractiveRelight() {
         pointLight.position.lerp(targetLightPos, 0.1)
       }
 
+      projScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+      frustum.setFromProjectionMatrix(projScreenMatrix)
+      scene.traverse((obj) => {
+        if ((obj as THREE.Mesh).isMesh) {
+          const mesh = obj as THREE.Mesh
+          if (mesh.geometry.boundingSphere) {
+            cullingSphere.copy(mesh.geometry.boundingSphere)
+            cullingSphere.applyMatrix4(mesh.matrixWorld)
+            mesh.visible = frustum.intersectsSphere(cullingSphere)
+          }
+        }
+      })
       renderer.render(scene, camera)
     }
     animate()
