@@ -126,46 +126,50 @@ export default async function AdminDashboard() {
                 </td>
               </tr>
             ))}
-            {staticRows.map((project) => (
-              <tr key={project.id} className="bg-warm/30">
-                <td className="px-6 py-4">
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-ink">{project.title}</span>
-                    <span className="text-[10px] text-muted tracking-tight">/{project.slug}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="inline-block text-[10px] tracking-widest uppercase px-2 py-0.5 border border-rule text-muted">
-                    {project.category}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-xs text-muted">{project.year}</td>
-                <td className="px-6 py-4 text-xs">
-                  {driveLinkFor(project.slug) ? (
-                    <a
-                      href={driveLinkFor(project.slug)}
-                      target="_blank"
-                      rel="noreferrer"
+            {staticRows.map((project) => {
+              const driveLink = driveLinkFor(project.slug)
+
+              return (
+                <tr key={project.id} className="bg-warm/30">
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-ink">{project.title}</span>
+                      <span className="text-[10px] text-muted tracking-tight">/{project.slug}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="inline-block text-[10px] tracking-widest uppercase px-2 py-0.5 border border-rule text-muted">
+                      {project.category}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-xs text-muted">{project.year}</td>
+                  <td className="px-6 py-4 text-xs">
+                    {driveLink ? (
+                      <a
+                        href={driveLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[10px] tracking-widest uppercase text-ink hover:underline"
+                      >
+                        Open Drive
+                      </a>
+                    ) : (
+                      <span className="text-[10px] text-muted uppercase tracking-widest">
+                        Drive link pending
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <Link
+                      href={`/admin/new?slug=${project.slug}`}
                       className="text-[10px] tracking-widest uppercase text-ink hover:underline"
                     >
-                      Open Drive
-                    </a>
-                  ) : (
-                    <span className="text-[10px] text-muted uppercase tracking-widest">
-                      Drive link pending
-                    </span>
-                  )}
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <Link
-                    href={`/admin/new?slug=${project.slug}`}
-                    className="text-[10px] tracking-widest uppercase text-ink hover:underline"
-                  >
-                    Create entry
-                  </Link>
-                </td>
-              </tr>
-            ))}
+                      Create entry
+                    </Link>
+                  </td>
+                </tr>
+              )
+            })}
             {staticRows.map((project) => (
               <tr key={project.id} className="bg-warm/40">
                 <td className="px-6 py-4">

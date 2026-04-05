@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useState, useCallback } from 'react'
+import Image from 'next/image'
 import * as THREE from 'three'
 import { useRouter } from 'next/navigation'
 import type { Project } from '@/lib/types'
@@ -341,12 +342,14 @@ export default function ProjectSphere({ projects }: { projects: Project[] }) {
                 onClick={() => router.push(`/projects/${proj.slug}`)}
                 className="group text-left"
               >
-                <div className="aspect-[3/2] bg-white/[0.04] border border-white/[0.07] overflow-hidden mb-4">
+                <div className="relative aspect-[3/2] bg-white/[0.04] border border-white/[0.07] overflow-hidden mb-4">
                   {proj.cover_image ? (
-                    <img
+                    <Image
                       src={proj.cover_image}
                       alt={proj.title}
-                      className="w-full h-full object-cover opacity-55 group-hover:opacity-90 scale-[1.04] group-hover:scale-100 transition-all duration-700"
+                      fill
+                      sizes="(min-width: 768px) 50vw, 100vw"
+                      className="object-cover opacity-55 group-hover:opacity-90 scale-[1.04] group-hover:scale-100 transition-all duration-700"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
