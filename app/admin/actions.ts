@@ -31,6 +31,7 @@ export async function logoutAdmin() {
 }
 
 import { revalidatePath } from 'next/cache'
+import type { ProjectPageContent } from '@/lib/project-data'
 
 // ─── Project Actions ────────────────────────────────────────────────────────
 export async function saveProject(project: Partial<Project>) {
@@ -70,6 +71,34 @@ export async function deleteProject(id: string) {
     return { success: true }
   } catch (err) {
     console.error('deleteProject unexpected error:', err)
+    return { error: String(err) }
+  }
+}
+
+export async function saveProjectPageContent(slug: string, content: ProjectPageContent) {
+  try {
+    const { error } = await db
+      .from('page_content')
+      .upsert(
+        {
+          page_slug: `project:${slug}`,
+          blocks: content,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'page_slug' }
+      )
+
+    if (error) {
+      console.error('saveProjectPageContent error:', error)
+      return { error: error.message }
+    }
+
+    revalidatePath(`/projects/${slug}`)
+    revalidatePath('/projects')
+    revalidatePath('/admin')
+    return { success: true }
+  } catch (err) {
+    console.error('saveProjectPageContent unexpected error:', err)
     return { error: String(err) }
   }
 }
