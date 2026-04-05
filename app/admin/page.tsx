@@ -5,6 +5,26 @@ import Link from 'next/link'
 import { deleteProject } from './actions'
 import { revalidatePath } from 'next/cache'
 import DeleteButton from './DeleteButton'
+import type { Project } from '@/lib/types'
+
+const STATIC_ADMIN_PROJECTS: Project[] = [
+  {
+    id: 'static-unfolding-landscapes',
+    slug: 'unfolding-landscapes',
+    title: 'Unfolding Landscapes',
+    year: 2024,
+    location: 'Reuse of the Thermae, Italy',
+    category: 'competition',
+    short_description: 'Reactivating the Thermae of Curiga through layered topography and cultural programming.',
+    description: '',
+    tags: ['adaptive reuse', 'landscape', 'heritage', 'public'],
+    cover_image: 'https://lh3.googleusercontent.com/d/USERFILE',
+    images: [],
+    featured: true,
+    order_index: 6,
+    created_at: '',
+  },
+]
 
 export default async function AdminDashboard() {
   const projects = await getProjects()
@@ -18,6 +38,10 @@ export default async function AdminDashboard() {
       revalidatePath('/projects')
     }
   }
+
+  const staticRows = STATIC_ADMIN_PROJECTS.filter(staticProject => {
+    return !projects.some((existing) => existing.slug === staticProject.slug)
+  })
 
   return (
     <div className="space-y-10">
@@ -69,6 +93,27 @@ export default async function AdminDashboard() {
                     </Link>
                     <DeleteButton id={project.id} action={handleDelete} />
                   </div>
+                </td>
+              </tr>
+            ))}
+            {staticRows.map((project) => (
+              <tr key={project.id} className="bg-warm/40">
+                <td className="px-6 py-4">
+                  <div className="flex flex-col">
+                    <span className="text-[13px] text-ink">{project.title}</span>
+                    <span className="text-[10px] text-muted tracking-tight">/{project.slug}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="inline-block text-[10px] tracking-widest uppercase px-2 py-0.5 border border-rule text-muted">
+                    {project.category}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-xs text-muted">{project.year}</td>
+                <td className="px-6 py-4 text-right">
+                  <span className="text-[10px] tracking-widest uppercase text-muted">
+                    Static preview — add via admin to edit
+                  </span>
                 </td>
               </tr>
             ))}
