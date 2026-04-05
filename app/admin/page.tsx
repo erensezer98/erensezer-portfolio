@@ -28,9 +28,9 @@ const STATIC_ADMIN_PROJECTS: Project[] = [
 ]
 
 const driveLinkFor = (slug: string) => {
-  const folder = DRIVE_FOLDERS[slug as keyof typeof DRIVE_FOLDERS]?.folder
-  if (!folder) return null
-  return `https://drive.google.com/drive/folders/${folder}`
+  const entry = DRIVE_FOLDERS[slug as keyof typeof DRIVE_FOLDERS]
+  if (!entry || typeof entry === 'string') return null
+  return `https://drive.google.com/drive/folders/${entry.folder}`
 }
 
 export default async function AdminDashboard() {
