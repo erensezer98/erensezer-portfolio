@@ -91,20 +91,23 @@ export default async function AdminDashboard() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-xs">
-                  {driveLinkFor(project.slug) ? (
-                    <a
-                      href={driveLinkFor(project.slug)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[10px] tracking-widest uppercase text-ink hover:underline"
-                    >
-                      Open Drive
-                    </a>
-                  ) : (
-                    <span className="text-[10px] text-muted uppercase tracking-widest">
-                      Drive link pending
-                    </span>
-                  )}
+                  {(() => {
+                    const driveLink = driveLinkFor(project.slug)
+                    return driveLink ? (
+                      <a
+                        href={driveLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[10px] tracking-widest uppercase text-ink hover:underline"
+                      >
+                        Open Drive
+                      </a>
+                    ) : (
+                      <span className="text-[10px] text-muted uppercase tracking-widest">
+                        Drive link pending
+                      </span>
+                    )
+                  })()}
                 </td>
                 <td className="px-6 py-4 text-xs text-muted">{project.year}</td>
                 <td className="px-6 py-4 text-right">
