@@ -78,7 +78,7 @@ export default async function AdminDashboard() {
             </thead>
             <tbody className="divide-y divide-rule">
               {projects.map((project) => (
-                <tr key={project.id} className="hover:bg-warm/30 transition-colors">
+              <tr key={project.id} className="hover:bg-warm/30 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex flex-col">
                     <span className="text-[13px] text-ink">{project.title}</span>
@@ -92,20 +92,23 @@ export default async function AdminDashboard() {
                 </td>
                 <td className="px-6 py-4 text-xs">
                   {(() => {
-                    const driveLink = driveLinkFor(project.slug)
-                    return driveLink ? (
+                    const driveLink = DRIVE_FOLDERS[project.slug as keyof typeof DRIVE_FOLDERS]
+                    if (!driveLink || typeof driveLink === 'string') {
+                      return (
+                        <span className="text-[10px] text-muted uppercase tracking-widest">
+                          Drive link pending
+                        </span>
+                      )
+                    }
+                    return (
                       <a
-                        href={driveLink}
+                        href={`https://drive.google.com/drive/folders/${driveLink.folder}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-[10px] tracking-widest uppercase text-ink hover:underline"
                       >
                         Open Drive
                       </a>
-                    ) : (
-                      <span className="text-[10px] text-muted uppercase tracking-widest">
-                        Drive link pending
-                      </span>
                     )
                   })()}
                 </td>
