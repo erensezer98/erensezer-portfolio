@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { submitContactMessage } from '@/lib/supabase'
+import { submitContactForm } from './actions'
 
 export default function ContactForm() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
@@ -14,7 +14,11 @@ export default function ContactForm() {
     e.preventDefault()
     setStatus('sending')
     try {
-      await submitContactMessage(form)
+      const result = await submitContactForm(form)
+      if (result.error) {
+        setStatus('error')
+        return
+      }
       setStatus('sent')
       setForm({ name: '', email: '', subject: '', message: '' })
     } catch {

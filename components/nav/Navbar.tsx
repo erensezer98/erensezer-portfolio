@@ -39,7 +39,7 @@ export default function Navbar() {
         <Link
           href="/"
           className={`text-[13px] transition-colors duration-200 ${
-            isDark ? 'text-zinc-100 hover:text-zinc-500' : 'text-ink hover:text-muted'
+            isDark ? 'text-zinc-100 hover:text-zinc-500 font-medium tracking-[-0.02em] lowercase' : 'text-ink hover:text-muted font-medium tracking-[-0.02em] lowercase'
           }`}
         >
           eren sezer
@@ -53,8 +53,8 @@ export default function Navbar() {
               href={href}
               className={`text-[13px] transition-colors duration-200 ${
                 pathname.startsWith(href)
-                  ? (isDark ? 'text-white' : 'text-ink')
-                  : (isDark ? 'text-zinc-500 hover:text-white' : 'text-muted hover:text-ink')
+                  ? (isDark ? 'text-white font-medium lowercase' : 'text-ink font-medium lowercase')
+                  : (isDark ? 'text-zinc-500 hover:text-white font-medium lowercase' : 'text-muted hover:text-ink font-medium lowercase')
               }`}
             >
               {label}
@@ -64,7 +64,7 @@ export default function Navbar() {
 
         {/* Mobile toggle */}
         <button
-          className="md:hidden text-[13px] text-muted hover:text-ink transition-colors"
+          className="md:hidden text-[13px] text-muted hover:text-ink transition-colors font-medium lowercase"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
         >
@@ -79,7 +79,7 @@ export default function Navbar() {
             <Link
               key={href}
               href={href}
-              className={`text-[13px] transition-colors duration-200 ${
+              className={`text-[13px] transition-colors duration-200 font-medium lowercase ${
                 pathname.startsWith(href) ? 'text-ink' : 'text-muted hover:text-ink'
               }`}
             >

@@ -296,8 +296,8 @@ export default function ProjectSphere({ projects }: { projects: Project[] }) {
             <span className="text-[11px] font-bold tracking-wider text-white/70">ES</span>
           </div>
 
-          <h1 className="text-7xl md:text-9xl font-extralight text-white leading-none tracking-tight mb-4">
-            Eren Sezer
+          <h1 className="text-6xl md:text-8xl font-medium text-white leading-none tracking-[-0.04em] mb-4 lowercase">
+            eren sezer
           </h1>
           <p className="text-white/25 text-[11px] tracking-[0.45em] uppercase font-mono mb-14">
             Architecture · Space · Technology
@@ -357,7 +357,7 @@ export default function ProjectSphere({ projects }: { projects: Project[] }) {
                     </div>
                   )}
                 </div>
-                <p className="text-white/65 text-sm font-light group-hover:text-white transition-colors duration-300">
+                <p className="text-white/65 text-sm font-medium group-hover:text-white transition-colors duration-300">
                   {proj.title}
                 </p>
                 <p className="text-white/25 text-xs font-mono mt-1">
@@ -403,7 +403,7 @@ export default function ProjectSphere({ projects }: { projects: Project[] }) {
         {hovered && (
           <div className="absolute bottom-10 left-0 right-0 flex justify-center pointer-events-none">
             <div className="text-center">
-              <p className="text-white text-lg font-extralight tracking-wide">{hovered.title}</p>
+              <p className="text-white text-lg font-medium tracking-[-0.02em]">{hovered.title}</p>
               <p className="text-white/30 text-[10px] font-mono tracking-[0.3em] uppercase mt-1">
                 {hovered.year} · {hovered.location} · click to view
               </p>

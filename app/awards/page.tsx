@@ -32,7 +32,7 @@ export default async function AwardsPage() {
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
 
-      <p className="text-[13px] text-muted mb-16">awards</p>
+      <p className="text-[13px] font-medium lowercase text-muted mb-16">awards</p>
 
       <div className="grid md:grid-cols-2 gap-16">
         <div>
@@ -42,7 +42,7 @@ export default async function AwardsPage() {
               <div className="md:col-span-3">
                 {byYear[year].map((award) => (
                   <div key={award.id} className="border-t border-rule py-7 last:border-b">
-                    <p className="text-[13px] text-ink leading-snug">{award.title}</p>
+                    <p className="text-[14px] font-medium text-ink leading-snug">{award.title}</p>
                     <p className="text-xs text-muted mt-1">{award.organization}</p>
                     {award.description && (
                       <p className="text-xs text-muted/70 mt-1">{award.description}</p>

@@ -41,22 +41,22 @@ export default async function PublicationsPage() {
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
 
-      <p className="text-[13px] text-muted mb-16">publications</p>
+      <p className="text-[13px] font-medium lowercase text-muted mb-16">publications</p>
 
       <div className="space-y-20 max-w-2xl">
         {(Object.keys(grouped) as Publication['type'][]).map((type) => (
           <section key={type}>
-            <p className="text-xs text-muted mb-8">{TYPE_LABELS[type]}</p>
+            <p className="text-xs font-medium lowercase text-muted mb-8">{TYPE_LABELS[type]}</p>
             {grouped[type]!.map((pub) => (
               <div key={pub.id} className="border-t border-rule py-7 last:border-b">
                 <div className="flex items-start justify-between gap-6">
                   <div>
                     {pub.url ? (
-                      <a href={pub.url} target="_blank" rel="noopener noreferrer" className="text-[13px] text-ink hover:text-muted transition-colors leading-snug underline underline-offset-4 decoration-rule">
+                      <a href={pub.url} target="_blank" rel="noopener noreferrer" className="text-[14px] font-medium text-ink hover:text-muted transition-colors leading-snug underline underline-offset-4 decoration-rule">
                         {pub.title}
                       </a>
                     ) : (
-                      <p className="text-[13px] text-ink leading-snug">{pub.title}</p>
+                      <p className="text-[14px] font-medium text-ink leading-snug">{pub.title}</p>
                     )}
                     <p className="text-xs text-muted mt-1">{pub.organization}</p>
                     {pub.description && (

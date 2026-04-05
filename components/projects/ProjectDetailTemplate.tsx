@@ -78,22 +78,22 @@ export default function ProjectDetailTemplate({
     <article className={`min-h-screen px-6 pt-28 pb-32 md:px-10 ${theme.bg}`}>
       <Link
         href="/projects"
-        className={`inline-block mb-14 text-xs transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
+        className={`inline-block mb-14 text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
       >
         ← projects
       </Link>
 
       <div className="grid md:grid-cols-2 gap-12 mb-16">
         <div>
-          <p className={`text-xs capitalize mb-3 ${theme.muted}`}>{project.category}</p>
-          <h1 className={`text-3xl md:text-5xl font-light leading-tight mb-4 ${theme.text}`}>{project.title}</h1>
+          <p className={`text-xs mb-3 font-medium lowercase ${theme.muted}`}>{project.category}</p>
+          <h1 className={`text-3xl md:text-5xl font-medium leading-tight mb-4 ${theme.text}`}>{project.title}</h1>
           <p className={`text-xs mb-6 ${theme.muted}`}>
             {project.year} — {project.location}
           </p>
           {project.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {project.tags.map((tag) => (
-                <span key={tag} className={`text-[11px] px-3 py-1 border ${theme.muted} ${theme.border}`}>
+                <span key={tag} className={`text-[11px] px-3 py-1 border font-medium lowercase ${theme.muted} ${theme.border}`}>
                   {tag}
                 </span>
               ))}
@@ -126,15 +126,15 @@ export default function ProjectDetailTemplate({
         </div>
       ) : (
         <div className={`aspect-[16/9] flex items-center justify-center ${theme.warm}`}>
-          <p className={`text-[11px] uppercase tracking-widest ${theme.subtle}`}>cover image</p>
+          <p className={`text-[11px] tracking-widest lowercase ${theme.subtle}`}>cover image</p>
         </div>
       )}
 
       <div className="grid md:grid-cols-[1fr_280px] gap-x-16 gap-y-12 mt-16 mb-16">
         <div>
           <div className="mb-8">
-            <p className={`text-[11px] uppercase tracking-widest mb-3 ${theme.muted}`}>Overview</p>
-            <h2 className={`text-2xl md:text-3xl font-light ${theme.text}`}>Project narrative</h2>
+            <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>overview</p>
+            <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>project narrative</h2>
           </div>
           <p className={`text-sm leading-relaxed mb-5 ${theme.text}`}>
             {content.introText || project.description || project.short_description}
@@ -146,13 +146,13 @@ export default function ProjectDetailTemplate({
 
         <div>
           <div className="mb-8">
-            <p className={`text-[11px] uppercase tracking-widest mb-3 ${theme.muted}`}>Project Info</p>
-            <h2 className={`text-2xl md:text-3xl font-light ${theme.text}`}>Details</h2>
+            <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>project info</p>
+            <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>details</h2>
           </div>
           <div className={`border-t ${theme.border}`}>
             {content.infoFields.map((field) => (
               <div key={field.label} className={`flex justify-between items-baseline py-3 border-b ${theme.border}`}>
-                <span className={`text-[11px] ${theme.muted}`}>{field.label}</span>
+                <span className={`text-[11px] font-medium lowercase ${theme.muted}`}>{field.label}</span>
                 <span className={`text-[11px] text-right max-w-[60%] ${theme.text}`}>{field.value || '—'}</span>
               </div>
             ))}
@@ -162,8 +162,8 @@ export default function ProjectDetailTemplate({
 
       <section className="mt-16 mb-16">
         <div className="mb-8">
-          <p className={`text-[11px] uppercase tracking-widest mb-3 ${theme.muted}`}>Process</p>
-          <h2 className={`text-2xl md:text-3xl font-light ${theme.text}`}>Development</h2>
+          <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>process</p>
+          <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>development</h2>
         </div>
         {content.processText && (
           <p className={`text-sm leading-relaxed max-w-3xl mb-8 ${theme.text}`}>{content.processText}</p>
@@ -189,8 +189,8 @@ export default function ProjectDetailTemplate({
 
       <section className="mt-16 mb-16">
         <div className="mb-8">
-          <p className={`text-[11px] uppercase tracking-widest mb-3 ${theme.muted}`}>Schematics</p>
-          <h2 className={`text-2xl md:text-3xl font-light ${theme.text}`}>Systems and diagrams</h2>
+          <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>schematics</p>
+          <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>systems and diagrams</h2>
         </div>
         {content.schematicText && (
           <p className={`text-sm leading-relaxed max-w-3xl mb-8 ${theme.text}`}>{content.schematicText}</p>
@@ -216,8 +216,8 @@ export default function ProjectDetailTemplate({
 
       <section className="mt-16">
         <div className="mb-8">
-          <p className={`text-[11px] uppercase tracking-widest mb-3 ${theme.muted}`}>Gallery</p>
-          <h2 className={`text-2xl md:text-3xl font-light ${theme.text}`}>Project images</h2>
+          <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>gallery</p>
+          <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>project images</h2>
         </div>
         {galleryImages.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
@@ -244,8 +244,8 @@ export default function ProjectDetailTemplate({
       {hasAwards && (
         <section className="mt-16">
           <div className="mb-8">
-            <p className={`text-[11px] uppercase tracking-widest mb-3 ${theme.muted}`}>Awards</p>
-            <h2 className={`text-2xl md:text-3xl font-light ${theme.text}`}>Recognition</h2>
+            <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>awards</p>
+            <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>recognition</h2>
           </div>
           <div className={`border-t ${theme.border}`}>
             {content.awards
@@ -262,13 +262,13 @@ export default function ProjectDetailTemplate({
       <div className={`border-t mt-20 pt-10 flex justify-between items-center ${theme.border}`}>
         <Link
           href="/projects"
-          className={`text-xs transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
+          className={`text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
         >
           ← all projects
         </Link>
         <Link
           href="/contact"
-          className={`text-xs transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
+          className={`text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
         >
           get in touch →
         </Link>

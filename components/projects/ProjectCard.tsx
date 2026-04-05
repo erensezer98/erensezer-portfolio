@@ -18,7 +18,7 @@ export default function ProjectCard({ project }: { project: Project }) {
           <div className="w-full h-full bg-warm" />
         )}
       </div>
-      <p className="text-[13px] text-ink">{project.title}</p>
+      <p className="text-[14px] font-medium text-ink">{project.title}</p>
       <p className="text-xs text-muted mt-0.5">{project.year} — {project.location}</p>
     </Link>
   )

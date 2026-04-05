@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default async function ContactPage() {
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
-      <p className="text-[13px] text-muted mb-16">contact</p>
+      <p className="text-[13px] font-medium lowercase text-muted mb-16">contact</p>
       <ContactForm />
     </div>
   )

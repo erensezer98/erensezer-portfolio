@@ -27,7 +27,7 @@ export default function AboutPage() {
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
 
-      <p className="text-[13px] text-muted mb-16">about</p>
+      <p className="text-[13px] font-medium lowercase text-muted mb-16">about</p>
 
       {/* Bio */}
       <div className="mb-24 max-w-2xl">
@@ -65,12 +65,12 @@ export default function AboutPage() {
 
       {/* Work Experience */}
       <section className="mb-24 max-w-2xl">
-        <p className="text-xs text-muted mb-10">experience</p>
+        <p className="text-xs font-medium lowercase text-muted mb-10">experience</p>
         {work.map((item, i) => (
           <div key={i} className="grid md:grid-cols-4 gap-4 border-t border-rule py-6 last:border-b">
             <p className="text-xs text-muted pt-0.5">{item.period}</p>
             <div className="md:col-span-3">
-              <p className="text-[13px] text-ink">{item.role}</p>
+              <p className="text-[14px] font-medium text-ink">{item.role}</p>
               <p className="text-xs text-muted mt-0.5">{item.org}</p>
               {item.note && <p className="text-xs text-muted/60 mt-1">{item.note}</p>}
             </div>
@@ -80,12 +80,12 @@ export default function AboutPage() {
 
       {/* Education */}
       <section className="mb-24 max-w-2xl">
-        <p className="text-xs text-muted mb-10">education</p>
+        <p className="text-xs font-medium lowercase text-muted mb-10">education</p>
         {education.map((item, i) => (
           <div key={i} className="grid md:grid-cols-4 gap-4 border-t border-rule py-6 last:border-b">
             <p className="text-xs text-muted pt-0.5">{item.period}</p>
             <div className="md:col-span-3">
-              <p className="text-[13px] text-ink">{item.role}</p>
+              <p className="text-[14px] font-medium text-ink">{item.role}</p>
               <p className="text-xs text-muted mt-0.5">{item.org}</p>
               {item.note && <p className="text-xs text-muted/60 mt-1">{item.note}</p>}
             </div>
@@ -96,14 +96,14 @@ export default function AboutPage() {
       {/* Languages + Contact */}
       <div className="max-w-2xl">
         <section>
-          <p className="text-xs text-muted mb-8">languages</p>
+          <p className="text-xs font-medium lowercase text-muted mb-8">languages</p>
           {languages.map((l) => (
-            <p key={l} className="text-[13px] text-ink border-t border-rule py-3 last:border-b">{l}</p>
+            <p key={l} className="text-[14px] font-medium text-ink border-t border-rule py-3 last:border-b">{l}</p>
           ))}
 
           <div className="mt-12">
-            <p className="text-xs text-muted mb-3">contact</p>
-            <a href="mailto:eren.sezer@hotmail.com" className="text-[13px] text-ink hover:text-muted transition-colors underline underline-offset-4 decoration-rule">
+            <p className="text-xs font-medium lowercase text-muted mb-3">contact</p>
+            <a href="mailto:eren.sezer@hotmail.com" className="text-[14px] font-medium text-ink hover:text-muted transition-colors underline underline-offset-4 decoration-rule lowercase">
               eren.sezer@hotmail.com
             </a>
           </div>
