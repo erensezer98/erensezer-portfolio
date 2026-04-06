@@ -289,6 +289,9 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
                 placeholder="https://lh3.googleusercontent.com/d/FILE_ID"
                 className="w-full border border-border bg-transparent px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
               />
+              <p className="text-[11px] text-muted">
+                Optional. If the matching Drive cover folder has public images and a Google Drive API key is configured, the first image can load automatically.
+              </p>
             </div>
           </div>
 
@@ -333,6 +336,7 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
                 placeholder="url-1, url-2"
                 className="w-full resize-none border border-border bg-transparent px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
               />
+              <p className="text-[11px] text-muted">Leave blank to use the Drive process folder when available.</p>
             </div>
             <div className="space-y-2">
               <label className="block text-[10px] uppercase tracking-widest text-muted">Schematic Image URLs</label>
@@ -343,6 +347,7 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
                 placeholder="url-1, url-2"
                 className="w-full resize-none border border-border bg-transparent px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
               />
+              <p className="text-[11px] text-muted">Leave blank to use the Drive wide folder when available.</p>
             </div>
             <div className="space-y-2">
               <label className="block text-[10px] uppercase tracking-widest text-muted">Gallery Image URLs</label>
@@ -353,6 +358,7 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
                 placeholder="url-1, url-2, url-3"
                 className="w-full resize-none border border-border bg-transparent px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
               />
+              <p className="text-[11px] text-muted">Leave blank to use the Drive gallery folder when available.</p>
             </div>
           </div>
 

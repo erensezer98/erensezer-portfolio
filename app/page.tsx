@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
+import { resolveProjectDisplayMedia } from '@/lib/drive-folder-media'
 import { mergeProjectWithStatic } from '@/lib/project-data'
 import { getProjects } from '@/lib/supabase'
 import type { Project } from '@/lib/types'
@@ -29,6 +30,7 @@ export default async function HomePage() {
 
     return (b.order_index ?? 0) - (a.order_index ?? 0)
   })
+  const displayProjects = await Promise.all(mergedProjects.map(resolveProjectDisplayMedia))
 
   return (
     <div className="px-6 md:px-10">
@@ -57,7 +59,7 @@ export default async function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          {mergedProjects.map((project) => (
+          {displayProjects.map((project) => (
             <Link key={project.slug} href={`/projects/${project.slug}`} className="group block">
               <div className="aspect-square overflow-hidden border border-rule bg-warm">
                 {project.cover_image ? (

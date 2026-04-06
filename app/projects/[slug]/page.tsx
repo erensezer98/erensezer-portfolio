@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import ProjectDetailTemplate from '@/components/projects/ProjectDetailTemplate'
+import { getProjectDriveMedia, resolveProjectDisplayMedia } from '@/lib/drive-folder-media'
 import {
   getDefaultProjectPageContent,
   getStaticProjectBySlug,
@@ -29,7 +30,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const project = (await getProjectBySlug(params.slug)) ?? getStaticProjectBySlug(params.slug)
+  const rawProject = (await getProjectBySlug(params.slug)) ?? getStaticProjectBySlug(params.slug)
+  const project = rawProject ? await resolveProjectDisplayMedia(rawProject) : null
 
   if (!project) {
     return { title: 'Project' }
@@ -44,20 +46,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProjectDetailPage({ params }: Props) {
   const dbProject = await getProjectBySlug(params.slug)
   const staticProject = getStaticProjectBySlug(params.slug)
-  const project = dbProject ?? staticProject
+  const rawProject = dbProject ?? staticProject
 
-  if (!project || EXCLUDED_SLUGS.includes(project.slug)) {
+  if (!rawProject || EXCLUDED_SLUGS.includes(rawProject.slug)) {
     notFound()
   }
+
+  const [project, driveMedia] = await Promise.all([
+    resolveProjectDisplayMedia(rawProject),
+    getProjectDriveMedia(params.slug),
+  ])
 
   const savedPageContent = await getProjectPageContent(params.slug)
   const defaultContent = getDefaultProjectPageContent(project)
   const mergedContent = {
     ...defaultContent,
     ...savedPageContent,
-    processImages: savedPageContent?.processImages?.length ? savedPageContent.processImages : defaultContent.processImages,
-    schematicImages: savedPageContent?.schematicImages?.length ? savedPageContent.schematicImages : defaultContent.schematicImages,
-    galleryImages: savedPageContent?.galleryImages?.length ? savedPageContent.galleryImages : defaultContent.galleryImages,
+    processImages: savedPageContent?.processImages?.length
+      ? savedPageContent.processImages
+      : defaultContent.processImages.length
+        ? defaultContent.processImages
+        : driveMedia.processImages,
+    schematicImages: savedPageContent?.schematicImages?.length
+      ? savedPageContent.schematicImages
+      : defaultContent.schematicImages.length
+        ? defaultContent.schematicImages
+        : driveMedia.schematicImages,
+    galleryImages: savedPageContent?.galleryImages?.length
+      ? savedPageContent.galleryImages
+      : defaultContent.galleryImages.length
+        ? defaultContent.galleryImages
+        : driveMedia.galleryImages,
     infoFields: savedPageContent?.infoFields?.length ? savedPageContent.infoFields : defaultContent.infoFields,
     awards: savedPageContent?.awards?.length ? savedPageContent.awards : defaultContent.awards,
   }

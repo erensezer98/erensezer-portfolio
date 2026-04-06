@@ -3,20 +3,27 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
 import DeleteButton from './DeleteButton'
+import DriveFoldersPanel from './DriveFoldersPanel'
 import { deleteProject } from './actions'
-import { getProjects } from '@/lib/supabase'
+import { isPlaceholderDriveValue, PROJECT_DRIVE_FIELDS } from '@/lib/drive-folder-settings'
+import { getProjects, getSiteSettings } from '@/lib/supabase'
 import { DRIVE_FOLDERS } from '@/lib/project-images'
 import { STATIC_PROJECTS } from '@/lib/project-data'
 
 const EXCLUDED_SLUGS = ['awayout']
 
-const driveLinkFor = (slug: string) => {
+const driveLinkFor = (slug: string, folderId?: string | null) => {
+  if (folderId && !isPlaceholderDriveValue(folderId)) {
+    return `https://drive.google.com/drive/folders/${folderId}`
+  }
+
   const entry = DRIVE_FOLDERS[slug as keyof typeof DRIVE_FOLDERS]
   if (!entry || typeof entry === 'string') return null
   return `https://drive.google.com/drive/folders/${entry.folder}`
 }
 
 export default async function AdminDashboard() {
+  const settings = await getSiteSettings()
   const projects = (await getProjects()).filter((project) => !EXCLUDED_SLUGS.includes(project.slug))
 
   async function handleDelete(formData: FormData) {
@@ -66,7 +73,8 @@ export default async function AdminDashboard() {
             </thead>
             <tbody className="divide-y divide-rule">
               {projects.map((project) => {
-                const driveLink = driveLinkFor(project.slug)
+                const fieldConfig = PROJECT_DRIVE_FIELDS.find((entry) => entry.slug === project.slug)
+                const driveLink = driveLinkFor(project.slug, fieldConfig ? String(settings[fieldConfig.fields.folder] ?? '') : null)
 
                 return (
                   <tr key={project.id} className="transition-colors hover:bg-warm/30">
@@ -112,7 +120,8 @@ export default async function AdminDashboard() {
               })}
 
               {staticRows.map((project) => {
-                const driveLink = driveLinkFor(project.slug)
+                const fieldConfig = PROJECT_DRIVE_FIELDS.find((entry) => entry.slug === project.slug)
+                const driveLink = driveLinkFor(project.slug, fieldConfig ? String(settings[fieldConfig.fields.folder] ?? '') : null)
 
                 return (
                   <tr key={project.slug} className="bg-warm/20">
@@ -165,6 +174,8 @@ export default async function AdminDashboard() {
           </table>
         </div>
       </div>
+
+      <DriveFoldersPanel initialSettings={settings} />
     </div>
   )
 }

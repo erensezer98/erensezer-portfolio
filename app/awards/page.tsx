@@ -1,4 +1,5 @@
 import { getAwards } from '@/lib/supabase'
+import { getAwardsDriveMedia } from '@/lib/site-drive-media'
 import type { Award } from '@/lib/types'
 import type { Metadata } from 'next'
 import Image from 'next/image'
@@ -17,6 +18,7 @@ const STATIC_AWARDS: Award[] = [
 ]
 
 export default async function AwardsPage() {
+  const media = await getAwardsDriveMedia()
   let awards: Award[] = []
   try { awards = await getAwards() } catch { /* fallback */ }
   if (!awards.length) awards = STATIC_AWARDS
@@ -57,7 +59,7 @@ export default async function AwardsPage() {
         <div className="flex justify-start">
           <div className="relative w-3/4 aspect-[3/4]">
             <Image
-              src="https://lh3.googleusercontent.com/d/17MQfO_SoqA_jkgDO2LiyNMMuNAe8tVyJ"
+              src={media.coverImage || "https://lh3.googleusercontent.com/d/17MQfO_SoqA_jkgDO2LiyNMMuNAe8tVyJ"}
               alt="Eren Sezer"
               fill
               sizes="(max-width: 768px) 75vw, 37vw"

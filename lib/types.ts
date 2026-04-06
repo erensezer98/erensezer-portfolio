@@ -1,3 +1,5 @@
+import { DRIVE_FOLDER_SETTING_DEFAULTS } from '@/lib/drive-folder-settings'
+
 export type ProjectCategory = 'academic' | 'freelance' | 'competition' | 'research'
 
 export interface Project {
@@ -62,6 +64,8 @@ export interface SiteSettings {
 
   // Project detail
   project_show_tags: boolean
+
+  [key: string]: string | number | boolean
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -71,6 +75,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   about_show_photo: true,
   about_bio_cols: 2,
   project_show_tags: true,
+  ...DRIVE_FOLDER_SETTING_DEFAULTS,
 }
 
 // ─── Text Styles ──────────────────────────────────────────────────────────────

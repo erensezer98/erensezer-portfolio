@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import ProjectCard from '@/components/projects/ProjectCard'
+import { resolveProjectDisplayMedia } from '@/lib/drive-folder-media'
 import { mergeProjectWithStatic } from '@/lib/project-data'
 import { getProjects, getSiteSettings } from '@/lib/supabase'
 import type { Project } from '@/lib/types'
@@ -28,6 +29,7 @@ export default async function ProjectsPage() {
 
     return (b.order_index ?? 0) - (a.order_index ?? 0)
   })
+  const displayProjects = await Promise.all(mergedProjects.map(resolveProjectDisplayMedia))
 
   const settings = await getSiteSettings()
   const gridCols =
@@ -40,7 +42,7 @@ export default async function ProjectsPage() {
       <p className="mb-16 text-[13px] text-muted">projects</p>
 
       <div className={`grid ${gridCols} gap-x-8 gap-y-14`}>
-        {mergedProjects.map((project) => (
+        {displayProjects.map((project) => (
           <ProjectCard key={project.slug} project={project} />
         ))}
       </div>

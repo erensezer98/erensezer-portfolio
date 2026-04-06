@@ -1,4 +1,6 @@
+import Image from 'next/image'
 import type { Metadata } from 'next'
+import { getAboutDriveMedia } from '@/lib/site-drive-media'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -23,44 +25,60 @@ const education = [
 
 const languages = ['Turkish', 'English', 'Italian']
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const media = await getAboutDriveMedia()
+
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
 
       <p className="text-[13px] font-medium lowercase text-muted mb-16">about</p>
 
       {/* Bio */}
-      <div className="mb-24 max-w-2xl">
-        <div className="space-y-5 text-sm text-ink leading-relaxed">
-          <p>
-            Born in Istanbul in 1998, Eren Sezer is an architect, researcher, and technologist
-            who uses the built environment as a framework to explore the future of design. He
-            operates at the intersection of &ldquo;intuitive technocracy&rdquo; and traditional
-            craftsmanship, constantly searching to detect and rationalize the inherent &ldquo;quality
-            without a name&rdquo; of spaces, as defined by architectural theorist Christopher Alexander.
-          </p>
-          <p>
-            Holding a Master&rsquo;s degree in Building Architecture from Politecnico di Milano,
-            Eren has an obsession for the integration of advanced technologies into the
-            architect&rsquo;s design process. After his studies, he collaborated with MIT Senseable
-            City Lab Director Carlo Ratti, to witness the limits of architectural tech. This work
-            transitioned into his current role as a Project Manager at the startup Maestro
-            Technologies in Carlo Ratti Group, where he helps lead a team committed to pioneering
-            entirely new ways to design and build.
-          </p>
-          <p>Eren&rsquo;s work has been recognized in:</p>
-          <p>
-            Global Climate Action: In 2025, he was selected as a representative architect for
-            the Italian Ministry of External Affairs at the UN Climate Change Summit (COP30),
-            as a part of Carlo Ratti Group&rsquo;s project Aquapraca.
-          </p>
-          <p>
-            International Exhibitions: As the co-founder of the architectural collective Cumba
-            (est. 2023), Eren and the team secured spots at the STRAND International Architecture
-            Exhibition and the 2025 Venice Architectural Biennale with their acclaimed project,
-            Istanbul A Way Out.
-          </p>
+      <div className="mb-24 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)] lg:items-start">
+        <div className="max-w-2xl">
+          <div className="space-y-5 text-sm text-ink leading-relaxed">
+            <p>
+              Born in Istanbul in 1998, Eren Sezer is an architect, researcher, and technologist
+              who uses the built environment as a framework to explore the future of design. He
+              operates at the intersection of &ldquo;intuitive technocracy&rdquo; and traditional
+              craftsmanship, constantly searching to detect and rationalize the inherent &ldquo;quality
+              without a name&rdquo; of spaces, as defined by architectural theorist Christopher Alexander.
+            </p>
+            <p>
+              Holding a Master&rsquo;s degree in Building Architecture from Politecnico di Milano,
+              Eren has an obsession for the integration of advanced technologies into the
+              architect&rsquo;s design process. After his studies, he collaborated with MIT Senseable
+              City Lab Director Carlo Ratti, to witness the limits of architectural tech. This work
+              transitioned into his current role as a Project Manager at the startup Maestro
+              Technologies in Carlo Ratti Group, where he helps lead a team committed to pioneering
+              entirely new ways to design and build.
+            </p>
+            <p>Eren&rsquo;s work has been recognized in:</p>
+            <p>
+              Global Climate Action: In 2025, he was selected as a representative architect for
+              the Italian Ministry of External Affairs at the UN Climate Change Summit (COP30),
+              as a part of Carlo Ratti Group&rsquo;s project Aquapraca.
+            </p>
+            <p>
+              International Exhibitions: As the co-founder of the architectural collective Cumba
+              (est. 2023), Eren and the team secured spots at the STRAND International Architecture
+              Exhibition and the 2025 Venice Architectural Biennale with their acclaimed project,
+              Istanbul A Way Out.
+            </p>
+          </div>
         </div>
+
+        {media.portraitImage && (
+          <div className="relative aspect-[3/4] overflow-hidden bg-warm">
+            <Image
+              src={media.portraitImage}
+              alt="eren sezer portrait"
+              fill
+              sizes="(max-width: 1024px) 100vw, 28vw"
+              className="object-cover"
+            />
+          </div>
+        )}
       </div>
 
       {/* Work Experience */}
@@ -109,6 +127,25 @@ export default function AboutPage() {
           </div>
         </section>
       </div>
+
+      {media.galleryImages.length > 0 && (
+        <section className="mt-24">
+          <p className="text-xs font-medium lowercase text-muted mb-8">gallery</p>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {media.galleryImages.map((src, index) => (
+              <div key={`${src}-${index}`} className="relative aspect-[4/3] overflow-hidden bg-warm">
+                <Image
+                  src={src}
+                  alt={`about image ${index + 1}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
     </div>
   )

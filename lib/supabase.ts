@@ -76,13 +76,23 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
       .from('projects')
       .select('*')
       .eq('slug', slug)
-      .single()
+      .order('created_at', { ascending: false })
+      .limit(2)
 
     if (error) {
       logDataAccessError('Error fetching project by slug:', error.message)
       return null
     }
-    return data
+
+    if (!data || data.length === 0) {
+      return null
+    }
+
+    if (data.length > 1) {
+      console.warn(`Duplicate project rows found for slug "${slug}". Using the most recent entry.`)
+    }
+
+    return data[0]
   } catch (err) {
     logDataAccessError('Unexpected error in getProjectBySlug:', err)
     return null
@@ -181,7 +191,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       else                    parsed[row.key] = v
     }
 
-    return { ...DEFAULT_SETTINGS, ...(parsed as Partial<SiteSettings>) }
+    return { ...DEFAULT_SETTINGS, ...(parsed as Record<string, string | number | boolean>) } as SiteSettings
   } catch {
     return DEFAULT_SETTINGS
   }
