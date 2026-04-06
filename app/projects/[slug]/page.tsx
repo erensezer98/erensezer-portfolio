@@ -62,21 +62,21 @@ export default async function ProjectDetailPage({ params }: Props) {
   const mergedContent = {
     ...defaultContent,
     ...savedPageContent,
-    processImages: savedPageContent?.processImages?.length
-      ? savedPageContent.processImages
-      : defaultContent.processImages.length
-        ? defaultContent.processImages
-        : driveMedia.processImages,
-    schematicImages: savedPageContent?.schematicImages?.length
-      ? savedPageContent.schematicImages
-      : defaultContent.schematicImages.length
-        ? defaultContent.schematicImages
-        : driveMedia.schematicImages,
-    galleryImages: savedPageContent?.galleryImages?.length
-      ? savedPageContent.galleryImages
-      : defaultContent.galleryImages.length
-        ? defaultContent.galleryImages
-        : driveMedia.galleryImages,
+    processImages: driveMedia.processImages.length
+      ? driveMedia.processImages
+      : savedPageContent?.processImages?.length
+        ? savedPageContent.processImages
+        : defaultContent.processImages,
+    schematicImages: driveMedia.schematicImages.length
+      ? driveMedia.schematicImages
+      : savedPageContent?.schematicImages?.length
+        ? savedPageContent.schematicImages
+        : defaultContent.schematicImages,
+    galleryImages: driveMedia.galleryImages.length
+      ? driveMedia.galleryImages
+      : savedPageContent?.galleryImages?.length
+        ? savedPageContent.galleryImages
+        : defaultContent.galleryImages,
     infoFields: savedPageContent?.infoFields?.length ? savedPageContent.infoFields : defaultContent.infoFields,
     awards: savedPageContent?.awards?.length ? savedPageContent.awards : defaultContent.awards,
   }

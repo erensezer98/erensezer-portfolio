@@ -116,7 +116,7 @@ export async function resolveProjectDisplayMedia(project: Project): Promise<Proj
 
   return {
     ...project,
-    cover_image: isPlaceholderDriveValue(project.cover_image) ? driveMedia.coverImage : project.cover_image ?? driveMedia.coverImage,
-    images: project.images.length ? project.images : driveMedia.galleryImages,
+    cover_image: driveMedia.coverImage ?? (isPlaceholderDriveValue(project.cover_image) ? null : project.cover_image),
+    images: driveMedia.galleryImages.length ? driveMedia.galleryImages : project.images,
   }
 }
