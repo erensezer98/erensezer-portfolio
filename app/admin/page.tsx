@@ -51,12 +51,20 @@ export default async function AdminDashboard() {
             Every project page now uses one fixed template. Add and edit content here without affecting the overall layout.
           </p>
         </div>
-        <Link
-          href="/admin/new"
-          className="inline-flex items-center justify-center border border-ink bg-ink px-6 py-2.5 text-xs uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-ink"
-        >
-          Add Project
-        </Link>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/admin/portfolio"
+            className="inline-flex items-center justify-center border border-rule bg-white px-6 py-2.5 text-xs uppercase tracking-widest text-ink transition-colors duration-200 hover:border-ink"
+          >
+            Generate Portfolio
+          </Link>
+          <Link
+            href="/admin/new"
+            className="inline-flex items-center justify-center border border-ink bg-ink px-6 py-2.5 text-xs uppercase tracking-widest text-white transition-colors duration-200 hover:bg-white hover:text-ink"
+          >
+            Add Project
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-hidden border border-rule bg-white">

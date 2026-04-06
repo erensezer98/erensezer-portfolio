@@ -1,35 +1,16 @@
 import type { Metadata } from 'next'
 import ProjectCard from '@/components/projects/ProjectCard'
-import { resolveProjectDisplayMedia } from '@/lib/drive-folder-media'
-import { getProjectCategoryLabel, mergeProjectWithStatic } from '@/lib/project-data'
-import { getProjects, getSiteSettings } from '@/lib/supabase'
-import type { Project } from '@/lib/types'
+import { getProjectCategoryLabel } from '@/lib/project-data'
+import { getSiteSettings } from '@/lib/supabase'
+import { getAllProjectsForDisplay } from '@/lib/project-page-data'
 
 export const metadata: Metadata = {
   title: 'Projects',
   description: 'Architectural and design projects by Eren Sezer.',
 }
 
-const EXCLUDED_SLUGS = ['awayout']
-
 export default async function ProjectsPage() {
-  let projects: Project[] = []
-
-  try {
-    const dbProjects = await getProjects()
-    projects = dbProjects.filter((project) => !EXCLUDED_SLUGS.includes(project.slug))
-  } catch {
-    projects = []
-  }
-
-  const mergedProjects = mergeProjectWithStatic(projects).sort((a, b) => {
-    if ((b.year ?? 0) !== (a.year ?? 0)) {
-      return (b.year ?? 0) - (a.year ?? 0)
-    }
-
-    return (b.order_index ?? 0) - (a.order_index ?? 0)
-  })
-  const displayProjects = await Promise.all(mergedProjects.map(resolveProjectDisplayMedia))
+  const displayProjects = await getAllProjectsForDisplay()
   const personalProjects = displayProjects.filter((project) => project.category !== 'involvement')
   const involvementProjects = displayProjects.filter((project) => project.category === 'involvement')
 

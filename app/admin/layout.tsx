@@ -10,7 +10,7 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-warm flex flex-col font-sans text-ink">
       {/* Admin Nav */}
-      <header className="bg-white border-b border-rule sticky top-0 z-50">
+      <header className="bg-white border-b border-rule sticky top-0 z-50 print:hidden">
         <div className="max-w-screen-xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/admin" className="text-[13px] text-ink hidden md:block">
@@ -18,6 +18,7 @@ export default function AdminLayout({
             </Link>
             <nav className="flex gap-4 sm:gap-6">
               <Link href="/admin"                   className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors">Projects</Link>
+              <Link href="/admin/portfolio"         className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors">Portfolio</Link>
               <Link href="/admin/awards"             className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors">Awards</Link>
               <Link href="/admin/publications"       className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors">Publications</Link>
               <Link href="/admin/messages"           className="text-xs tracking-widest uppercase text-muted hover:text-ink transition-colors">Messages</Link>
@@ -37,7 +38,7 @@ export default function AdminLayout({
       </header>
 
       {/* Admin Content */}
-      <main className="flex-1 max-w-screen-xl mx-auto w-full px-6 py-12">
+      <main className="flex-1 max-w-screen-xl mx-auto w-full px-6 py-12 print:max-w-none print:px-0 print:py-0">
         {children}
       </main>
     </div>
