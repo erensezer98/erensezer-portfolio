@@ -27,6 +27,28 @@
  * using those URLs instead.
  */
 
+function buildProtectedDriveImageUrl(fileId: string, size = 1600): string {
+  return `/api/drive-image/${fileId}?size=${size}`
+}
+
+export function extractGoogleDriveFileId(value: string | null | undefined): string | null {
+  if (!value) return null
+
+  const trimmed = value.trim()
+  if (!trimmed) return null
+
+  const directMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/)
+  if (directMatch) return directMatch[1]
+
+  const fileMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)
+  if (fileMatch) return fileMatch[1]
+
+  const queryMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+  if (queryMatch) return queryMatch[1]
+
+  return null
+}
+
 /**
  * Returns a publicly-accessible image URL for a Google Drive file.
  *
@@ -55,5 +77,11 @@ export function gdriveUrl(fileId: string): string {
  *   // → 'https://lh3.googleusercontent.com/d/1A2B3C4D5E6F7G8H9I0J=w1200'
  */
 export function gdriveThumbnailUrl(fileId: string, size = 1600): string {
-  return `https://lh3.googleusercontent.com/d/${fileId}=w${size}`
+  return buildProtectedDriveImageUrl(fileId, size)
+}
+
+export function protectGoogleDriveImageUrl(value: string | null | undefined, size = 1600): string | null {
+  const fileId = extractGoogleDriveFileId(value)
+  if (!fileId) return value?.trim() || null
+  return buildProtectedDriveImageUrl(fileId, size)
 }

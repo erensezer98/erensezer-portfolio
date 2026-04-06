@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { resolveProjectDisplayMedia } from '@/lib/drive-folder-media'
 import { mergeProjectWithStatic } from '@/lib/project-data'
+import { getProjectListingImage } from '@/lib/project-listing-media'
 import { getProjects } from '@/lib/supabase'
 import type { Project } from '@/lib/types'
 
@@ -59,12 +60,15 @@ export default async function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          {displayProjects.map((project) => (
+          {displayProjects.map((project) => {
+            const listingImage = getProjectListingImage(project)
+
+            return (
             <Link key={project.slug} href={`/projects/${project.slug}`} className="group block">
               <div className="aspect-square overflow-hidden border border-rule bg-warm">
-                {project.cover_image ? (
+                {listingImage ? (
                   <Image
-                    src={project.cover_image}
+                    src={listingImage}
                     alt={project.title}
                     width={900}
                     height={900}
@@ -84,7 +88,8 @@ export default async function HomePage() {
                 </p>
               </div>
             </Link>
-          ))}
+            )
+          })}
         </div>
       </section>
     </div>

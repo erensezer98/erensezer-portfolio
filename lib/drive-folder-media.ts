@@ -1,5 +1,5 @@
 import { PROJECT_DRIVE_FIELDS, isPlaceholderDriveValue } from '@/lib/drive-folder-settings'
-import { gdriveThumbnailUrl } from '@/lib/gdrive'
+import { gdriveThumbnailUrl, protectGoogleDriveImageUrl } from '@/lib/gdrive'
 import { DRIVE_FOLDERS } from '@/lib/project-images'
 import { getSiteSettings } from '@/lib/supabase'
 import type { Project } from '@/lib/types'
@@ -35,9 +35,11 @@ function normalizeImageUrl(value: string | null | undefined) {
   const trimmed = value.trim()
   if (!trimmed) return null
 
-  return trimmed
+  const normalized = trimmed
     .replace(/^https:\/\/ih3\.googleusercontent\.com/i, 'https://lh3.googleusercontent.com')
     .replace(/^https:\/\/Ih3\.googleusercontent\.com/i, 'https://lh3.googleusercontent.com')
+
+  return protectGoogleDriveImageUrl(normalized)
 }
 
 function normalizeImageList(values: string[] | null | undefined) {

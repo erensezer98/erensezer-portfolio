@@ -27,6 +27,19 @@
   img { display: block; max-width: 100%; }
 
   ::selection { background: #e8e2dc; }
+
+  body.content-protected [data-protect-content="true"],
+  body.content-protected [data-protect-content="true"] * {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  body.content-protected [data-protect-content="true"] img {
+    -webkit-user-drag: none;
+    user-drag: none;
+    pointer-events: none;
+  }
 }
 
 @layer components {

@@ -1,14 +1,17 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { getProjectListingImage } from '@/lib/project-listing-media'
 import type { Project } from '@/lib/types'
 
 export default function ProjectCard({ project }: { project: Project }) {
+  const listingImage = getProjectListingImage(project)
+
   return (
     <Link href={`/projects/${project.slug}`} className="group block">
       <div className="aspect-[4/3] bg-warm overflow-hidden mb-4">
-        {project.cover_image ? (
+        {listingImage ? (
           <Image
-            src={project.cover_image}
+            src={listingImage}
             alt={project.title}
             width={800}
             height={600}
