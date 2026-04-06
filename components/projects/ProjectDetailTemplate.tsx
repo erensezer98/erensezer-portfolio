@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import ProjectScene from '@/components/projects/ProjectScene'
-import type { Project } from '@/lib/types'
+import { getProjectCategoryLabel } from '@/lib/project-data'
 import type { ProjectPageContent } from '@/lib/project-data'
+import type { Project } from '@/lib/types'
 
 function ClickableImage({
   src,
@@ -40,20 +41,6 @@ function ClickableImage({
   )
 }
 
-function PlaceholderImage({
-  label,
-  aspect = 'aspect-[4/3]',
-}: {
-  label: string
-  aspect?: string
-}) {
-  return (
-    <div className={`${aspect} flex items-center justify-center bg-warm`}>
-      <p className="text-[11px] uppercase tracking-widest text-subtle">{label}</p>
-    </div>
-  )
-}
-
 export default function ProjectDetailTemplate({
   project,
   content,
@@ -62,13 +49,17 @@ export default function ProjectDetailTemplate({
   content: ProjectPageContent
 }) {
   const isIstanbul = project.slug === 'istanbul-a-way-out'
+  const isInvolvement = project.category === 'involvement'
   const coverImage = project.cover_image
   const galleryImages = content.galleryImages.length ? content.galleryImages : project.images
   const hasAwards = content.awards.some((award) => award.trim())
+  const hasProcessSection = Boolean(content.processText || content.processImages.length)
+  const hasSchematicSection = Boolean(content.schematicText || content.schematicImages.length)
+  const hasGallerySection = galleryImages.length > 0
   const lightboxImages = [
     ...content.processImages.map((src, index) => ({ src, alt: `${project.title} process ${index + 1}` })),
     ...content.schematicImages.map((src, index) => ({ src, alt: `${project.title} schematic ${index + 1}` })),
-    ...galleryImages.map((src, index) => ({ src, alt: `${project.title} — ${index + 1}` })),
+    ...galleryImages.map((src, index) => ({ src, alt: `${project.title} image ${index + 1}` })),
   ]
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
   const theme = isIstanbul
@@ -142,25 +133,25 @@ export default function ProjectDetailTemplate({
 
   return (
     <>
-      <article className={`min-h-screen px-6 pt-28 pb-32 md:px-10 ${theme.bg}`}>
+      <article className={`min-h-screen px-6 pb-32 pt-28 md:px-10 ${theme.bg}`}>
         <Link
           href="/projects"
-          className={`inline-block mb-14 text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
+          className={`mb-14 inline-block text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
         >
-          ← projects
+          {'<- projects'}
         </Link>
 
-        <div className="grid md:grid-cols-2 gap-12 mb-16">
+        <div className="mb-16 grid gap-12 md:grid-cols-2">
           <div>
-            <p className={`text-xs mb-3 font-medium lowercase ${theme.muted}`}>{project.category}</p>
-            <h1 className={`text-3xl md:text-5xl font-medium leading-tight mb-4 ${theme.text}`}>{project.title}</h1>
-            <p className={`text-xs mb-6 ${theme.muted}`}>
-              {project.year} — {project.location}
+            <p className={`mb-3 text-xs font-medium lowercase ${theme.muted}`}>{getProjectCategoryLabel(project.category)}</p>
+            <h1 className={`mb-4 text-3xl font-medium leading-tight md:text-5xl ${theme.text}`}>{project.title}</h1>
+            <p className={`mb-6 text-xs ${theme.muted}`}>
+              {project.year} - {project.location}
             </p>
             {project.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {project.tags.map((tag) => (
-                  <span key={tag} className={`text-[11px] px-3 py-1 border font-medium lowercase ${theme.muted} ${theme.border}`}>
+                  <span key={tag} className={`border px-3 py-1 text-[11px] font-medium lowercase ${theme.muted} ${theme.border}`}>
                     {tag}
                   </span>
                 ))}
@@ -175,35 +166,35 @@ export default function ProjectDetailTemplate({
         </div>
 
         {content.sceneComponent !== 'none' && (
-          <div className={`w-full aspect-[16/7] mb-8 overflow-hidden border ${theme.surface} ${theme.border}`}>
+          <div className={`mb-8 aspect-[16/7] w-full overflow-hidden border ${theme.surface} ${theme.border}`}>
             <ProjectScene component={content.sceneComponent} />
           </div>
         )}
 
         {coverImage ? (
-          <div className={`aspect-[16/9] overflow-hidden mb-3 ${theme.warm}`}>
+          <div className={`mb-3 aspect-[16/9] overflow-hidden ${theme.warm}`}>
             <Image
               src={coverImage}
               alt={project.title}
               width={1600}
               height={900}
               priority
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
             />
           </div>
         ) : (
-          <div className={`aspect-[16/9] flex items-center justify-center ${theme.warm}`}>
+          <div className={`flex aspect-[16/9] items-center justify-center ${theme.warm}`}>
             <p className={`text-[11px] tracking-widest lowercase ${theme.subtle}`}>cover image</p>
           </div>
         )}
 
-        <div className="grid md:grid-cols-[1fr_280px] gap-x-16 gap-y-12 mt-16 mb-16">
+        <div className="mt-16 mb-16 grid gap-x-16 gap-y-12 md:grid-cols-[1fr_280px]">
           <div>
             <div className="mb-8">
-              <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>overview</p>
-              <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>project narrative</h2>
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>overview</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>project narrative</h2>
             </div>
-            <p className={`text-sm leading-relaxed mb-5 ${theme.text}`}>
+            <p className={`mb-5 text-sm leading-relaxed ${theme.text}`}>
               {content.introText || project.description || project.short_description}
             </p>
             {project.description && content.introText !== project.description && (
@@ -213,111 +204,100 @@ export default function ProjectDetailTemplate({
 
           <div>
             <div className="mb-8">
-              <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>project info</p>
-              <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>details</h2>
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>project info</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>details</h2>
             </div>
             <div className={`border-t ${theme.border}`}>
               {content.infoFields.map((field) => (
-                <div key={field.label} className={`flex justify-between items-baseline py-3 border-b ${theme.border}`}>
+                <div key={field.label} className={`flex items-baseline justify-between border-b py-3 ${theme.border}`}>
                   <span className={`text-[11px] font-medium lowercase ${theme.muted}`}>{field.label}</span>
-                  <span className={`text-[11px] text-right max-w-[60%] ${theme.text}`}>{field.value || '—'}</span>
+                  <span className={`max-w-[60%] text-right text-[11px] ${theme.text}`}>{field.value || '-'}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <section className="mt-16 mb-16">
-          <div className="mb-8">
-            <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>process</p>
-            <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>development</h2>
-          </div>
-          {content.processText && (
-            <p className={`text-sm leading-relaxed max-w-3xl mb-8 ${theme.text}`}>{content.processText}</p>
-          )}
-
-          {content.processImages.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {content.processImages.map((src, index) => (
-                <ClickableImage
-                  key={`${src}-${index}`}
-                  src={src}
-                  alt={`${project.title} process ${index + 1}`}
-                  aspect="aspect-[4/3]"
-                  onOpen={openImage}
-                  backgroundClass={theme.warm}
-                />
-              ))}
+        {hasProcessSection && (
+          <section className="mt-16 mb-16">
+            <div className="mb-8">
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'involvement' : 'process'}</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{isInvolvement ? 'scope of work' : 'development'}</h2>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <PlaceholderImage label="process image 01" />
-              <PlaceholderImage label="process image 02" />
-            </div>
-          )}
-        </section>
+            {content.processText && (
+              <p className={`mb-8 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.processText}</p>
+            )}
 
-        <section className="mt-16 mb-16">
-          <div className="mb-8">
-            <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>schematics</p>
-            <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>systems and diagrams</h2>
-          </div>
-          {content.schematicText && (
-            <p className={`text-sm leading-relaxed max-w-3xl mb-8 ${theme.text}`}>{content.schematicText}</p>
-          )}
+            {content.processImages.length > 0 && (
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {content.processImages.map((src, index) => (
+                  <ClickableImage
+                    key={`${src}-${index}`}
+                    src={src}
+                    alt={`${project.title} process ${index + 1}`}
+                    aspect="aspect-[4/3]"
+                    onOpen={openImage}
+                    backgroundClass={theme.warm}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
-          {content.schematicImages.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {content.schematicImages.map((src, index) => (
-                <ClickableImage
-                  key={`${src}-${index}`}
-                  src={src}
-                  alt={`${project.title} schematic ${index + 1}`}
-                  aspect="aspect-[4/3]"
-                  onOpen={openImage}
-                  backgroundClass={theme.warm}
-                />
-              ))}
+        {hasSchematicSection && (
+          <section className="mt-16 mb-16">
+            <div className="mb-8">
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'role' : 'schematics'}</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{isInvolvement ? 'contribution' : 'systems and diagrams'}</h2>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <PlaceholderImage label="schematic 01" />
-              <PlaceholderImage label="schematic 02" />
-            </div>
-          )}
-        </section>
+            {content.schematicText && (
+              <p className={`mb-8 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.schematicText}</p>
+            )}
 
-        <section className="mt-16">
-          <div className="mb-8">
-            <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>gallery</p>
-            <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>project images</h2>
-          </div>
-          {galleryImages.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            {content.schematicImages.length > 0 && (
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {content.schematicImages.map((src, index) => (
+                  <ClickableImage
+                    key={`${src}-${index}`}
+                    src={src}
+                    alt={`${project.title} schematic ${index + 1}`}
+                    aspect="aspect-[4/3]"
+                    onOpen={openImage}
+                    backgroundClass={theme.warm}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {hasGallerySection && (
+          <section className="mt-16">
+            <div className="mb-8">
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>gallery</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>project images</h2>
+            </div>
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
               {galleryImages.map((src, index) => (
                 <ClickableImage
                   key={`${src}-${index}`}
                   src={src}
-                  alt={`${project.title} — ${index + 1}`}
+                  alt={`${project.title} image ${index + 1}`}
                   aspect="aspect-[4/3]"
                   onOpen={openImage}
                   backgroundClass={theme.warm}
                 />
               ))}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <PlaceholderImage label="image 01" />
-              <PlaceholderImage label="image 02" />
-            </div>
-          )}
-        </section>
+          </section>
+        )}
 
         {hasAwards && (
           <section className="mt-16">
             <div className="mb-8">
-              <p className={`text-[11px] tracking-widest lowercase mb-3 ${theme.muted}`}>awards</p>
-              <h2 className={`text-2xl md:text-3xl font-medium lowercase ${theme.text}`}>recognition</h2>
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>awards</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>recognition</h2>
             </div>
             <div className={`border-t ${theme.border}`}>
               {content.awards
@@ -331,18 +311,18 @@ export default function ProjectDetailTemplate({
           </section>
         )}
 
-        <div className={`border-t mt-20 pt-10 flex justify-between items-center ${theme.border}`}>
+        <div className={`mt-20 flex items-center justify-between border-t pt-10 ${theme.border}`}>
           <Link
             href="/projects"
             className={`text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
           >
-            ← all projects
+            {'<- all projects'}
           </Link>
           <Link
             href="/contact"
             className={`text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
           >
-            get in touch →
+            {'get in touch ->'}
           </Link>
         </div>
       </article>
@@ -369,7 +349,7 @@ export default function ProjectDetailTemplate({
                 }}
                 className="absolute left-4 top-1/2 z-[101] -translate-y-1/2 border border-white/20 bg-black/40 px-4 py-3 text-xs font-medium lowercase text-white transition-colors hover:bg-black/60"
               >
-                ← prev
+                {'<- prev'}
               </button>
               <button
                 type="button"
@@ -379,7 +359,7 @@ export default function ProjectDetailTemplate({
                 }}
                 className="absolute right-4 top-1/2 z-[101] -translate-y-1/2 border border-white/20 bg-black/40 px-4 py-3 text-xs font-medium lowercase text-white transition-colors hover:bg-black/60"
               >
-                next →
+                {'next ->'}
               </button>
             </>
           )}

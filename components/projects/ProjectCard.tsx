@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getProjectListingImage } from '@/lib/project-listing-media'
+import { getProjectCategoryLabel } from '@/lib/project-data'
 import type { Project } from '@/lib/types'
 
 export default function ProjectCard({ project }: { project: Project }) {
@@ -22,6 +23,7 @@ export default function ProjectCard({ project }: { project: Project }) {
         )}
       </div>
       <p className="text-[14px] font-medium text-ink">{project.title}</p>
+      <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted">{getProjectCategoryLabel(project.category)}</p>
       <p className="text-xs text-muted mt-0.5">{project.year} — {project.location}</p>
     </Link>
   )

@@ -176,6 +176,7 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
                 <option value="freelance">Freelance</option>
                 <option value="competition">Competition</option>
                 <option value="research">Research</option>
+                <option value="involvement">Involvement</option>
               </select>
             </div>
             <div className="space-y-2">

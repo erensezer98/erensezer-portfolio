@@ -31,6 +31,23 @@ export interface StaticProjectRecord {
   page: ProjectPageContent
 }
 
+export function getProjectCategoryLabel(category: ProjectCategory): string {
+  switch (category) {
+    case 'academic':
+      return 'Academic'
+    case 'freelance':
+      return 'Freelance'
+    case 'competition':
+      return 'Competition'
+    case 'research':
+      return 'Research'
+    case 'involvement':
+      return 'Involvement'
+    default:
+      return category
+  }
+}
+
 function createProject(
   id: string,
   slug: string,
@@ -295,6 +312,97 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Area', value: 'Thermae of Curinga site' },
         { label: 'Status', value: 'Competition Entry' },
         { label: 'Client', value: 'Reuse Italy' },
+      ],
+    }),
+  },
+  {
+    project: createProject(
+      'static-mondadori',
+      'mondadori',
+      'Palazzo Mondadori / Office As A Playground',
+      2024,
+      'Palazzo Mondadori, Milan, Italy',
+      'involvement',
+      'Revitalization work at Oscar Niemeyer\'s Palazzo Mondadori developed with Carlo Ratti Associati, Maestro Technologies, and Italo Rota Studio.',
+      'CRA was granted the design of Oscar Niemeyer\'s Palazzo Mondadori. This involvement focused on the transformation of layouts, the design of new furniture elements, and the technical development required to bring those interventions into production and site execution.',
+      ['adaptive reuse', 'workplace', 'furniture design', 'site management'],
+      null,
+      true,
+      8
+    ),
+    page: createPageContent({
+      introText:
+        'A workplace transformation inside Oscar Niemeyer\'s Palazzo Mondadori, developed through the collaboration between Carlo Ratti Associati, Maestro Technologies, and Italo Rota Studio. The work moved between spatial layout design, custom furniture development, and the practical realities of delivering the project on site.',
+      processText:
+        'I was involved in the design of the layouts and in the design of the new furniture elements. I also worked as a technical designer, developing product-scale solutions and coordinating the transition from design intent to buildable outcomes.',
+      schematicText:
+        'My role was Designer & Assistant Project Manager. After the design phase was over, I was responsible for procurement, production, and site management, helping guide the project from development into execution.',
+      infoFields: [
+        { label: 'Office', value: 'Carlo Ratti Associati / Maestro Technologies / Italo Rota Studio' },
+        { label: 'Role', value: 'Designer & Assistant Project Manager' },
+        { label: 'Year', value: '2024' },
+        { label: 'Photo credits', value: 'CRA & DSL Studio' },
+      ],
+    }),
+  },
+  {
+    project: createProject(
+      'static-biennale',
+      'biennale',
+      'Venice Biennale di Architettura 2025',
+      2025,
+      'Venice, Italy',
+      'involvement',
+      'Curatorial and delivery coordination work for the 2025 Venice Architecture Biennale with Carlo Ratti Associati and Maestro Technologies.',
+      'An involvement within the curator\'s team for the 2025 Venice Architecture Biennale, supporting cross-studio coordination, design development, and construction processes across multiple contributors.',
+      ['exhibition', 'curatorial coordination', 'executive design'],
+      null,
+      true,
+      9
+    ),
+    page: createPageContent({
+      introText:
+        'This involvement was part of the curatorial team behind the 2025 Venice Architecture Biennale, working across design, coordination, and construction with Carlo Ratti Associati and Maestro Technologies.',
+      processText:
+        'I was an assistant member of the curator\'s team. I collaborated with studios including Howeler + Yoon, Diller Scofidio + Renfro, and Fondazione Pistoletto to coordinate design and construction processes across the exhibition.',
+      schematicText:
+        'My role was Assistant Manager to the Curatorial Team, supporting communication and delivery between contributors while helping maintain alignment between design development and execution.',
+      infoFields: [
+        { label: 'Office', value: 'Carlo Ratti Associati / Maestro Technologies' },
+        { label: 'Role', value: 'Assistant Manager to Curatorial Team' },
+        { label: 'Year', value: '2025' },
+        { label: 'Location', value: 'Venice' },
+      ],
+      awards: ['Golden Lion Award to Canal Cafe, which I was involved in during the executive design phase.'],
+    }),
+  },
+  {
+    project: createProject(
+      'static-aquapraca',
+      'aquapraca',
+      'Aquapraca',
+      2025,
+      'Venice, Italy / Belem, Brazil',
+      'involvement',
+      'International project delivered with Carlo Ratti Associati, Howeler + Yoon, and Maestro Technologies as a gift from the Italian Government to the Brazilian Government.',
+      'Aquapraca was developed as a gift from the Italian Government to the Brazilian Government. The project brought together international collaborators across design development, executive detailing, procurement, and stakeholder coordination, eventually extending to representation at COP30 in Belem.',
+      ['international collaboration', 'executive design', 'procurement', 'cop30'],
+      null,
+      true,
+      10
+    ),
+    page: createPageContent({
+      introText:
+        'Aquapraca was developed with Carlo Ratti Associati, Howeler + Yoon, and Maestro Technologies as a diplomatic and architectural collaboration between Italy and Brazil. The project connected design development with international coordination and public representation.',
+      processText:
+        'I was one of the project managers for Aquapraca. I helped the design teams develop executive details and organized stakeholder coordination together with procurement processes across the project.',
+      schematicText:
+        'My role was Project Manager. In the final phase of the project, at COP30 in Belem, I was selected by the Italian Ministry of Foreign Affairs as one of the representative architects for the work.',
+      infoFields: [
+        { label: 'Office', value: 'Carlo Ratti Associati / Howeler + Yoon / Maestro Technologies' },
+        { label: 'Role', value: 'Project Manager' },
+        { label: 'Year', value: '2025' },
+        { label: 'Location', value: 'Venice, Italy / Belem, Brazil' },
       ],
     }),
   },
