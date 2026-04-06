@@ -30,6 +30,23 @@ export interface ProjectDriveMedia {
   schematicImages: string[]
 }
 
+function normalizeImageUrl(value: string | null | undefined) {
+  if (!value) return null
+
+  const trimmed = value.trim()
+  if (!trimmed) return null
+
+  return trimmed
+    .replace(/^https:\/\/ih3\.googleusercontent\.com/i, 'https://lh3.googleusercontent.com')
+    .replace(/^https:\/\/Ih3\.googleusercontent\.com/i, 'https://lh3.googleusercontent.com')
+}
+
+function normalizeImageList(values: string[] | null | undefined) {
+  return (values ?? [])
+    .map((value) => normalizeImageUrl(value))
+    .filter((value): value is string => Boolean(value))
+}
+
 function getDriveFoldersForSlug(slug: string): DriveProjectFolders | null {
   const entry = DRIVE_FOLDERS[slug as keyof typeof DRIVE_FOLDERS]
   if (!entry || typeof entry === 'string') return null
@@ -113,10 +130,13 @@ export async function getProjectDriveMedia(slug: string): Promise<ProjectDriveMe
 
 export async function resolveProjectDisplayMedia(project: Project): Promise<Project> {
   const driveMedia = await getProjectDriveMedia(project.slug)
+  const preferredCoverImage = driveMedia.coverImage ?? driveMedia.galleryImages[0] ?? null
+  const manualCoverImage = normalizeImageUrl(project.cover_image)
+  const manualImages = normalizeImageList(project.images)
 
   return {
     ...project,
-    cover_image: driveMedia.coverImage ?? (isPlaceholderDriveValue(project.cover_image) ? null : project.cover_image),
-    images: driveMedia.galleryImages.length ? driveMedia.galleryImages : project.images,
+    cover_image: preferredCoverImage ?? (isPlaceholderDriveValue(manualCoverImage) ? null : manualCoverImage),
+    images: driveMedia.galleryImages.length ? driveMedia.galleryImages : manualImages,
   }
 }

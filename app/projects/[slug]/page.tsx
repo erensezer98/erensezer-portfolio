@@ -1,5 +1,8 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { unstable_noStore as noStore } from 'next/cache'
 import ProjectDetailTemplate from '@/components/projects/ProjectDetailTemplate'
 import { getProjectDriveMedia, resolveProjectDisplayMedia } from '@/lib/drive-folder-media'
 import {
@@ -30,6 +33,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  noStore()
   const rawProject = (await getProjectBySlug(params.slug)) ?? getStaticProjectBySlug(params.slug)
   const project = rawProject ? await resolveProjectDisplayMedia(rawProject) : null
 
@@ -44,6 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProjectDetailPage({ params }: Props) {
+  noStore()
   const dbProject = await getProjectBySlug(params.slug)
   const staticProject = getStaticProjectBySlug(params.slug)
   const rawProject = dbProject ?? staticProject
