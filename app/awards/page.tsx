@@ -56,8 +56,8 @@ export default async function AwardsPage() {
           ))}
         </div>
 
-        <div className="flex justify-start">
-          <div className="relative w-3/4 aspect-[3/4]">
+        <div>
+          <div className="relative aspect-[3/4] w-[70%] justify-self-start overflow-hidden bg-warm">
             <Image
               src={media.coverImage || "https://lh3.googleusercontent.com/d/17MQfO_SoqA_jkgDO2LiyNMMuNAe8tVyJ"}
               alt="Eren Sezer"

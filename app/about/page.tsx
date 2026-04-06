@@ -69,7 +69,7 @@ export default async function AboutPage() {
         </div>
 
         {media.portraitImage && (
-          <div className="relative aspect-[3/4] overflow-hidden bg-warm">
+          <div className="relative aspect-[3/4] w-[70%] justify-self-start overflow-hidden bg-warm">
             <Image
               src={media.portraitImage}
               alt="eren sezer portrait"
