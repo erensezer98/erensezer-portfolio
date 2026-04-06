@@ -1,4 +1,3 @@
-import { cache } from 'react'
 import { SITE_DRIVE_FIELDS, isPlaceholderDriveValue } from '@/lib/drive-folder-settings'
 import { gdriveThumbnailUrl } from '@/lib/gdrive'
 import { getSiteSettings } from '@/lib/supabase'
@@ -11,7 +10,7 @@ interface GoogleDriveListResponse {
   files?: GoogleDriveFile[]
 }
 
-const listFolderImages = cache(async (folderId: string, limit = 24) => {
+async function listFolderImages(folderId: string, limit = 24) {
   const apiKey = process.env.GOOGLE_DRIVE_API_KEY
   if (!apiKey || isPlaceholderDriveValue(folderId)) return []
 
@@ -28,7 +27,7 @@ const listFolderImages = cache(async (folderId: string, limit = 24) => {
 
   try {
     const response = await fetch(`https://www.googleapis.com/drive/v3/files?${params.toString()}`, {
-      next: { revalidate: 3600 },
+      cache: 'no-store',
     })
 
     if (!response.ok) return []
@@ -38,7 +37,7 @@ const listFolderImages = cache(async (folderId: string, limit = 24) => {
   } catch {
     return []
   }
-})
+}
 
 export async function getAboutDriveMedia() {
   const settings = await getSiteSettings()

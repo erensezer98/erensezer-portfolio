@@ -1,4 +1,3 @@
-import { cache } from 'react'
 import { PROJECT_DRIVE_FIELDS, isPlaceholderDriveValue } from '@/lib/drive-folder-settings'
 import { gdriveThumbnailUrl } from '@/lib/gdrive'
 import { DRIVE_FOLDERS } from '@/lib/project-images'
@@ -53,7 +52,7 @@ function getDriveFoldersForSlug(slug: string): DriveProjectFolders | null {
   return entry
 }
 
-const listPublicFolderImages = cache(async (folderId: string, limit = 24) => {
+async function listPublicFolderImages(folderId: string, limit = 24) {
   const apiKey = process.env.GOOGLE_DRIVE_API_KEY
   if (!apiKey || isPlaceholderDriveValue(folderId)) return []
 
@@ -70,7 +69,7 @@ const listPublicFolderImages = cache(async (folderId: string, limit = 24) => {
 
   try {
     const response = await fetch(`https://www.googleapis.com/drive/v3/files?${params.toString()}`, {
-      next: { revalidate: 3600 },
+      cache: 'no-store',
     })
 
     if (!response.ok) {
@@ -82,7 +81,7 @@ const listPublicFolderImages = cache(async (folderId: string, limit = 24) => {
   } catch {
     return []
   }
-})
+}
 
 async function getConfiguredProjectFolders(slug: string): Promise<DriveProjectFolders | null> {
   const defaults = getDriveFoldersForSlug(slug)
