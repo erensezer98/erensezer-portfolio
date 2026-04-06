@@ -61,11 +61,16 @@ export default function ProjectDetailTemplate({
   project: Project
   content: ProjectPageContent
 }) {
-  const [activeImage, setActiveImage] = useState<{ src: string; alt: string } | null>(null)
   const isIstanbul = project.slug === 'istanbul-a-way-out'
   const coverImage = project.cover_image
   const galleryImages = content.galleryImages.length ? content.galleryImages : project.images
   const hasAwards = content.awards.some((award) => award.trim())
+  const lightboxImages = [
+    ...content.processImages.map((src, index) => ({ src, alt: `${project.title} process ${index + 1}` })),
+    ...content.schematicImages.map((src, index) => ({ src, alt: `${project.title} schematic ${index + 1}` })),
+    ...galleryImages.map((src, index) => ({ src, alt: `${project.title} — ${index + 1}` })),
+  ]
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
   const theme = isIstanbul
     ? {
         bg: 'bg-black',
@@ -87,11 +92,25 @@ export default function ProjectDetailTemplate({
       }
 
   useEffect(() => {
-    if (!activeImage) return
+    if (activeImageIndex === null) return
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        setActiveImage(null)
+        setActiveImageIndex(null)
+      }
+
+      if (event.key === 'ArrowRight') {
+        setActiveImageIndex((current) => {
+          if (current === null || lightboxImages.length === 0) return null
+          return (current + 1) % lightboxImages.length
+        })
+      }
+
+      if (event.key === 'ArrowLeft') {
+        setActiveImageIndex((current) => {
+          if (current === null || lightboxImages.length === 0) return null
+          return (current - 1 + lightboxImages.length) % lightboxImages.length
+        })
       }
     }
 
@@ -102,10 +121,23 @@ export default function ProjectDetailTemplate({
       document.body.style.overflow = ''
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [activeImage])
+  }, [activeImageIndex, lightboxImages.length])
 
   function openImage(src: string, alt: string) {
-    setActiveImage({ src, alt })
+    const nextIndex = lightboxImages.findIndex((image) => image.src === src && image.alt === alt)
+    setActiveImageIndex(nextIndex >= 0 ? nextIndex : null)
+  }
+
+  function moveImage(direction: 'prev' | 'next') {
+    setActiveImageIndex((current) => {
+      if (current === null || lightboxImages.length === 0) return null
+
+      if (direction === 'next') {
+        return (current + 1) % lightboxImages.length
+      }
+
+      return (current - 1 + lightboxImages.length) % lightboxImages.length
+    })
   }
 
   return (
@@ -149,14 +181,16 @@ export default function ProjectDetailTemplate({
         )}
 
         {coverImage ? (
-          <ClickableImage
-            src={coverImage}
-            alt={project.title}
-            priority
-            aspect="aspect-[16/9]"
-            onOpen={openImage}
-            backgroundClass={`${theme.warm} mb-3`}
-          />
+          <div className={`aspect-[16/9] overflow-hidden mb-3 ${theme.warm}`}>
+            <Image
+              src={coverImage}
+              alt={project.title}
+              width={1600}
+              height={900}
+              priority
+              className="w-full h-full object-cover"
+            />
+          </div>
         ) : (
           <div className={`aspect-[16/9] flex items-center justify-center ${theme.warm}`}>
             <p className={`text-[11px] tracking-widest lowercase ${theme.subtle}`}>cover image</p>
@@ -313,25 +347,52 @@ export default function ProjectDetailTemplate({
         </div>
       </article>
 
-      {activeImage && (
+      {activeImageIndex !== null && lightboxImages[activeImageIndex] && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 md:p-8"
-          onClick={() => setActiveImage(null)}
+          onClick={() => setActiveImageIndex(null)}
         >
           <button
             type="button"
-            onClick={() => setActiveImage(null)}
+            onClick={() => setActiveImageIndex(null)}
             className="absolute right-4 top-4 text-xs font-medium lowercase text-white transition-opacity hover:opacity-70"
           >
             close
           </button>
+          {lightboxImages.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  moveImage('prev')
+                }}
+                className="absolute left-4 top-1/2 z-[101] -translate-y-1/2 border border-white/20 bg-black/40 px-4 py-3 text-xs font-medium lowercase text-white transition-colors hover:bg-black/60"
+              >
+                ← prev
+              </button>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  moveImage('next')
+                }}
+                className="absolute right-4 top-1/2 z-[101] -translate-y-1/2 border border-white/20 bg-black/40 px-4 py-3 text-xs font-medium lowercase text-white transition-colors hover:bg-black/60"
+              >
+                next →
+              </button>
+            </>
+          )}
+          <div className="absolute bottom-4 left-1/2 z-[101] -translate-x-1/2 text-xs font-medium lowercase text-white/75">
+            {activeImageIndex + 1} / {lightboxImages.length}
+          </div>
           <div
             className="relative h-full w-full max-w-7xl"
             onClick={(event) => event.stopPropagation()}
           >
             <Image
-              src={activeImage.src}
-              alt={activeImage.alt}
+              src={lightboxImages[activeImageIndex].src}
+              alt={lightboxImages[activeImageIndex].alt}
               fill
               sizes="100vw"
               className="object-contain"
