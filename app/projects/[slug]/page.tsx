@@ -8,29 +8,14 @@ import { getProjectDriveMedia, resolveProjectDisplayMedia } from '@/lib/drive-fo
 import {
   getDefaultProjectPageContent,
   getStaticProjectBySlug,
-  KNOWN_PROJECT_SLUGS,
 } from '@/lib/project-data'
-import { getProjectBySlug, getProjectPageContent, getProjects } from '@/lib/supabase'
+import { getProjectBySlug, getProjectPageContent } from '@/lib/supabase'
 
 interface Props {
   params: { slug: string }
 }
 
 const EXCLUDED_SLUGS = ['awayout']
-
-export async function generateStaticParams() {
-  try {
-    const projects = await getProjects()
-    const dbSlugs = projects
-      .map((project) => project.slug)
-      .filter((slug) => !EXCLUDED_SLUGS.includes(slug))
-
-    const allSlugs = Array.from(new Set([...KNOWN_PROJECT_SLUGS, ...dbSlugs]))
-    return allSlugs.map((slug) => ({ slug }))
-  } catch {
-    return KNOWN_PROJECT_SLUGS.map((slug) => ({ slug }))
-  }
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   noStore()

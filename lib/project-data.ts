@@ -275,8 +275,8 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
       2024,
       'Reuse of the Thermae, Italy',
       'competition',
-      'Reactivating the Thermae of Curiga through layered topography and cultural programming.',
-      'Unfolding Landscapes reimagines the Thermae of Curiga as an open, flowing topography that folds over the archaeological remnants, animating old terraces with new public routes, cultural pavilions, and pergola-covered gathering spaces.',
+      'A reuse proposal for the Thermae of Curinga shaped by the dialogue between archaeological remains and the surrounding landscape.',
+      'Unfolding Landscapes proposes a careful reuse strategy for the Thermae of Curinga, centered on the relationship between the archaeological ruins and the environmental landscape that surrounds them. The project introduces a continuous protective roof and walkway that frame, shelter, and reveal the remains, allowing visitors to experience the site through both panoramic movement around the perimeter and a more direct transversal passage through the ruins themselves.',
       ['adaptive reuse', 'landscape', 'heritage', 'public'],
       'https://lh3.googleusercontent.com/d/USERFILE',
       true,
@@ -285,16 +285,16 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     page: createPageContent({
       sceneComponent: 'architectural-wireframe',
       introText:
-        'The proposal reactivates the Thermae as a public landscape where archaeology, movement, and cultural programming are layered into one continuous spatial experience.',
+        'The proposal seeks to understand the interaction between the archaeological and environmental landscapes of Curinga and to create a design that allows both to coexist harmoniously. A singular roof element protects the ruins while establishing a continuous walkway that opens panoramic views over the site and reconnects visitors with the surrounding terrain.',
       processText:
-        'The design studies the site as a sequence of terraces, shaded routes, and framed views. New interventions stay light and strategic so the historic fabric remains central to the project.',
+        'Priority was given to shaping a seamless relationship between exterior and interior experience. The intervention combines an encircling path beneath the protective roof with a transversal route through the ruins, allowing visitors to alternate between distant reading and direct immersion. This movement system was developed to strengthen awareness of both the archaeological fabric and the environmental landscape of Curinga at the same time.',
       schematicText:
-        'Diagrams clarify how circulation, landscape surfaces, and pavilion insertions work together to protect the ruins while opening them to new collective uses.',
+        'The roof language is derived from two intertwined references: the layered movement of the surrounding topography and the spatial logic of the ruins themselves. Its geometry rises and folds to frame significant spaces such as the frigidarium, while its organic continuity helps the intervention blend into the land. Structurally, the proposal draws inspiration from the historic cross vault of the central bath space, and its clay materiality pays homage to Roman African construction traditions and pottery techniques.',
       infoFields: [
-        { label: 'Program', value: 'Landscape / Cultural Reuse' },
-        { label: 'Area', value: 'Thermae site at Curiga' },
+        { label: 'Program', value: 'Archaeological Reuse / Landscape Intervention' },
+        { label: 'Area', value: 'Thermae of Curinga site' },
         { label: 'Status', value: 'Competition Entry' },
-        { label: 'Client', value: 'Reuse Italy / Thermae Project' },
+        { label: 'Client', value: 'Reuse Italy' },
       ],
     }),
   },
