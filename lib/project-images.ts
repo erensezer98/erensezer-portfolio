@@ -87,6 +87,27 @@ export const DRIVE_FOLDERS = {
     process:            'PLACEHOLDER_TOOR_TOOR_PROCESS_FOLDER',
     wide:               'PLACEHOLDER_TOOR_TOOR_WIDE_FOLDER',
   },
+  'mondadori': {
+    folder:             'PLACEHOLDER_MONDADORI_FOLDER',
+    cover:              'PLACEHOLDER_MONDADORI_COVER_FOLDER',
+    gallery:            'PLACEHOLDER_MONDADORI_GALLERY_FOLDER',
+    process:            'PLACEHOLDER_MONDADORI_PROCESS_FOLDER',
+    wide:               'PLACEHOLDER_MONDADORI_WIDE_FOLDER',
+  },
+  'biennale': {
+    folder:             'PLACEHOLDER_BIENNALE_FOLDER',
+    cover:              'PLACEHOLDER_BIENNALE_COVER_FOLDER',
+    gallery:            'PLACEHOLDER_BIENNALE_GALLERY_FOLDER',
+    process:            'PLACEHOLDER_BIENNALE_PROCESS_FOLDER',
+    wide:               'PLACEHOLDER_BIENNALE_WIDE_FOLDER',
+  },
+  'aquapraca': {
+    folder:             'PLACEHOLDER_AQUAPRACA_FOLDER',
+    cover:              'PLACEHOLDER_AQUAPRACA_COVER_FOLDER',
+    gallery:            'PLACEHOLDER_AQUAPRACA_GALLERY_FOLDER',
+    process:            'PLACEHOLDER_AQUAPRACA_PROCESS_FOLDER',
+    wide:               'PLACEHOLDER_AQUAPRACA_WIDE_FOLDER',
+  },
 } as const
 
 // ─── Image file IDs ───────────────────────────────────────────────────────────
@@ -222,6 +243,54 @@ export const PROJECT_IMAGE_IDS = {
     process: [
       'PLACEHOLDER_TOOR_TOOR_PROCESS_1',
       'PLACEHOLDER_TOOR_TOOR_PROCESS_2',
+    ],
+  },
+
+  'mondadori': {
+    cover:   'PLACEHOLDER_MONDADORI_COVER',
+    gallery: [
+      'PLACEHOLDER_MONDADORI_GALLERY_1',
+      'PLACEHOLDER_MONDADORI_GALLERY_2',
+      'PLACEHOLDER_MONDADORI_GALLERY_3',
+    ],
+    wide: [
+      'PLACEHOLDER_MONDADORI_WIDE_1',
+    ],
+    process: [
+      'PLACEHOLDER_MONDADORI_PROCESS_1',
+      'PLACEHOLDER_MONDADORI_PROCESS_2',
+    ],
+  },
+
+  'biennale': {
+    cover:   'PLACEHOLDER_BIENNALE_COVER',
+    gallery: [
+      'PLACEHOLDER_BIENNALE_GALLERY_1',
+      'PLACEHOLDER_BIENNALE_GALLERY_2',
+      'PLACEHOLDER_BIENNALE_GALLERY_3',
+    ],
+    wide: [
+      'PLACEHOLDER_BIENNALE_WIDE_1',
+    ],
+    process: [
+      'PLACEHOLDER_BIENNALE_PROCESS_1',
+      'PLACEHOLDER_BIENNALE_PROCESS_2',
+    ],
+  },
+
+  'aquapraca': {
+    cover:   'PLACEHOLDER_AQUAPRACA_COVER',
+    gallery: [
+      'PLACEHOLDER_AQUAPRACA_GALLERY_1',
+      'PLACEHOLDER_AQUAPRACA_GALLERY_2',
+      'PLACEHOLDER_AQUAPRACA_GALLERY_3',
+    ],
+    wide: [
+      'PLACEHOLDER_AQUAPRACA_WIDE_1',
+    ],
+    process: [
+      'PLACEHOLDER_AQUAPRACA_PROCESS_1',
+      'PLACEHOLDER_AQUAPRACA_PROCESS_2',
     ],
   },
 }

@@ -55,7 +55,7 @@ export default function ProjectDetailTemplate({
   const hasAwards = content.awards.some((award) => award.trim())
   const hasProcessSection = Boolean(content.processText || content.processImages.length)
   const hasSchematicSection = Boolean(content.schematicText || content.schematicImages.length)
-  const hasGallerySection = galleryImages.length > 0
+  const hasGallerySection = galleryImages.length > 0 || isInvolvement
   const lightboxImages = [
     ...content.processImages.map((src, index) => ({ src, alt: `${project.title} process ${index + 1}` })),
     ...content.schematicImages.map((src, index) => ({ src, alt: `${project.title} schematic ${index + 1}` })),
@@ -278,18 +278,24 @@ export default function ProjectDetailTemplate({
               <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>gallery</p>
               <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>project images</h2>
             </div>
-            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-              {galleryImages.map((src, index) => (
-                <ClickableImage
-                  key={`${src}-${index}`}
-                  src={src}
-                  alt={`${project.title} image ${index + 1}`}
-                  aspect="aspect-[4/3]"
-                  onOpen={openImage}
-                  backgroundClass={theme.warm}
-                />
-              ))}
-            </div>
+            {galleryImages.length > 0 ? (
+              <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                {galleryImages.map((src, index) => (
+                  <ClickableImage
+                    key={`${src}-${index}`}
+                    src={src}
+                    alt={`${project.title} image ${index + 1}`}
+                    aspect="aspect-[4/3]"
+                    onOpen={openImage}
+                    backgroundClass={theme.warm}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className={`mt-3 flex aspect-[16/9] items-center justify-center ${theme.warm}`}>
+                <p className={`text-[11px] tracking-widest lowercase ${theme.subtle}`}>gallery images coming soon</p>
+              </div>
+            )}
           </section>
         )}
 

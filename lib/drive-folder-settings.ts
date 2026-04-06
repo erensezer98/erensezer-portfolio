@@ -94,6 +94,39 @@ export const PROJECT_DRIVE_FIELDS = [
       wide: 'drive_toor_toor_school_wide_folder',
     },
   },
+  {
+    slug: 'mondadori',
+    label: 'palazzo mondadori',
+    fields: {
+      folder: 'drive_mondadori_folder',
+      cover: 'drive_mondadori_cover_folder',
+      gallery: 'drive_mondadori_gallery_folder',
+      process: 'drive_mondadori_process_folder',
+      wide: 'drive_mondadori_wide_folder',
+    },
+  },
+  {
+    slug: 'biennale',
+    label: 'venice biennale di architettura 2025',
+    fields: {
+      folder: 'drive_biennale_folder',
+      cover: 'drive_biennale_cover_folder',
+      gallery: 'drive_biennale_gallery_folder',
+      process: 'drive_biennale_process_folder',
+      wide: 'drive_biennale_wide_folder',
+    },
+  },
+  {
+    slug: 'aquapraca',
+    label: 'aquapraca',
+    fields: {
+      folder: 'drive_aquapraca_folder',
+      cover: 'drive_aquapraca_cover_folder',
+      gallery: 'drive_aquapraca_gallery_folder',
+      process: 'drive_aquapraca_process_folder',
+      wide: 'drive_aquapraca_wide_folder',
+    },
+  },
 ] as const
 
 type ProjectConfig = (typeof PROJECT_DRIVE_FIELDS)[number]
