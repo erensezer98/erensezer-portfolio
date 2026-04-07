@@ -173,6 +173,7 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
                 className="w-full border border-border bg-transparent px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
               >
                 <option value="academic">Academic</option>
+                <option value="professional">Professional</option>
                 <option value="freelance">Freelance</option>
                 <option value="competition">Competition</option>
                 <option value="research">Research</option>

@@ -1,6 +1,6 @@
 import { DRIVE_FOLDER_SETTING_DEFAULTS } from '@/lib/drive-folder-settings'
 
-export type ProjectCategory = 'academic' | 'freelance' | 'competition' | 'research' | 'involvement'
+export type ProjectCategory = 'academic' | 'freelance' | 'competition' | 'research' | 'involvement' | 'professional'
 
 export interface Project {
   id: string

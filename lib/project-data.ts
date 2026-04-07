@@ -62,6 +62,8 @@ export function getProjectCategoryLabel(category: ProjectCategory): string {
       return 'Research'
     case 'involvement':
       return 'Involvement'
+    case 'professional':
+      return 'Professional'
     default:
       return category
   }
