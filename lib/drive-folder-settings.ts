@@ -18,6 +18,18 @@ export const SITE_DRIVE_FIELDS = {
 
 export const PROJECT_DRIVE_FIELDS = [
   {
+    slug: 'the-wall-of-porta-romana',
+    label: 'the wall of porta romana',
+    fields: {
+      folder: 'drive_the_wall_of_porta_romana_folder',
+      cover: 'drive_the_wall_of_porta_romana_cover_folder',
+      gallery: 'drive_the_wall_of_porta_romana_gallery_folder',
+      process: 'drive_the_wall_of_porta_romana_process_folder',
+      wide: 'drive_the_wall_of_porta_romana_wide_folder',
+      chapterReferences: 'drive_the_wall_of_porta_romana_chapter_references_folder',
+    },
+  },
+  {
     slug: 'food-tower',
     label: 'food tower',
     fields: {

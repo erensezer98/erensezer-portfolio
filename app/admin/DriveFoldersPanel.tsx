@@ -176,6 +176,14 @@ export default function DriveFoldersPanel({ initialSettings }: Props) {
                     value={settings[project.fields.wide]}
                     onChange={(value) => update(project.fields.wide, value)}
                   />
+                  {'chapterReferences' in project.fields && (
+                    <InputRow
+                      label="chapter references"
+                      hint="folder containing chapter subfolders"
+                      value={settings[(project.fields as any).chapterReferences]}
+                      onChange={(value) => update((project.fields as any).chapterReferences, value)}
+                    />
+                  )}
                 </div>
               </div>
             ))}

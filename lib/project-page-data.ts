@@ -52,9 +52,31 @@ export async function getResolvedProjectPageDataBySlug(slug: string): Promise<Re
   ])
 
   const defaultContent = getDefaultProjectPageContent(project)
+  let detailSections = savedPageContent?.detailSections?.length
+    ? savedPageContent.detailSections
+    : defaultContent.detailSections
+
+  if (detailSections && driveMedia.chapterImages && driveMedia.chapterImages.length > 0) {
+    detailSections = detailSections.map((section, index) => {
+      const sectionDriveImages = driveMedia.chapterImages![index] || []
+      
+      if (sectionDriveImages.length > 0) {
+        return {
+          ...section,
+          images: section.images.map((img, imgIndex) => ({
+            ...img,
+            src: sectionDriveImages[imgIndex] || img.src,
+          })),
+        }
+      }
+      return section
+    })
+  }
+
   const content: ProjectPageContent = {
     ...defaultContent,
     ...savedPageContent,
+    detailSections,
     processImages: driveMedia.processImages.length
       ? driveMedia.processImages
       : savedPageContent?.processImages?.length

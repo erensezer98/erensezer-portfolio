@@ -40,7 +40,7 @@ export default async function ProjectsPage() {
         <section className="mt-24">
           <div className="mb-8 max-w-2xl">
             <p className="text-[11px] uppercase tracking-[0.22em] text-muted">{getProjectCategoryLabel('involvement')}s</p>
-            <h2 className="mt-3 text-2xl font-medium text-ink">Projects delivered as part of wider teams and offices</h2>
+            <h2 className="mt-3 text-2xl font-medium text-ink">Selected projects delivered as part of wider teams and offices</h2>
           </div>
           <div className={`grid ${gridCols} gap-x-8 gap-y-14`}>
             {involvementProjects.map((project) => (

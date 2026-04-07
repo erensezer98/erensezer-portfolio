@@ -60,7 +60,7 @@ export default async function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          {displayProjects.map((project) => {
+          {displayProjects.filter((p) => p.featured).map((project) => {
             const listingImage = getProjectListingImage(project)
 
             return (
