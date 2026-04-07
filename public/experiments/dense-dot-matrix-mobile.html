@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dense Dot Matrix Mobile</title>
+  <style>
+    body {
+      margin: 0;
+      background: #050505;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    video {
+      width: 100vw;
+      height: auto;
+      max-height: 70vh;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transform: scaleX(-1);
+      display: none;
+    }
+
+    .container { text-align: center; padding: 20px; transition: opacity 0.5s ease; }
+    h2 { font-weight: 300; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; font-size: 16px; }
+    p { color: #888; font-size: 12px; letter-spacing: 1px; margin-bottom: 30px; }
+    #status { color: #1db954; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
+
+    button {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      padding: 16px 32px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      cursor: pointer;
+      border-radius: 2px;
+      font-family: inherit;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: white;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="init-container" class="container">
+    <h2>Digital Mirror Lens</h2>
+    <p>Use your phone as the live body tracker</p>
+    <button id="start-btn">Activate Camera</button>
+  </div>
+
+  <div id="tracking-container" class="container" style="display: none;">
+    <div id="status">Waiting for desktop...</div>
+    <video id="preview" autoplay playsinline muted></video>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search)
+    const roomId = params.get('room')
+    const startBtn = document.getElementById('start-btn')
+    const statusEl = document.getElementById('status')
+    const videoEl = document.getElementById('preview')
+
+    if (!roomId) {
+      startBtn.innerText = 'Invalid connection link'
+      startBtn.disabled = true
+    }
+
+    startBtn.addEventListener('click', () => {
+      document.getElementById('init-container').style.display = 'none'
+      document.getElementById('tracking-container').style.display = 'block'
+      videoEl.style.display = 'block'
+      statusEl.innerText = 'Booting PeerJS...'
+
+      const peer = new window.Peer()
+
+      peer.on('open', () => {
+        statusEl.innerText = 'Pinging desktop...'
+        const conn = peer.connect(roomId)
+
+        conn.on('open', () => {
+          statusEl.innerText = 'Loading pose tracking...'
+
+          const pose = new window.Pose({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`,
+          })
+
+          pose.setOptions({
+            modelComplexity: 1,
+            smoothLandmarks: true,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5,
+          })
+
+          pose.onResults((results) => {
+            if (results.poseLandmarks) {
+              const minimalData = results.poseLandmarks.map((lm) => ({ x: lm.x, y: lm.y }))
+              conn.send(minimalData)
+            } else {
+              conn.send({ empty: true })
+            }
+          })
+
+          statusEl.innerText = 'Accessing camera...'
+
+          const mpCamera = new window.Camera(videoEl, {
+            onFrame: async () => {
+              await pose.send({ image: videoEl })
+            },
+            width: 640,
+            height: 480,
+          })
+
+          mpCamera.start()
+            .then(() => {
+              statusEl.innerText = 'Streaming telemetry'
+            })
+            .catch(() => {
+              statusEl.innerText = 'Camera denied.'
+            })
+        })
+
+        conn.on('error', () => {
+          statusEl.innerText = 'Data stream dropped.'
+        })
+      })
+    })
+  </script>
+</body>
+</html>

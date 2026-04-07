@@ -51,6 +51,15 @@ export default function ExperimentDetailPage({ params }: Props) {
           <p className="text-[11px] uppercase tracking-[0.22em] text-muted">{experiment.category}</p>
           <h1 className="mt-3 text-4xl font-medium tracking-[-0.05em] text-ink">{experiment.title}</h1>
           <p className="mt-4 text-sm leading-7 text-muted">{experiment.description}</p>
+          {experiment.notes?.length ? (
+            <div className="mt-6">
+              {experiment.notes.map((note) => (
+                <p key={note} className="mt-2 text-sm leading-7 text-muted">
+                  {note}
+                </p>
+              ))}
+            </div>
+          ) : null}
           <div className="mt-8 flex flex-wrap gap-6 text-xs text-muted">
             <span>{experiment.year}</span>
             <span>{experiment.location}</span>
