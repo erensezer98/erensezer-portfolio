@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import ProjectScene from '@/components/projects/ProjectScene'
 import { getProjectCategoryLabel } from '@/lib/project-data'
-import type { ProjectPageContent } from '@/lib/project-data'
+import type { ProjectDetailSectionImage, ProjectPageContent } from '@/lib/project-data'
 import type { Project } from '@/lib/types'
 
 function ClickableImage({
@@ -41,6 +41,93 @@ function ClickableImage({
   )
 }
 
+function getAspectClass(aspectRatio?: string) {
+  switch (aspectRatio) {
+    case '16/9':
+      return 'aspect-[16/9]'
+    case '1/1':
+      return 'aspect-square'
+    case '3/4':
+      return 'aspect-[3/4]'
+    case '21/9':
+      return 'aspect-[21/9]'
+    case '4/3':
+    default:
+      return 'aspect-[4/3]'
+  }
+}
+
+function PlaceholderImage({
+  aspect,
+  caption,
+  backgroundClass,
+  borderClass,
+  textClass,
+}: {
+  aspect: string
+  caption?: string
+  backgroundClass: string
+  borderClass: string
+  textClass: string
+}) {
+  return (
+    <div className={`${aspect} flex items-center justify-center border border-dashed ${backgroundClass} ${borderClass}`}>
+      <p className={`px-6 text-center text-[11px] tracking-[0.18em] lowercase ${textClass}`}>
+        {caption || 'image slot'}
+      </p>
+    </div>
+  )
+}
+
+function MediaTile({
+  image,
+  fallbackAlt,
+  priority = false,
+  onOpen,
+  backgroundClass,
+  borderClass,
+  textClass,
+}: {
+  image: ProjectDetailSectionImage
+  fallbackAlt: string
+  priority?: boolean
+  onOpen: (src: string, alt: string) => void
+  backgroundClass: string
+  borderClass: string
+  textClass: string
+}) {
+  const aspect = getAspectClass(image.aspectRatio)
+
+  if (image.src) {
+    return (
+      <div className="space-y-2">
+        <ClickableImage
+          src={image.src}
+          alt={image.alt || fallbackAlt}
+          aspect={aspect}
+          priority={priority}
+          onOpen={onOpen}
+          backgroundClass={backgroundClass}
+        />
+        {image.caption && <p className={`text-[11px] leading-relaxed ${textClass}`}>{image.caption}</p>}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <PlaceholderImage
+        aspect={aspect}
+        caption={image.caption}
+        backgroundClass={backgroundClass}
+        borderClass={borderClass}
+        textClass={textClass}
+      />
+      {image.caption && <p className={`text-[11px] leading-relaxed ${textClass}`}>{image.caption}</p>}
+    </div>
+  )
+}
+
 export default function ProjectDetailTemplate({
   project,
   content,
@@ -53,15 +140,27 @@ export default function ProjectDetailTemplate({
   const coverImage = project.cover_image
   const galleryImages = content.galleryImages.length ? content.galleryImages : project.images
   const hasAwards = content.awards.some((award) => award.trim())
+  const hasDetailSections = Boolean(content.detailSections?.length)
   const hasProcessSection = Boolean(content.processText || content.processImages.length)
   const hasSchematicSection = Boolean(content.schematicText || content.schematicImages.length)
   const hasGallerySection = galleryImages.length > 0 || isInvolvement
   const lightboxImages = [
     ...content.processImages.map((src, index) => ({ src, alt: `${project.title} process ${index + 1}` })),
     ...content.schematicImages.map((src, index) => ({ src, alt: `${project.title} schematic ${index + 1}` })),
+    ...(content.detailSections ?? []).flatMap((section) =>
+      section.images
+        .filter((image) => Boolean(image.src))
+        .map((image, index) => ({
+          src: image.src as string,
+          alt: image.alt || `${project.title} ${section.title} ${index + 1}`,
+        }))
+    ),
     ...galleryImages.map((src, index) => ({ src, alt: `${project.title} image ${index + 1}` })),
   ]
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(
+    Object.fromEntries((content.detailSections ?? []).map((section) => [section.id, Boolean(section.defaultOpen)]))
+  )
   const theme = isIstanbul
     ? {
         bg: 'bg-black',
@@ -71,6 +170,7 @@ export default function ProjectDetailTemplate({
         surface: 'bg-zinc-900',
         subtle: 'text-zinc-700',
         warm: 'bg-zinc-900',
+        accent: 'text-white',
       }
     : {
         bg: 'bg-white',
@@ -80,7 +180,14 @@ export default function ProjectDetailTemplate({
         surface: 'bg-[#faf5f0]',
         subtle: 'text-subtle',
         warm: 'bg-warm',
+        accent: 'text-ink',
       }
+
+  useEffect(() => {
+    setOpenSections(
+      Object.fromEntries((content.detailSections ?? []).map((section) => [section.id, Boolean(section.defaultOpen)]))
+    )
+  }, [content.detailSections])
 
   useEffect(() => {
     if (activeImageIndex === null) return
@@ -131,6 +238,13 @@ export default function ProjectDetailTemplate({
     })
   }
 
+  function toggleSection(sectionId: string) {
+    setOpenSections((current) => ({
+      ...current,
+      [sectionId]: !current[sectionId],
+    }))
+  }
+
   return (
     <>
       <article className={`min-h-screen px-6 pb-32 pt-28 md:px-10 ${theme.bg}`}>
@@ -165,7 +279,7 @@ export default function ProjectDetailTemplate({
           </div>
         </div>
 
-        {content.sceneComponent !== 'none' && (
+        {content.sceneComponent !== 'none' && !hasDetailSections && (
           <div className={`mb-8 aspect-[16/7] w-full overflow-hidden border ${theme.surface} ${theme.border}`}>
             <ProjectScene component={content.sceneComponent} />
           </div>
@@ -197,8 +311,13 @@ export default function ProjectDetailTemplate({
             <p className={`mb-5 text-sm leading-relaxed ${theme.text}`}>
               {content.introText || project.description || project.short_description}
             </p>
-            {project.description && content.introText !== project.description && (
+            {hasDetailSections && content.processText ? (
+              <p className={`text-sm leading-relaxed ${theme.text}`}>{content.processText}</p>
+            ) : (
+              project.description &&
+              content.introText !== project.description && (
               <p className={`text-sm leading-relaxed ${theme.text}`}>{project.description}</p>
+              )
             )}
           </div>
 
@@ -218,7 +337,84 @@ export default function ProjectDetailTemplate({
           </div>
         </div>
 
-        {hasProcessSection && (
+        {hasDetailSections && (
+          <section className="mt-16 mb-16">
+            <div className="mb-8">
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>thesis chapters</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>read the project deeper</h2>
+            </div>
+
+            <div className={`border-t ${theme.border}`}>
+              {(content.detailSections ?? []).map((section, sectionIndex) => {
+                const isOpen = Boolean(openSections[section.id])
+
+                return (
+                  <div key={section.id} className={`border-b ${theme.border}`}>
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(section.id)}
+                      className="flex w-full items-start justify-between gap-6 py-6 text-left"
+                    >
+                      <div className="max-w-3xl">
+                        {section.eyebrow && (
+                          <p className={`mb-2 text-[11px] tracking-widest lowercase ${theme.muted}`}>{section.eyebrow}</p>
+                        )}
+                        <h3 className={`text-xl font-medium lowercase md:text-2xl ${theme.text}`}>{section.title}</h3>
+                        <p className={`mt-3 text-sm leading-relaxed ${theme.text}`}>{section.summary}</p>
+                      </div>
+                      <span
+                        className={`mt-1 text-xl leading-none transition-transform ${theme.accent} ${isOpen ? 'rotate-90' : ''}`}
+                        aria-hidden="true"
+                      >
+                        {'->'}
+                      </span>
+                    </button>
+
+                    {isOpen && (
+                      <div className="pb-8">
+                        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:gap-10">
+                          <div>
+                            {section.paragraphs.map((paragraph) => (
+                              <p key={paragraph} className={`mb-5 text-sm leading-relaxed ${theme.text}`}>
+                                {paragraph}
+                              </p>
+                            ))}
+                          </div>
+
+                          <div className="space-y-4">
+                            {section.includeScene && content.sceneComponent !== 'none' && (
+                              <div className="space-y-2">
+                                <div className={`aspect-[4/3] overflow-hidden border ${theme.surface} ${theme.border}`}>
+                                  <ProjectScene component={content.sceneComponent} />
+                                </div>
+                                <p className={`text-[11px] leading-relaxed ${theme.muted}`}>Interactive three.js study</p>
+                              </div>
+                            )}
+
+                            {section.images.map((image, imageIndex) => (
+                              <MediaTile
+                                key={`${section.id}-${image.alt}-${imageIndex}`}
+                                image={image}
+                                fallbackAlt={`${project.title} ${section.title} ${imageIndex + 1}`}
+                                priority={sectionIndex === 0 && imageIndex === 0}
+                                onOpen={openImage}
+                                backgroundClass={theme.warm}
+                                borderClass={theme.border}
+                                textClass={theme.muted}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
+
+        {hasProcessSection && !hasDetailSections && (
           <section className="mt-16 mb-16">
             <div className="mb-8">
               <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'involvement' : 'process'}</p>
@@ -245,7 +441,7 @@ export default function ProjectDetailTemplate({
           </section>
         )}
 
-        {hasSchematicSection && (
+        {hasSchematicSection && !hasDetailSections && (
           <section className="mt-16 mb-16">
             <div className="mb-8">
               <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'role' : 'schematics'}</p>

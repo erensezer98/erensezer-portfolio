@@ -45,6 +45,13 @@ export const DRIVE_FOLDERS = {
     process:            '1oIVdyRNYc3deTUY1YHMyWOQTrawtQLc8',
     wide:               '1O6UkditGTQKUX1iiml-RvRSZAtGCOGwQ',
   },
+  'the-wall-of-porta-romana': {
+    folder:             'PLACEHOLDER_PORTA_ROMANA_FOLDER',
+    cover:              'PLACEHOLDER_PORTA_ROMANA_COVER_FOLDER',
+    gallery:            'PLACEHOLDER_PORTA_ROMANA_GALLERY_FOLDER',
+    process:            'PLACEHOLDER_PORTA_ROMANA_PROCESS_FOLDER',
+    wide:               'PLACEHOLDER_PORTA_ROMANA_WIDE_FOLDER',
+  },
   'istanbul-a-way-out': {
     folder:             '1s7xzeiCewoHXTh41-BgpPnrSZOh5g4g6',
     cover:              '1U4aOqHbrSbRLy5Usgm56RT1j-uMq6z7b',
@@ -131,6 +138,24 @@ export const PROJECT_IMAGE_IDS = {
     // Process/ subfolder → https://drive.google.com/drive/folders/1oIVdyRNYc3deTUY1YHMyWOQTrawtQLc8
     process: [
       'PLACEHOLDER_FOOD_TOWER_PROCESS_1',
+    ],
+  },
+
+  'the-wall-of-porta-romana': {
+    cover:   'PLACEHOLDER_PORTA_ROMANA_COVER',
+    gallery: [
+      'PLACEHOLDER_PORTA_ROMANA_GALLERY_1',
+      'PLACEHOLDER_PORTA_ROMANA_GALLERY_2',
+      'PLACEHOLDER_PORTA_ROMANA_GALLERY_3',
+    ],
+    wide: [
+      'PLACEHOLDER_PORTA_ROMANA_WIDE_1',
+      'PLACEHOLDER_PORTA_ROMANA_WIDE_2',
+    ],
+    process: [
+      'PLACEHOLDER_PORTA_ROMANA_PROCESS_1',
+      'PLACEHOLDER_PORTA_ROMANA_PROCESS_2',
+      'PLACEHOLDER_PORTA_ROMANA_PROCESS_3',
     ],
   },
 

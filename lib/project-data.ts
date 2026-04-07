@@ -14,6 +14,24 @@ export interface ProjectInfoField {
   value: string
 }
 
+export interface ProjectDetailSectionImage {
+  src?: string
+  alt: string
+  caption?: string
+  aspectRatio?: string
+}
+
+export interface ProjectDetailSection {
+  id: string
+  eyebrow?: string
+  title: string
+  summary: string
+  paragraphs: string[]
+  images: ProjectDetailSectionImage[]
+  defaultOpen?: boolean
+  includeScene?: boolean
+}
+
 export interface ProjectPageContent {
   sceneComponent: ProjectSceneComponent
   introText: string
@@ -24,6 +42,7 @@ export interface ProjectPageContent {
   galleryImages: string[]
   infoFields: ProjectInfoField[]
   awards: string[]
+  detailSections?: ProjectDetailSection[]
 }
 
 export interface StaticProjectRecord {
@@ -91,11 +110,164 @@ function createPageContent(content: Partial<ProjectPageContent> = {}): ProjectPa
     galleryImages: [],
     infoFields: [],
     awards: [],
+    detailSections: [],
     ...content,
   }
 }
 
 export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
+  {
+    project: createProject(
+      'static-the-wall-of-porta-romana',
+      'the-wall-of-porta-romana',
+      'The Wall of Porta Romana',
+      2024,
+      'Milan, Italy',
+      'academic',
+      'Thesis proposal for a future library and civic landmark in Porta Romana, developed through architecture, structure, and technology as one continuous system.',
+      'The Wall of Porta Romana is a thesis project for a new public library in Milan, positioned between the historical weight of Porta Romana and the future regeneration of the surrounding urban edge. Conceived as both landmark and infrastructure, the project rethinks the library as a civic laboratory: a place for reading, making, meeting, digital production, and collective life. Its architectural identity grows from the tension between a calm urban wall and an interior sculptural journey that draws people through the building like a canyon carved into the city.',
+      ['library', 'thesis', 'urban regeneration', 'structure', 'technology'],
+      null,
+      true,
+      11
+    ),
+    page: createPageContent({
+      introText:
+        'The Wall of Porta Romana started with a question: what should a library be now? Not a silent container, but a civic instrument for culture, exchange, and public life. Set in Milan at the threshold of Porta Romana, the project treats the future library as both urban landmark and shared interior world, shaped as much by the city around it as by the people moving through it.',
+      processText:
+        'Architecturally, the project is conceived as a sculpture held inside a calm urban wall. Structurally, it develops through a hybrid armature of steel, cables, and CLT that opens the interior and allows flexibility over time. Technologically, it is designed as a library for the present century, where daylight, ventilation, energy collection, water reuse, and fabrication logic are not added later, but built into the project from the beginning.',
+      infoFields: [
+        { label: 'Program', value: 'Library / Civic Knowledge Hub' },
+        { label: 'Status', value: 'Academic Thesis Project' },
+        { label: 'Location', value: 'Porta Romana, Milan' },
+        { label: 'Institution', value: 'Politecnico di Milano' },
+      ],
+      detailSections: [
+        {
+          id: 'urban-context',
+          eyebrow: 'chapter 01',
+          title: 'Milan and Porta Romana',
+          summary:
+            'The project begins with the city, placing the library at the edge of Porta Romana as a tool for urban repair and public intensity.',
+          paragraphs: [
+            'The thesis reads Milan through time: what it has been, what it is becoming, and where a new public institution could matter most. Porta Romana emerged not as a leftover site, but as a charged edge where infrastructure, memory, and future growth meet.',
+            'Positioned between Viale Isonzo, Corso Lodi, and Piazzale Lodi, the project closes an urban gap while opening new civic possibilities. It works with transport, nearby institutions, and the regeneration of the former rail-yard to turn the site into a point of arrival rather than a boundary.',
+            'This is why the library is imagined less as an isolated building and more as an urban hinge. It gathers movement, culture, and public life into one place and gives Porta Romana a new face toward the city.',
+          ],
+          images: [
+            {
+              alt: 'The Wall of Porta Romana urban analysis placeholder',
+              caption: 'Urban analysis / Milan perimeter',
+              aspectRatio: '4/3',
+            },
+            {
+              alt: 'The Wall of Porta Romana masterplan placeholder',
+              caption: 'Porta Romana masterplan / site strategy',
+              aspectRatio: '4/3',
+            },
+          ],
+          defaultOpen: true,
+        },
+        {
+          id: 'architecture',
+          eyebrow: 'chapter 02',
+          title: 'Architecture: composition and sculpture',
+          summary:
+            'A clear outer wall holds a fluid inner world, making the project feel at once urban, civic, and deeply spatial.',
+          paragraphs: [
+            'The architectural idea is simple and deliberate: a sculpture within a box. The outer figure keeps a formal, urban discipline, while the inside unfolds as an organic landscape of voids, paths, overlooks, and public rooms.',
+            'That contrast allows the project to handle a demanding program without losing clarity. Departments, forum spaces, auditorium functions, and collective interiors are not stacked mechanically, but tied together through a continuous spatial journey.',
+            'The result is a library that is meant to be experienced in sequence. You do not just enter it, find a room, and leave. You move through it, discover it, and slowly understand it as a public interior carved into the thickness of the wall.',
+          ],
+          images: [
+            {
+              alt: 'The Wall of Porta Romana composition placeholder',
+              caption: 'Concept diagram / sculpture within a box',
+              aspectRatio: '4/3',
+            },
+            {
+              alt: 'The Wall of Porta Romana circulation placeholder',
+              caption: 'Circulation / section / program sequence',
+              aspectRatio: '4/3',
+            },
+          ],
+          includeScene: true,
+        },
+        {
+          id: 'structure',
+          eyebrow: 'chapter 03',
+          title: 'Armature: structural logic',
+          summary:
+            'The structure had to do more than hold the building up. It had to protect openness, long spans, and the freedom of the interior.',
+          paragraphs: [
+            'The structural study moved through several iterations before reaching the final system. Early schemes with more columns and conventional framing solved stability, but they compromised the openness and flexibility the architecture demanded.',
+            'The chosen solution is a spatial armature built through reinforced concrete cores, steel members, and tension cables. This system distributes loads efficiently while freeing the interior from repetitive supports and making room for double heights, gaps, and changing spatial configurations.',
+            'CLT slabs help lighten the floors and sharpen the overall logic of the structure. What remains is an armature that stays mostly hidden, but quietly gives the project its range, its generosity, and its ability to evolve over time.',
+          ],
+          images: [
+            {
+              alt: 'The Wall of Porta Romana structural evolution placeholder',
+              caption: 'Structural evolution / system phases',
+              aspectRatio: '4/3',
+            },
+            {
+              alt: 'The Wall of Porta Romana structural verification placeholder',
+              caption: 'Typical floor structure / verification diagrams',
+              aspectRatio: '4/3',
+            },
+          ],
+        },
+        {
+          id: 'technology',
+          eyebrow: 'chapter 04',
+          title: 'Technology: facade, environment, BIM',
+          summary:
+            'Performance is not layered onto the project afterward. It is folded directly into the facade, the section, and the life of the building.',
+          paragraphs: [
+            'Technology enters the project through necessity: how to bring air, light, comfort, and environmental control into a large civic building without weakening its architectural presence. The answer is a facade that behaves as a layered system rather than a flat skin.',
+            'Double glazing, photovoltaic collection, controlled daylight, natural and cross ventilation, concealed services, and rainwater harvesting are woven into the design to improve both performance and daily use. The goal is not simply efficiency, but a building that feels intelligent in the way it works.',
+            'This chapter also grounds the project in detail. BIM coordination and assembly studies translate the thesis from concept into something buildable, precise, and technically credible.',
+          ],
+          images: [
+            {
+              alt: 'The Wall of Porta Romana facade placeholder',
+              caption: 'Facade development / entrance condition',
+              aspectRatio: '4/3',
+            },
+            {
+              alt: 'The Wall of Porta Romana environmental systems placeholder',
+              caption: 'Ventilation / daylight / building services',
+              aspectRatio: '4/3',
+            },
+          ],
+        },
+        {
+          id: 'materiality',
+          eyebrow: 'chapter 05',
+          title: 'Materiality: sustainability and fabrication',
+          summary:
+            'Materiality gives the project its final weight, tying environmental ambition to real fabrication and construction logic.',
+          paragraphs: [
+            'The material strategy follows the wider environmental ambitions of Milan 2030, but it also stays close to the reality of making. Recycled and recyclable materials, photovoltaic integration, water-conscious systems, and lower-emission choices are treated as architectural decisions, not technical decoration.',
+            'At the same time, the thesis looks carefully at fabrication. CNC-milled components, plywood studies, custom integrated elements, and digitally controlled production methods test how the project’s organic language can be translated into precise parts.',
+            'That is what gives the project credibility. The wall is not only imagined as a powerful figure in the city, but as something that could be assembled, detailed, and built with care.',
+          ],
+          images: [
+            {
+              alt: 'The Wall of Porta Romana sustainability placeholder',
+              caption: 'Sustainability goals / Milan 2030',
+              aspectRatio: '4/3',
+            },
+            {
+              alt: 'The Wall of Porta Romana fabrication placeholder',
+              caption: 'Fabrication logic / CNC / material study',
+              aspectRatio: '4/3',
+            },
+          ],
+        },
+      ],
+    }),
+  },
   {
     project: createProject(
       'static-food-tower',
