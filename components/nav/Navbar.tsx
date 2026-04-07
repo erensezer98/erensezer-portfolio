@@ -39,11 +39,11 @@ export default function Navbar() {
       <div className="px-6 md:px-10 h-12 flex items-center justify-between">
         <Link
           href="/"
-          className={`flex h-[26px] w-[26px] items-center justify-center bg-white border border-rule text-[13px] transition-colors duration-200 ${
-            isDark ? 'text-ink hover:bg-zinc-100 font-normal tracking-[-0.02em] lowercase mix-blend-difference' : 'text-ink hover:text-muted font-normal tracking-[-0.02em] lowercase'
+          className={`text-[13px] transition-colors duration-200 ${
+            isDark ? 'text-zinc-100 hover:text-zinc-500 font-medium tracking-[-0.02em] lowercase' : 'text-ink hover:text-muted font-medium tracking-[-0.02em] lowercase'
           }`}
         >
-          es
+          eren sezer
         </Link>
 
         {/* Desktop */}

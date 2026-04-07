@@ -140,6 +140,9 @@ export default function ArchitecturalWireframe() {
       root.rotation.y = baseRotationY + currentX * 0.4
       root.rotation.x = currentY * 0.15
 
+      // Always look at the center of the structure
+      camera.lookAt(0, 0, 0)
+
       renderer.render(scene, camera)
     }
 
