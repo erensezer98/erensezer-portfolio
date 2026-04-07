@@ -27,24 +27,42 @@
   </div>
 
   <div id="info">
-    Dense Dot Matrix / Networked Study<br>
-    <span style="font-size: 10px; color: #888;">Receiving real-time telemetry from mobile</span>
+    Dense Dot Matrix / Silhouette Field<br>
+    <span style="font-size: 10px; color: #888;">A living point cloud shaped by the body in motion</span>
   </div>
 
   <script type="module">
     import * as THREE from 'three'
+
+    const POSE_CONNECTIONS = [
+      [11, 12], [11, 13], [13, 15], [15, 17], [15, 19], [15, 21],
+      [12, 14], [14, 16], [16, 18], [16, 20], [16, 22],
+      [11, 23], [12, 24], [23, 24],
+      [23, 25], [25, 27], [27, 29], [29, 31],
+      [24, 26], [26, 28], [28, 30], [30, 32],
+      [11, 24], [12, 23], [0, 7], [0, 8],
+    ]
 
     const landmarkUniforms = []
     for (let i = 0; i < 33; i += 1) {
       landmarkUniforms.push(new THREE.Vector2(-100, -100))
     }
 
+    const segmentUniforms = POSE_CONNECTIONS.map(() => new THREE.Vector4(-100, -100, -100, -100))
     let lastDataTime = Date.now()
 
     function decayLandmarks() {
       landmarkUniforms.forEach((v) => {
         v.x += (-100 - v.x) * 0.05
         v.y += (-100 - v.y) * 0.05
+      })
+    }
+
+    function updateSegmentUniforms() {
+      POSE_CONNECTIONS.forEach(([aIndex, bIndex], index) => {
+        const a = landmarkUniforms[aIndex]
+        const b = landmarkUniforms[bIndex]
+        segmentUniforms[index].set(a.x, a.y, b.x, b.y)
       })
     }
 
@@ -83,8 +101,10 @@
             landmarkUniforms[i].x += (targetX - landmarkUniforms[i].x) * 0.2
             landmarkUniforms[i].y += (targetY - landmarkUniforms[i].y) * 0.2
           })
+          updateSegmentUniforms()
         } else if (data && data.empty) {
           decayLandmarks()
+          updateSegmentUniforms()
         }
       })
     })
@@ -103,8 +123,8 @@
     document.body.appendChild(renderer.domElement)
 
     const gridWidth = 80
-    const gridHeight = 40
-    const density = 4
+    const gridHeight = 46
+    const density = 5
 
     const countX = Math.floor(gridWidth * density)
     const countY = Math.floor(gridHeight * density)
@@ -134,6 +154,7 @@
       uniforms: {
         uTime: { value: 0 },
         uLandmarks: { value: landmarkUniforms },
+        uSegments: { value: segmentUniforms },
         uVisibleWidth: { value: getVisibleFrustumHeight() * camera.aspect },
         uVisibleHeight: { value: getVisibleFrustumHeight() },
         uAspect: { value: camera.aspect },
@@ -141,49 +162,120 @@
       vertexShader: `
         uniform float uTime;
         uniform vec2 uLandmarks[33];
+        uniform vec4 uSegments[26];
         uniform float uVisibleWidth;
         uniform float uVisibleHeight;
         uniform float uAspect;
         attribute float baseSize;
         varying vec3 vColor;
+        varying float vEnergy;
+
+        float sdSegment(vec2 p, vec2 a, vec2 b) {
+          vec2 pa = p - a;
+          vec2 ba = b - a;
+          float denom = max(dot(ba, ba), 0.0001);
+          float h = clamp(dot(pa, ba) / denom, 0.0, 1.0);
+          return length(pa - ba * h);
+        }
+
+        float roundedBoxField(vec2 p, vec2 center, vec2 halfSize, float radius, vec2 axisY) {
+          vec2 safeAxisY = normalize(axisY + vec2(0.0001, 0.0001));
+          vec2 axisX = vec2(safeAxisY.y, -safeAxisY.x);
+          vec2 local = p - center;
+          vec2 q = vec2(dot(local, axisX), dot(local, safeAxisY));
+          vec2 d = abs(q) - halfSize;
+          float outside = length(max(d, 0.0));
+          float inside = min(max(d.x, d.y), 0.0);
+          float dist = outside + inside;
+          return 1.0 - smoothstep(radius, radius + 0.12, dist);
+        }
+
+        float circleField(vec2 p, vec2 center, float radius) {
+          float d = length(p - center);
+          return 1.0 - smoothstep(radius, radius + 0.14, d);
+        }
 
         void main() {
           vec3 pos = position;
           vec2 normalizedPos = vec2(pos.x / (uVisibleWidth / 2.0), pos.y / (uVisibleHeight / 2.0));
-          float totalInfluence = 0.0;
+          float jointField = 0.0;
 
           for (int i = 0; i < 33; i++) {
             vec2 diff = normalizedPos - uLandmarks[i];
             diff.x *= uAspect;
             float d = length(diff);
-            totalInfluence += pow(1.0 - smoothstep(0.0, 0.35, d), 1.8);
+            jointField = max(jointField, 1.0 - smoothstep(0.0, 0.12, d));
           }
 
-          totalInfluence = clamp(totalInfluence, 0.0, 1.3);
-          pos.z += totalInfluence * 3.5;
-          pos.z += sin(pos.x * 0.5 + uTime * 1.2) * cos(pos.y * 0.5 + uTime * 1.2) * 0.3;
+          float skeletonField = 0.0;
+          for (int i = 0; i < 26; i++) {
+            vec2 a = uSegments[i].xy;
+            vec2 b = uSegments[i].zw;
+            vec2 scaledPos = normalizedPos;
+            vec2 scaledA = a;
+            vec2 scaledB = b;
+            scaledPos.x *= uAspect;
+            scaledA.x *= uAspect;
+            scaledB.x *= uAspect;
+            float d = sdSegment(scaledPos, scaledA, scaledB);
+            skeletonField = max(skeletonField, 1.0 - smoothstep(0.0, 0.08, d));
+          }
+
+          vec2 shoulderCenter = (uLandmarks[11] + uLandmarks[12]) * 0.5;
+          vec2 hipCenter = (uLandmarks[23] + uLandmarks[24]) * 0.5;
+          vec2 torsoAxis = shoulderCenter - hipCenter;
+          float torsoHeight = max(length(torsoAxis), 0.16) * 0.55;
+          float torsoWidth = max(length(uLandmarks[11] - uLandmarks[12]), length(uLandmarks[23] - uLandmarks[24])) * 0.28 + 0.06;
+          float torsoField = roundedBoxField(
+            normalizedPos,
+            (shoulderCenter + hipCenter) * 0.5,
+            vec2(torsoWidth, torsoHeight),
+            0.04,
+            torsoAxis
+          );
+
+          vec2 headCenter = mix(uLandmarks[0], shoulderCenter, 0.18);
+          float headRadius = max(length(uLandmarks[7] - uLandmarks[8]), 0.08) * 0.9 + 0.05;
+          float headField = circleField(normalizedPos, headCenter, headRadius);
+
+          float totalInfluence = max(max(skeletonField, torsoField), max(headField, jointField * 0.75));
+          totalInfluence = clamp(totalInfluence, 0.0, 1.0);
+
+          float ripple = sin(pos.x * 0.55 + uTime * 1.8) * cos(pos.y * 0.45 - uTime * 1.35) * 0.28;
+          float shimmer = sin((pos.x + pos.y) * 0.35 - uTime * 2.2) * 0.12;
+          pos.z += ripple + shimmer;
+          pos.z += totalInfluence * 5.0;
+          pos.x += sin(pos.y * 0.16 + uTime) * 0.12 * totalInfluence;
+          pos.y += cos(pos.x * 0.14 - uTime * 0.85) * 0.12 * totalInfluence;
 
           vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-          gl_PointSize = baseSize * (22.0 / -mvPosition.z) * (1.0 + totalInfluence * 4.0);
+          gl_PointSize = baseSize * (18.0 / -mvPosition.z) * (1.25 + totalInfluence * 6.2);
           gl_Position = projectionMatrix * mvPosition;
 
-          vec3 idleColor = vec3(0.04, 0.08, 0.12);
-          vec3 activeColor = vec3(0.0, 0.85, 1.0);
-          vec3 coreColor = vec3(1.0, 1.0, 1.0);
+          float hueMix = 0.5 + 0.5 * sin(uTime * 0.9 + pos.y * 0.08);
+          vec3 idleColor = mix(vec3(0.03, 0.05, 0.09), vec3(0.10, 0.07, 0.16), hueMix);
+          vec3 contourColor = mix(vec3(0.10, 0.95, 1.0), vec3(1.0, 0.45, 0.22), hueMix);
+          vec3 coreColor = vec3(1.0, 0.96, 0.82);
 
-          vec3 finalColor = mix(idleColor, activeColor, clamp(totalInfluence * 1.4, 0.0, 1.0));
-          finalColor = mix(finalColor, coreColor, clamp((totalInfluence - 0.7) * 2.0, 0.0, 1.0));
+          vec3 finalColor = mix(idleColor, contourColor, clamp(totalInfluence * 1.3, 0.0, 1.0));
+          finalColor = mix(finalColor, coreColor, clamp((totalInfluence - 0.55) * 2.4, 0.0, 1.0));
           vColor = finalColor;
+          vEnergy = totalInfluence;
         }
       `,
       fragmentShader: `
         varying vec3 vColor;
+        varying float vEnergy;
 
         void main() {
           vec2 coord = gl_PointCoord - vec2(0.5);
-          if (length(coord) > 0.5) discard;
-          float alpha = mix(1.0, 0.0, length(coord) * 2.0);
-          gl_FragColor = vec4(vColor * alpha, 1.0);
+          float d = length(coord);
+          if (d > 0.5) discard;
+          float halo = smoothstep(0.5, 0.0, d);
+          float core = smoothstep(0.24, 0.0, d);
+          float alpha = mix(0.28, 1.0, vEnergy) * halo;
+          vec3 color = vColor + vec3(core * 0.24);
+          gl_FragColor = vec4(color, alpha);
         }
       `,
       transparent: true,
@@ -210,11 +302,13 @@
 
       if (Date.now() - lastDataTime > 1500) {
         decayLandmarks()
+        updateSegmentUniforms()
       }
 
       renderer.render(scene, camera)
     }
 
+    updateSegmentUniforms()
     animate()
   </script>
 </body>
