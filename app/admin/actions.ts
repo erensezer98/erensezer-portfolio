@@ -57,6 +57,27 @@ export async function saveProject(project: Partial<Project>) {
   }
 }
 
+export async function toggleProjectFeatured(id: string, featured: boolean) {
+  try {
+    const { error } = await db
+      .from('projects')
+      .update({ featured })
+      .eq('id', id)
+
+    if (error) {
+      console.error('toggleProjectFeatured error:', error)
+      return { error: error.message }
+    }
+
+    revalidatePath('/', 'layout')
+    revalidatePath('/admin')
+    return { success: true }
+  } catch (err) {
+    console.error('toggleProjectFeatured unexpected error:', err)
+    return { error: String(err) }
+  }
+}
+
 export async function deleteProject(id: string) {
   try {
     const { error } = await db

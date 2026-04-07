@@ -137,7 +137,23 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
       introText:
         'The Wall of Porta Romana started with a question: what should a library be now? Not a silent container, but a civic instrument for culture, exchange, and public life. Set in Milan at the threshold of Porta Romana, the project treats the future library as both urban landmark and shared interior world, shaped as much by the city around it as by the people moving through it.',
       processText:
-        'Architecturally, the project is conceived as a sculpture held inside a calm urban wall. Structurally, it develops through a hybrid armature of steel, cables, and CLT that opens the interior and allows flexibility over time. Technologically, it is designed as a library for the present century, where daylight, ventilation, energy collection, water reuse, and fabrication logic are not added later, but built into the project from the beginning.',
+        'The design process moved across five parallel disciplines — architecture, structure, technology, materiality, and urban context — developed simultaneously rather than in sequence. Each strand informed the others: the structural armature shaped the openness of the interior; the facade system drove the environmental logic; the fabrication studies tested whether the organic quality of the spaces could be translated into real components. The final result is a building where every layer is legible without being separated. The wall holds everything together, not as a boundary, but as a civic instrument.',
+      schematicText:
+        'The technical drawings investigate the facade as a layered system and the structure as a spatial armature. Double-glazed units, photovoltaic surfaces, concealed service risers, and natural ventilation channels are integrated directly into the building envelope. Floor plans reveal how the outer discipline of the wall produces a liberated inner landscape of voids, overlooks, and shared rooms. Sections document the journey from entrance to the upper reading terraces, where the roof becomes productive infrastructure: collecting water, harvesting energy, and opening toward the sky.',
+      processImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_PORTA_ROMANA_PROCESS_1',
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_PORTA_ROMANA_PROCESS_2',
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_PORTA_ROMANA_PROCESS_3',
+      ],
+      schematicImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_PORTA_ROMANA_WIDE_1',
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_PORTA_ROMANA_WIDE_2',
+      ],
+      galleryImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_PORTA_ROMANA_GALLERY_1',
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_PORTA_ROMANA_GALLERY_2',
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_PORTA_ROMANA_GALLERY_3',
+      ],
       infoFields: [
         { label: 'Program', value: 'Library / Civic Knowledge Hub' },
         { label: 'Status', value: 'Academic Thesis Project' },
@@ -158,12 +174,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
           ],
           images: [
             {
-              alt: 'The Wall of Porta Romana urban analysis placeholder',
+              alt: 'The Wall of Porta Romana urban analysis',
               caption: 'Urban analysis / Milan perimeter',
               aspectRatio: '4/3',
             },
             {
-              alt: 'The Wall of Porta Romana masterplan placeholder',
+              alt: 'The Wall of Porta Romana masterplan',
               caption: 'Porta Romana masterplan / site strategy',
               aspectRatio: '4/3',
             },
@@ -183,12 +199,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
           ],
           images: [
             {
-              alt: 'The Wall of Porta Romana composition placeholder',
+              alt: 'The Wall of Porta Romana composition diagram',
               caption: 'Concept diagram / sculpture within a box',
               aspectRatio: '4/3',
             },
             {
-              alt: 'The Wall of Porta Romana circulation placeholder',
+              alt: 'The Wall of Porta Romana circulation section',
               caption: 'Circulation / section / program sequence',
               aspectRatio: '4/3',
             },
@@ -208,12 +224,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
           ],
           images: [
             {
-              alt: 'The Wall of Porta Romana structural evolution placeholder',
+              alt: 'The Wall of Porta Romana structural evolution',
               caption: 'Structural evolution / system phases',
               aspectRatio: '4/3',
             },
             {
-              alt: 'The Wall of Porta Romana structural verification placeholder',
+              alt: 'The Wall of Porta Romana structural verification',
               caption: 'Typical floor structure / verification diagrams',
               aspectRatio: '4/3',
             },
@@ -232,12 +248,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
           ],
           images: [
             {
-              alt: 'The Wall of Porta Romana facade placeholder',
+              alt: 'The Wall of Porta Romana facade development',
               caption: 'Facade development / entrance condition',
               aspectRatio: '4/3',
             },
             {
-              alt: 'The Wall of Porta Romana environmental systems placeholder',
+              alt: 'The Wall of Porta Romana environmental systems',
               caption: 'Ventilation / daylight / building services',
               aspectRatio: '4/3',
             },
@@ -251,17 +267,17 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
             'Materiality gives the project its final weight, tying environmental ambition to real fabrication and construction logic.',
           paragraphs: [
             'The material strategy follows the wider environmental ambitions of Milan 2030, but it also stays close to the reality of making. Recycled and recyclable materials, photovoltaic integration, water-conscious systems, and lower-emission choices are treated as architectural decisions, not technical decoration.',
-            'At the same time, the thesis looks carefully at fabrication. CNC-milled components, plywood studies, custom integrated elements, and digitally controlled production methods test how the project’s organic language can be translated into precise parts.',
+            'At the same time, the thesis looks carefully at fabrication. CNC-milled components, plywood studies, custom integrated elements, and digitally controlled production methods test how the project\'s organic language can be translated into precise parts.',
             'That is what gives the project credibility. The wall is not only imagined as a powerful figure in the city, but as something that could be assembled, detailed, and built with care.',
           ],
           images: [
             {
-              alt: 'The Wall of Porta Romana sustainability placeholder',
+              alt: 'The Wall of Porta Romana sustainability diagram',
               caption: 'Sustainability goals / Milan 2030',
               aspectRatio: '4/3',
             },
             {
-              alt: 'The Wall of Porta Romana fabrication placeholder',
+              alt: 'The Wall of Porta Romana fabrication study',
               caption: 'Fabrication logic / CNC / material study',
               aspectRatio: '4/3',
             },

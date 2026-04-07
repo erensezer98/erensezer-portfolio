@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { saveProject, saveProjectPageContent } from './actions'
+import { saveProject, saveProjectPageContent, toggleProjectFeatured } from './actions'
 import { DRIVE_FOLDERS } from '@/lib/project-images'
 import type { Project, ProjectCategory } from '@/lib/types'
 import type { ProjectPageContent, ProjectSceneComponent } from '@/lib/project-data'
@@ -52,6 +52,8 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [featured, setFeatured] = useState(project?.featured ?? false)
+  const [featuredLoading, setFeaturedLoading] = useState(false)
   const [slugPreview, setSlugPreview] = useState(project?.slug ?? '')
 
   const infoFields = useMemo(() => {
@@ -87,7 +89,7 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
       location: (formData.get('location') as string).trim(),
       short_description: (formData.get('short_description') as string).trim(),
       description: (formData.get('description') as string).trim(),
-      featured: formData.get('featured') === 'on',
+      featured: featured,
       tags: parseCommaSeparated(formData.get('tags') as string),
       cover_image: ((formData.get('cover_image') as string).trim() || null),
       images: parseCommaSeparated(formData.get('images') as string),
@@ -233,9 +235,21 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
               />
             </div>
             <div className="flex items-center gap-6">
-              <label className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted">
-                <input type="checkbox" name="featured" defaultChecked={project?.featured} className="h-4 w-4 accent-salmon" />
-                Feature on homepage
+              <label className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={featured}
+                  disabled={featuredLoading}
+                  className="h-4 w-4 accent-salmon disabled:opacity-50"
+                  onChange={async (e) => {
+                    if (!project?.id) { setFeatured(e.target.checked); return }
+                    setFeaturedLoading(true)
+                    const result = await toggleProjectFeatured(project.id, e.target.checked)
+                    if (!result.error) setFeatured(e.target.checked)
+                    setFeaturedLoading(false)
+                  }}
+                />
+                {featuredLoading ? 'Saving…' : 'Feature on homepage'}
               </label>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase tracking-widest text-muted">Order</span>
