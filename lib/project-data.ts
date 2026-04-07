@@ -593,6 +593,7 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Role', value: 'Project Manager' },
         { label: 'Year', value: '2025' },
         { label: 'Location', value: 'Venice, Italy / Belem, Brazil' },
+        { label: 'Photo credits', value: 'Leonardo Finotti' },
       ],
     }),
   },
