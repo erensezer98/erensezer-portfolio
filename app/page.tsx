@@ -36,7 +36,7 @@ export default async function HomePage() {
   return (
     <div className="px-6 md:px-10">
       <section className="pt-28 pb-14">
-        <h1 className="mb-4 text-[clamp(2.2rem,5.2vw,4.4rem)] font-medium leading-[1.04] tracking-[-0.04em] text-ink lowercase">
+        <h1 className="mb-4 text-[clamp(2.2rem,5.2vw,4.4rem)] font-normal leading-[1.04] tracking-[-0.04em] text-ink lowercase">
           eren sezer
         </h1>
         <p className="max-w-xs text-[15px] font-medium leading-relaxed text-muted lowercase">
