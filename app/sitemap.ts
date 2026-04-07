@@ -15,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
+    changeFrequency: 'daily' as const,
     priority: route === '' ? 1 : 0.8,
   }))
 
@@ -29,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const projectRoutes = projects.map((project) => ({
     url: `${baseUrl}/projects/${project.slug}`,
     lastModified: project.created_at ? new Date(project.created_at) : new Date(),
-    changeFrequency: 'monthly' as const,
+    changeFrequency: 'weekly' as const,
     priority: project.featured ? 0.9 : 0.7,
   }))
 
