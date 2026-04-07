@@ -10,11 +10,11 @@ export const metadata: Metadata = {
     template: '%s | Eren Sezer',
   },
   description:
-    'Architectural portfolio of Eren Sezer — architect and digital designer based in Milan.',
+    'Eren Sezer - Architect, Designer and Researcher.',
   openGraph: {
     title: 'Eren Sezer — Architect',
     description:
-      'Architectural portfolio of Eren Sezer — architect and digital designer based in Milan.',
+      'Eren Sezer - Architect, Designer and Researcher.',
     type: 'website',
   },
 }
