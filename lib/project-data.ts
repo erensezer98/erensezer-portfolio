@@ -402,8 +402,8 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
       2023,
       'Istanbul, Turkey',
       'academic',
-      'An urban escape strategy for Istanbul: light, shadow, and threshold.',
-      'Istanbul: A Way Out is an urban research project that maps the thresholds between the city\'s formal and informal fabrics, the passages, courtyards, and light-filled voids that constitute an alternative urban geography. The project proposes a series of spatial interventions that amplify these in-between conditions.',
+      'A research-driven project studying how everyday street obstructions can turn into life-threatening barriers after an earthquake in Istanbul.',
+      'Istanbul: A Way Out is a research-driven architectural project that investigates post-earthquake emergency conditions in Istanbul by shifting attention away from collapse alone and toward accessibility. Through urban observation and AI-based analysis, the project studies how narrow streets, parked cars, street furniture, bay windows, and informal spatial patterns can block evacuation and delay aid, proposing a new way to read urban resilience through the street itself.',
       ['urban', 'istanbul', 'light', 'installation'],
       null,
       true,
@@ -412,11 +412,11 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     page: createPageContent({
       sceneComponent: 'interactive-relight',
       introText:
-        'This project studies Istanbul through thresholds, traces of light, and overlooked urban rooms. It proposes a spatial reading of the city that is experiential rather than monumental.',
+        'Istanbul: A Way Out began with a blunt question: what happens after the earthquake, when the buildings that remain standing still leave no room to escape or to be reached? Rather than focusing only on collapse, the project looks at the everyday elements of the city, parked cars, narrow roads, street furniture, cumbas, pavements, and urban clutter, and asks how they might become deadly obstacles in a moment of emergency. The result is a different reading of resilience, one rooted in access, delay, and survival.',
       processText:
-        'Mappings, atmospheric studies, and on-site observations build a narrative around the city\'s in-between spaces. The work moves between urban analysis and spatial intervention.',
+        'The work combines urban observation with AI-based analysis to uncover patterns that are easy to ignore in daily life but critical after disaster. Through object detection and semantic segmentation models, streets were studied as active risk fields rather than neutral infrastructure. The project compares neighborhoods with different urban and socio-economic conditions, testing whether informal growth, density, and spatial inequality can also be read through the likelihood of blocked access and interrupted rescue routes.',
       schematicText:
-        'The relight model foregrounds light as an active design tool, showing how orientation, shadow, and enclosure reveal hidden layers within the city\'s fabric.',
+        'The diagrams translate that research into a visual system. Street sections isolate the elements that interfere with emergency accessibility, graphs compare street width against risk level, and total risk maps reveal urban bottlenecks across different parts of Istanbul. Together, they build a tool that does not try to predict collapse, but instead helps identify where movement, aid distribution, and evacuation are most likely to fail when every second matters.',
       infoFields: [
         { label: 'Program', value: 'Urban Installation / Research' },
         { label: 'Area', value: 'Urban Scale' },
@@ -433,8 +433,8 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
       2023,
       'Senegal',
       'academic',
-      'A flexible community school inspired by Senegalese vernacular settlements.',
-      'Toor-Toor, meaning "Flower" in Wolof, draws from the traditional Senegalese arrangement of scattered houses gathered around a communal center. Six classroom modules radiate outward from a shared outdoor playground, with flexible spaces that serve the school during the day and the wider community after hours.',
+      'A flexible primary school inspired by Senegalese vernacular settlement patterns and designed to serve both children and the wider community.',
+      'Toor-Toor, meaning "Flower" in Wolof, takes inspiration from the logic of traditional Senegalese compounds, where scattered buildings gather around a communal center. The project transforms that social structure into a circular school organized around an outdoor playground, where classroom modules, shared spaces, and community functions are woven together through flexibility, climate awareness, and local material intelligence.',
       ['education', 'rammed earth', 'circular plan', 'community'],
       null,
       true,
@@ -443,11 +443,11 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     page: createPageContent({
       sceneComponent: 'toor-toor-scene',
       introText:
-        'The school is organized around a shared courtyard that keeps collective life at the center of the project. Circular geometry, local materials, and flexible use define both the architecture and its civic role.',
+        'Toor-Toor School begins with the idea that a child\'s environment shapes the way they grow, learn, and imagine. Inspired by the spatial logic of traditional Senegalese settlements, the project organizes the school as a circular community gathered around a central playground. The plan keeps collective life at its heart while using curved forms, color, and pattern to create a place that feels playful, open, and generous rather than rigid or institutional.',
       processText:
-        'The design translates vernacular settlement principles into a contemporary educational framework. Classroom modules, support spaces, and outdoor learning areas are composed as a coherent village-like plan.',
+        'The school is made of ten modules arranged radially: six classrooms and four flexible spaces in between. These intermediate spaces hold functions such as the laboratory, canteen, offices, and sickroom, but they also act as connectors, allowing the whole plan to work as one continuous learning environment. That flexibility extends beyond school hours, when the same spaces can open to the wider community and offer shelter, shared use, or support for everyday life around the school.',
       schematicText:
-        'Plans and diagrams explain the radial organization, climate-responsive openings, and the transitions between dedicated classroom space and shared community functions.',
+        'The technical logic of the project is closely tied to climate, construction, and reuse. Inclined roofs collect water, bring controlled daylight into the classrooms, and support layered solutions for ventilation and acoustics, from corrugated metal sheets to straw insulation and suspended patterned fabrics. Rammed earth walls, bamboo foldable panels, reused tire foundations, and simple modular construction make the school buildable with local means while giving it a material identity that is both practical and warm.',
       infoFields: [
         { label: 'Program', value: 'Educational / Community' },
         { label: 'Area', value: 'N/A' },
@@ -474,11 +474,11 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     page: createPageContent({
       sceneComponent: 'architectural-wireframe',
       introText:
-        'The proposal seeks to understand the interaction between the archaeological and environmental landscapes of Curinga and to create a design that allows both to coexist harmoniously. A singular roof element protects the ruins while establishing a continuous walkway that opens panoramic views over the site and reconnects visitors with the surrounding terrain.',
+        'Unfolding Landscapes begins with a delicate question: how can the archaeological landscape of the Thermae of Curinga and the environmental landscape around it exist together without one overpowering the other? The proposal answers through a single continuous roof that protects the ruins while tracing their perimeter, turning preservation into an experience. More than a shelter, the roof becomes a device for looking, walking, and understanding the site as both artifact and terrain.',
       processText:
-        'Priority was given to shaping a seamless relationship between exterior and interior experience. The intervention combines an encircling path beneath the protective roof with a transversal route through the ruins, allowing visitors to alternate between distant reading and direct immersion. This movement system was developed to strengthen awareness of both the archaeological fabric and the environmental landscape of Curinga at the same time.',
+        'The project gives priority to the movement of the visitor. A panoramic walkway unfolds beneath the roof and circles the ruins, offering a slower, more distant reading of the archaeological field, while a transversal passage cuts through the site for a more direct and intimate encounter. Together, these two paths create a seamless dialogue between exterior and interior experience, allowing users to shift constantly between the scale of the ruin and the scale of the landscape.',
       schematicText:
-        'The roof language is derived from two intertwined references: the layered movement of the surrounding topography and the spatial logic of the ruins themselves. Its geometry rises and folds to frame significant spaces such as the frigidarium, while its organic continuity helps the intervention blend into the land. Structurally, the proposal draws inspiration from the historic cross vault of the central bath space, and its clay materiality pays homage to Roman African construction traditions and pottery techniques.',
+        'The roof takes its language from two motions at once: the layered flow of the topography and the spatial rhythm of the ruins themselves. It rises where certain moments need to be framed, especially around spaces such as the frigidarium, and then softens back into the terrain, almost camouflaging the archaeology beneath it. Its structure draws from the memory of the central cross vault once covering the bath, while its clay materiality pays homage to Roman African construction traditions and the craft of pottery, giving the intervention both historical depth and a quiet, earthy presence.',
       infoFields: [
         { label: 'Program', value: 'Archaeological Reuse / Landscape Intervention' },
         { label: 'Area', value: 'Thermae of Curinga site' },
@@ -495,8 +495,8 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
       2024,
       'Palazzo Mondadori, Milan, Italy',
       'involvement',
-      'Revitalization work at Oscar Niemeyer\'s Palazzo Mondadori developed with Carlo Ratti Associati, Maestro Technologies, and Italo Rota Studio.',
-      'CRA was granted the design of Oscar Niemeyer\'s Palazzo Mondadori. This involvement focused on the transformation of layouts, the design of new furniture elements, and the technical development required to bring those interventions into production and site execution.',
+      'Workplace transformation inside Oscar Niemeyer\'s Palazzo Mondadori, rethinking the office as a more open, reconfigurable, and social environment.',
+      'The Office As A Playground is a renovation project for Oscar Niemeyer\'s Palazzo Mondadori in Milan, developed by CRA-Carlo Ratti Associati in collaboration with Italo Rota and Maestro Technologies. The intervention reimagines more than 20,000 square meters of office space, preserving the character of Niemeyer\'s landmark while introducing a more fluid and interaction-driven workplace shaped by adaptable layouts, transparent meeting spaces, natural light, and reconfigured furniture systems.',
       ['adaptive reuse', 'workplace', 'furniture design', 'site management'],
       null,
       true,
@@ -504,7 +504,7 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     ),
     page: createPageContent({
       introText:
-        'A workplace transformation inside Oscar Niemeyer\'s Palazzo Mondadori, developed through the collaboration between Carlo Ratti Associati, Maestro Technologies, and Italo Rota Studio. The work moved between spatial layout design, custom furniture development, and the practical realities of delivering the project on site.',
+        'The Office As A Playground rethinks Palazzo Mondadori not as a fixed office landscape, but as a more open and sociable workplace. Developed inside one of Oscar Niemeyer\'s most celebrated buildings, the project balances respect for the original architecture with a new spatial culture shaped by informal encounters, transparency, reconfigurable furniture, and a closer relationship to daylight and the surrounding park.',
       processText:
         'I was involved in the design of the layouts and in the design of the new furniture elements. I also worked as a technical designer, developing product-scale solutions and coordinating the transition from design intent to buildable outcomes.',
       schematicText:
@@ -525,8 +525,8 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
       2025,
       'Venice, Italy',
       'involvement',
-      'Curatorial and delivery coordination work for the 2025 Venice Architecture Biennale with Carlo Ratti Associati and Maestro Technologies.',
-      'An involvement within the curator\'s team for the 2025 Venice Architecture Biennale, supporting cross-studio coordination, design development, and construction processes across multiple contributors.',
+      'Curatorial and delivery work for Biennale Architettura 2025, centered on adaptation, collaboration, and new forms of architectural authorship.',
+      'Biennale Architettura 2025 unfolds under the title Intelligens. Natural. Artificial. Collective., a curatorial framework led by Carlo Ratti that calls for architecture to move beyond mitigation and engage adaptation as its central challenge. The exhibition brings together hundreds of contributors across disciplines, generations, and forms of intelligence, proposing a more inclusive and collaborative model of authorship in response to climate change.',
       ['exhibition', 'curatorial coordination', 'executive design'],
       null,
       true,
@@ -534,7 +534,7 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     ),
     page: createPageContent({
       introText:
-        'This involvement was part of the curatorial team behind the 2025 Venice Architecture Biennale, working across design, coordination, and construction with Carlo Ratti Associati and Maestro Technologies.',
+        'Intelligens. Natural. Artificial. Collective. frames the 2025 Venice Architecture Biennale as a laboratory for adaptation. Rather than treating architecture as an isolated discipline, the exhibition gathers architects, scientists, artists, coders, philosophers, and many others to ask how design can respond to a world already transformed by climate change. The result is a broad, collaborative exhibition that rethinks both how we build and how authorship itself is understood.',
       processText:
         'I was an assistant member of the curator\'s team. I collaborated with studios including Howeler + Yoon, Diller Scofidio + Renfro, and Fondazione Pistoletto to coordinate design and construction processes across the exhibition.',
       schematicText:
@@ -556,8 +556,8 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
       2025,
       'Venice, Italy / Belem, Brazil',
       'involvement',
-      'International project delivered with Carlo Ratti Associati, Howeler + Yoon, and Maestro Technologies as a gift from the Italian Government to the Brazilian Government.',
-      'Aquapraca was developed as a gift from the Italian Government to the Brazilian Government. The project brought together international collaborators across design development, executive detailing, procurement, and stakeholder coordination, eventually extending to representation at COP30 in Belem.',
+      'A floating cultural plaza developed for the 2025 Venice Biennale and COP30, designed to become permanent public infrastructure in Belem.',
+      'Aquapraca is a floating cultural plaza developed by CRA-Carlo Ratti Associati and Höweler + Yoon as a platform for climate dialogue, public gathering, and long-term civic use. First unveiled in Venice and later installed in Belem for COP30, the project uses buoyancy, sensing technologies, and a shifting relationship to water level to let visitors encounter climate change at eye level. After the summit, it remains in the Amazon as permanent cultural infrastructure and a legacy of cooperation between Italy and Brazil.',
       ['international collaboration', 'executive design', 'procurement', 'cop30'],
       null,
       true,
@@ -565,7 +565,7 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     ),
     page: createPageContent({
       introText:
-        'Aquapraca was developed with Carlo Ratti Associati, Howeler + Yoon, and Maestro Technologies as a diplomatic and architectural collaboration between Italy and Brazil. The project connected design development with international coordination and public representation.',
+        'Aquapraca is imagined as a floating public square, a civic platform that brings architecture, water, and climate awareness into direct contact. Developed for the 2025 Venice Biennale and COP30 in Belem, the project creates public space out of the sea itself, allowing visitors to experience shifting water levels and environmental change at a human scale. What begins as an exhibition piece is designed to continue its life as permanent cultural infrastructure in the Amazon.',
       processText:
         'I was one of the project managers for Aquapraca. I helped the design teams develop executive details and organized stakeholder coordination together with procurement processes across the project.',
       schematicText:
