@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description: 'Awards, recognitions, and certificates received by Eren Sezer.',
 }
 
+export const dynamic = 'force-dynamic'
+
+
 const STATIC_AWARDS: Award[] = [
   { id: '1', title: 'Buildner Skyhive Skyscrapers Challenge — Shortlisted', organization: 'Buildner',                            year: 2022, description: 'The Food Tower, Vertical Farm and Factory in Milano.', created_at: '' },
   { id: '2', title: 'Student Projects Selection',                           organization: 'Mimdap Architecture Magazine',         year: 2020, description: 'Haliç CO-OP · Creative Industries Center, Istanbul.', created_at: '' },

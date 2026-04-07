@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description: 'Publications, workshops, and activities by Eren Sezer.',
 }
 
+export const dynamic = 'force-dynamic'
+
+
 const STATIC_PUBLICATIONS: Publication[] = [
   { id: '1', title: 'Istanbul A Way Out — Mimarizm',                                            type: 'publication', organization: 'Mimarizm',           year: 2025, description: 'Feature article on the acclaimed project by the Cumba collective, exploring Istanbul\'s urban future.', url: 'https://www.mimarizm.com/haberler/gorus/istanbul-bir-cikis-yolu_138919', created_at: '' },
   { id: '2', title: 'Buildner Skyhive Skyscrapers Challenge — Shortlisted Project Publication', type: 'publication', organization: 'Buildner',            year: 2022, description: 'The Food Tower shortlisted and featured in the Buildner annual skyscraper publication.', url: null, created_at: '' },
