@@ -139,6 +139,7 @@ async function getConfiguredProjectFolders(slug: string): Promise<DriveProjectFo
     process: resolveVal(config.fields.process, defaults.process),
     wide: resolveVal(config.fields.wide, defaults.wide),
     ...('chapterReferences' in config.fields ? {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       chapterReferences: resolveVal((config.fields as any).chapterReferences, (defaults as any).chapterReferences)
     } : {}),
   }

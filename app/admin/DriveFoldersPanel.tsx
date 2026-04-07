@@ -180,7 +180,9 @@ export default function DriveFoldersPanel({ initialSettings }: Props) {
                     <InputRow
                       label="chapter references"
                       hint="folder containing chapter subfolders"
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       value={settings[(project.fields as any).chapterReferences]}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onChange={(value) => update((project.fields as any).chapterReferences, value)}
                     />
                   )}
