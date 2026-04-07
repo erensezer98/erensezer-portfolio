@@ -414,7 +414,7 @@ export default function ProjectDetailTemplate({
           </section>
         )}
 
-        {hasProcessSection && !hasDetailSections && (
+        {hasProcessSection && (
           <section className="mt-16 mb-16">
             <div className="mb-8">
               <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'involvement' : 'process'}</p>
@@ -441,7 +441,7 @@ export default function ProjectDetailTemplate({
           </section>
         )}
 
-        {hasSchematicSection && !hasDetailSections && (
+        {hasSchematicSection && (
           <section className="mt-16 mb-16">
             <div className="mb-8">
               <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'role' : 'schematics'}</p>

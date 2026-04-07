@@ -73,25 +73,29 @@ export async function getResolvedProjectPageDataBySlug(slug: string): Promise<Re
     })
   }
 
+  const isPlaceholderUrl = (url: string) => url.includes('PLACEHOLDER_')
+
+  const filterPlaceholders = (urls: string[]) => urls.filter((url) => !isPlaceholderUrl(url))
+
   const content: ProjectPageContent = {
     ...defaultContent,
     ...savedPageContent,
     detailSections,
     processImages: driveMedia.processImages.length
       ? driveMedia.processImages
-      : savedPageContent?.processImages?.length
+      : filterPlaceholders(savedPageContent?.processImages?.length
         ? savedPageContent.processImages
-        : defaultContent.processImages,
+        : defaultContent.processImages),
     schematicImages: driveMedia.schematicImages.length
       ? driveMedia.schematicImages
-      : savedPageContent?.schematicImages?.length
+      : filterPlaceholders(savedPageContent?.schematicImages?.length
         ? savedPageContent.schematicImages
-        : defaultContent.schematicImages,
+        : defaultContent.schematicImages),
     galleryImages: driveMedia.galleryImages.length
       ? driveMedia.galleryImages
-      : savedPageContent?.galleryImages?.length
+      : filterPlaceholders(savedPageContent?.galleryImages?.length
         ? savedPageContent.galleryImages
-        : defaultContent.galleryImages,
+        : defaultContent.galleryImages),
     infoFields: savedPageContent?.infoFields?.length ? savedPageContent.infoFields : defaultContent.infoFields,
     awards: savedPageContent?.awards?.length ? savedPageContent.awards : defaultContent.awards,
   }
