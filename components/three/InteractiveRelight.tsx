@@ -1,233 +1,336 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 
+type TileEntry = {
+  x: number
+  z: number
+}
+
+type ObstacleEntry = {
+  mesh: THREE.Mesh
+  basePosition: THREE.Vector3
+  center: THREE.Vector3
+  influenceRadius: number
+  material: THREE.MeshBasicMaterial
+}
+
+const TILE_GREEN = new THREE.Color(0x2f7a4f)
+const TILE_HOT = new THREE.Color(0xd16a4b)
+const OBJECT_IDLE = new THREE.Color(0xb9f0c5)
+const OBJECT_HOT = new THREE.Color(0xffd0b2)
+
 export default function InteractiveRelight() {
   const mountRef = useRef<HTMLDivElement>(null)
+  const [pressureLabel, setPressureLabel] = useState('waiting')
+  const [nearbyLabel, setNearbyLabel] = useState('0 active objects')
 
   useEffect(() => {
     const el = mountRef.current
     if (!el) return
 
-    // â”€â”€â”€ Scene & Camera â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const scene = new THREE.Scene()
-    const w = el.clientWidth
-    const h = el.clientHeight
-    const camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 1000)
-    camera.position.set(0, 4, 6)
-    camera.lookAt(0, 1, 0)
+    scene.fog = new THREE.FogExp2(0x050505, 0.045)
 
-    // â”€â”€â”€ Renderer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    const camera = new THREE.PerspectiveCamera(52, el.clientWidth / el.clientHeight, 0.1, 1000)
+    camera.position.set(0, 11.5, 16)
+    camera.lookAt(0, 0.5, 0)
+
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-    renderer.setSize(w, h)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.setClearColor(0x000000, 0) // transparent background
-
-    // Enable shadows for the dramatic relight effect
-    renderer.shadowMap.enabled = true
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.setSize(el.clientWidth, el.clientHeight)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1))
+    renderer.setClearColor(0x050505)
     el.appendChild(renderer.domElement)
 
-    // â”€â”€â”€ Lighting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    // Very dim ambient light so shadows are almost completely dark
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.05)
-    scene.add(ambientLight)
+    const modelGroup = new THREE.Group()
+    scene.add(modelGroup)
 
-    // The magical point light that follows the mouse
-    const pointLight = new THREE.PointLight(0xffffff, 60, 50)
-    pointLight.position.set(0, 2, 0)
-    pointLight.castShadow = true
-    pointLight.shadow.bias = -0.001
-    pointLight.shadow.mapSize.width = 1024
-    pointLight.shadow.mapSize.height = 1024
-    scene.add(pointLight)
-
-    // â”€â”€â”€ Dark matte material (same as original) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x222222,
-      roughness: 0.8,
-      metalness: 0.2,
+    const tileGeometry = new THREE.BoxGeometry(0.95, 0.08, 0.95)
+    const tileMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.9,
+      vertexColors: true,
     })
 
-    // â”€â”€â”€ Road material â€” low emissive glow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    const roadMaterial = new THREE.MeshStandardMaterial({
-      color: 0x333333,
-      roughness: 0.9,
-      metalness: 0.0,
-      emissive: new THREE.Color(0x333333),
-      emissiveIntensity: 0.25,
-    })
+    const tileEntries: TileEntry[] = []
+    let tileMesh: THREE.InstancedMesh | null = null
+    let modelBounds: THREE.Box3 | null = null
+    let groundY = -0.5
+    let modelLoaded = false
 
-    // â”€â”€â”€ Base plane that receives shadows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    const planeGeo = new THREE.PlaneGeometry(30, 30)
-    const planeMenu = new THREE.Mesh(planeGeo, material)
-    planeMenu.rotation.x = -Math.PI / 2
-    planeMenu.position.y = -0.5
-    planeMenu.receiveShadow = true
-    scene.add(planeMenu)
+    const obstacleEntries: ObstacleEntry[] = []
+    const materialsToDispose: THREE.Material[] = [tileMaterial]
+    const geometriesToDispose: THREE.BufferGeometry[] = [tileGeometry]
 
-    // â”€â”€â”€ Group (for slow rotation animation) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    const group = new THREE.Group()
-    scene.add(group)
-
-    // â”€â”€â”€ Catch plane for mouse â†’ light position â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    // Will be updated after model loads; default at y=2
-    const catchPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -2)
-
-    // â”€â”€â”€ Load GLB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const dracoLoader = new DRACOLoader()
     dracoLoader.setDecoderPath('/draco/')
     const loader = new GLTFLoader()
     loader.setDRACOLoader(dracoLoader)
+
+    const raycaster = new THREE.Raycaster()
+    const mouse = new THREE.Vector2()
+    const targetMouse = new THREE.Vector2()
+    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0.5)
+    const hoverPoint = new THREE.Vector3()
+    const tempColor = new THREE.Color()
+    const tempMatrix = new THREE.Matrix4()
+    const tempQuaternion = new THREE.Quaternion()
+    const tempScale = new THREE.Vector3()
+    const activeObstacleCenters: Array<{ center: THREE.Vector3; strength: number }> = []
+
     loader.load(
-      '/models/awayout.glb',
+      '/models/objects.glb',
       (gltf) => {
         const model = gltf.scene
-
-        // First pass: find the largest flat mesh (the road)
-        let largestArea = 0
         let roadMesh: THREE.Mesh | null = null
+        let largestArea = 0
+
         model.traverse((child) => {
-          const asMesh = child as THREE.Mesh
-          if (asMesh.isMesh) {
-            asMesh.geometry.computeBoundingBox()
-            const box = asMesh.geometry.boundingBox!
-            const sx = box.max.x - box.min.x
-            const sz = box.max.z - box.min.z
-            const sy = box.max.y - box.min.y
-            // Road is large in XZ and flat in Y
-            const area = sx * sz
-            if (area > largestArea && sy < Math.max(sx, sz) * 0.1) {
-              largestArea = area
-              roadMesh = asMesh
-            }
+          const mesh = child as THREE.Mesh
+          if (!mesh.isMesh) return
+          mesh.geometry.computeBoundingBox()
+          const box = mesh.geometry.boundingBox
+          if (!box) return
+
+          const sx = box.max.x - box.min.x
+          const sy = box.max.y - box.min.y
+          const sz = box.max.z - box.min.z
+          const area = sx * sz
+
+          if (area > largestArea && sy < Math.max(sx, sz) * 0.1) {
+            largestArea = area
+            roadMesh = mesh
           }
         })
 
-        // Second pass: apply materials + shadows
-        model.traverse((child) => {
-          const asMesh = child as THREE.Mesh
-          if (asMesh.isMesh) {
-            const origMat = asMesh.material as THREE.MeshStandardMaterial
-            const emissiveSum = (origMat?.emissive?.r ?? 0) + (origMat?.emissive?.g ?? 0) + (origMat?.emissive?.b ?? 0)
-            const hasEmissive = emissiveSum > 0.3 && (origMat?.emissiveIntensity ?? 0) > 0.1
-            if (hasEmissive) {
-              origMat.roughness = Math.max(origMat.roughness ?? 0.9, 0.5)
-              origMat.needsUpdate = true
-            } else {
-              asMesh.material = asMesh === roadMesh ? roadMaterial : material
-
-            }
-            if (!asMesh.geometry.boundingSphere) {
-              asMesh.geometry.computeBoundingSphere()
-            }
-            asMesh.castShadow = true
-            asMesh.receiveShadow = true
-          }
-        })
-
-        // Auto-fit: center + scale to view
-        const box = new THREE.Box3().setFromObject(model)
-        const center = box.getCenter(new THREE.Vector3())
-        const size = box.getSize(new THREE.Vector3())
+        const overallBox = new THREE.Box3().setFromObject(model)
+        const center = overallBox.getCenter(new THREE.Vector3())
+        const size = overallBox.getSize(new THREE.Vector3())
         const maxDim = Math.max(size.x, size.y, size.z)
         const scale = 15 / maxDim
 
         model.scale.setScalar(scale)
         model.position.sub(center.multiplyScalar(scale))
 
-        // Sit flush on ground at y=-0.5 (matching base plane)
-        const box2 = new THREE.Box3().setFromObject(model)
-        model.position.y -= box2.min.y + 0.5
+        const fittedBox = new THREE.Box3().setFromObject(model)
+        model.position.y -= fittedBox.min.y + 0.5
+        modelGroup.add(model)
+        model.updateMatrixWorld(true)
 
-        group.add(model)
+        modelBounds = new THREE.Box3().setFromObject(model)
+        groundY = modelBounds.min.y
+        groundPlane.constant = -groundY
 
-        // Set catch plane to mid-height of the fitted model
-        const box3 = new THREE.Box3().setFromObject(model)
-        const midY = (box3.min.y + box3.max.y) / 2
-        catchPlane.constant = -midY
+        model.traverse((child) => {
+          const mesh = child as THREE.Mesh
+          if (!mesh.isMesh) return
+
+          geometriesToDispose.push(mesh.geometry)
+
+          if (mesh === roadMesh) {
+            mesh.visible = false
+            return
+          }
+
+          const material = new THREE.MeshBasicMaterial({
+            color: OBJECT_IDLE.clone(),
+            wireframe: true,
+            transparent: true,
+            opacity: 0.8,
+          })
+          mesh.material = material
+          materialsToDispose.push(material)
+
+          const box = new THREE.Box3().setFromObject(mesh)
+          const boxSize = box.getSize(new THREE.Vector3())
+          if (boxSize.lengthSq() < 0.0001) return
+
+          obstacleEntries.push({
+            mesh,
+            basePosition: mesh.position.clone(),
+            center: box.getCenter(new THREE.Vector3()),
+            influenceRadius: Math.max(boxSize.x, boxSize.z) * 0.4 + 0.28,
+            material,
+          })
+        })
+
+        if (modelBounds) {
+          const tileSpacing = 0.95
+          for (let x = modelBounds.min.x - 0.5; x <= modelBounds.max.x + 0.5; x += tileSpacing) {
+            for (let z = modelBounds.min.z - 0.5; z <= modelBounds.max.z + 0.5; z += tileSpacing) {
+              tileEntries.push({ x, z })
+            }
+          }
+
+          tileMesh = new THREE.InstancedMesh(tileGeometry, tileMaterial, tileEntries.length)
+          tileMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
+          tileMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(tileEntries.length * 3), 3)
+
+          tileEntries.forEach((tile, index) => {
+            tempScale.set(0.92, 1, 0.92)
+            tempMatrix.compose(
+              new THREE.Vector3(tile.x, groundY + 0.04, tile.z),
+              tempQuaternion,
+              tempScale
+            )
+            tileMesh?.setMatrixAt(index, tempMatrix)
+            tileMesh?.setColorAt(index, TILE_GREEN)
+          })
+
+          tileMesh.instanceMatrix.needsUpdate = true
+          if (tileMesh.instanceColor) tileMesh.instanceColor.needsUpdate = true
+          modelGroup.add(tileMesh)
+        }
+
+        modelLoaded = true
       },
       undefined,
-      (err) => console.error('GLB load error:', err)
+      (error) => console.error('GLB load error:', error)
     )
 
-    // â”€â”€â”€ Interaction (Mouse tracking) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    const raycaster = new THREE.Raycaster()
-    const mouse = new THREE.Vector2()
-
-    const targetLightPos = new THREE.Vector3(0, 2, 0)
-
-    const onMouseMoveSmooth = (e: MouseEvent) => {
+    const onPointerMove = (event: MouseEvent) => {
       const bounds = el.getBoundingClientRect()
-      mouse.x = ((e.clientX - bounds.left) / w) * 2 - 1
-      mouse.y = -((e.clientY - bounds.top) / h) * 2 + 1
-
-      raycaster.setFromCamera(mouse, camera)
-      raycaster.ray.intersectPlane(catchPlane, targetLightPos)
+      targetMouse.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1
+      targetMouse.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1
     }
 
-    window.addEventListener('mousemove', onMouseMoveSmooth)
+    const onPointerLeave = () => {
+      targetMouse.set(-100, -100)
+    }
 
-    // â”€â”€â”€ Resize â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const onResize = () => {
-      if (!el) return
-      const nw = el.clientWidth
-      const nh = el.clientHeight
-      camera.aspect = nw / nh
+      camera.aspect = el.clientWidth / el.clientHeight
       camera.updateProjectionMatrix()
-      renderer.setSize(nw, nh)
+      renderer.setSize(el.clientWidth, el.clientHeight)
     }
+
+    el.addEventListener('mousemove', onPointerMove)
+    el.addEventListener('mouseleave', onPointerLeave)
     window.addEventListener('resize', onResize)
 
-    // â”€â”€â”€ Animation loop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    let animId: number
+    let disposed = false
+    let animationFrame = 0
     const clock = new THREE.Clock()
-    const frustum = new THREE.Frustum()
-    const projScreenMatrix = new THREE.Matrix4()
-    const cullingSphere = new THREE.Sphere()
+    let lastHudUpdate = performance.now()
 
     const animate = () => {
-      animId = requestAnimationFrame(animate)
-      const elapsed = clock.getElapsedTime()
+      if (disposed) return
+      animationFrame = window.requestAnimationFrame(animate)
 
-      // Very slow rotation of the entire group to keep it dynamic
-      group.rotation.y = Math.sin(elapsed * 0.1) * 0.1
+      const t = clock.getElapsedTime()
+      mouse.lerp(targetMouse, 0.08)
 
-      // Smoothly move light towards target
-      if (targetLightPos) {
-        pointLight.position.lerp(targetLightPos, 0.1)
+      if (modelLoaded) {
+        raycaster.setFromCamera(mouse, camera)
+        const hit = new THREE.Vector3()
+        if (raycaster.ray.intersectPlane(groundPlane, hit)) {
+          if (modelBounds) {
+            hoverPoint.x = THREE.MathUtils.clamp(hit.x, modelBounds.min.x, modelBounds.max.x)
+            hoverPoint.z = THREE.MathUtils.clamp(hit.z, modelBounds.min.z, modelBounds.max.z)
+          } else {
+            hoverPoint.copy(hit)
+          }
+          hoverPoint.y = groundY
+        }
       }
 
-      projScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
-      frustum.setFromProjectionMatrix(projScreenMatrix)
-      scene.traverse((obj) => {
-        if ((obj as THREE.Mesh).isMesh) {
-          const mesh = obj as THREE.Mesh
-          if (mesh.geometry.boundingSphere) {
-            cullingSphere.copy(mesh.geometry.boundingSphere)
-            cullingSphere.applyMatrix4(mesh.matrixWorld)
-            mesh.visible = frustum.intersectsSphere(cullingSphere)
-          }
+      activeObstacleCenters.length = 0
+      let nearbyCount = 0
+      let pressureSum = 0
+
+      for (const obstacle of obstacleEntries) {
+        const distance = Math.hypot(obstacle.center.x - hoverPoint.x, obstacle.center.z - hoverPoint.z)
+        const rawInfluence = Math.max(0, 1 - distance / obstacle.influenceRadius)
+        const influence = rawInfluence * rawInfluence * (3 - 2 * rawInfluence)
+
+        if (influence > 0.02) {
+          activeObstacleCenters.push({ center: obstacle.center, strength: influence })
+          nearbyCount += 1
         }
-      })
+
+        pressureSum += influence
+
+        const lift = influence * 1.15
+        obstacle.mesh.position.y = obstacle.basePosition.y + lift
+        obstacle.material.color.copy(tempColor.copy(OBJECT_IDLE).lerp(OBJECT_HOT, influence))
+        obstacle.material.opacity = 0.72 + influence * 0.22
+      }
+
+      if (tileMesh) {
+        const currentTileMesh = tileMesh
+        tileEntries.forEach((tile, index) => {
+          let tileInfluence = 0
+
+          for (const active of activeObstacleCenters) {
+            const distance = Math.hypot(tile.x - active.center.x, tile.z - active.center.z)
+            const spread = 1.2
+            const raw = Math.max(0, 1 - distance / spread)
+            tileInfluence = Math.max(tileInfluence, raw * active.strength)
+          }
+
+          const lift = tileInfluence * 0.8
+          tempScale.set(0.92, 1 + tileInfluence * 7.5, 0.92)
+          tempMatrix.compose(
+            new THREE.Vector3(tile.x, groundY + 0.04 + lift * 0.5, tile.z),
+            tempQuaternion,
+            tempScale
+          )
+          currentTileMesh.setMatrixAt(index, tempMatrix)
+          currentTileMesh.setColorAt(index, tempColor.copy(TILE_GREEN).lerp(TILE_HOT, tileInfluence))
+        })
+
+        currentTileMesh.instanceMatrix.needsUpdate = true
+        if (currentTileMesh.instanceColor) currentTileMesh.instanceColor.needsUpdate = true
+      }
+
+      const normalizedPressure = THREE.MathUtils.clamp(pressureSum / 5.5, 0, 1)
+      if (performance.now() - lastHudUpdate > 220) {
+        if (normalizedPressure > 0.66) {
+          setPressureLabel('high pressure')
+        } else if (normalizedPressure > 0.28) {
+          setPressureLabel('moderate pressure')
+        } else {
+          setPressureLabel('low pressure')
+        }
+        setNearbyLabel(`${nearbyCount} active objects`)
+        lastHudUpdate = performance.now()
+      }
+
+      modelGroup.rotation.y = Math.sin(t * 0.05) * 0.15
       renderer.render(scene, camera)
     }
+
     animate()
 
-    // â”€â”€â”€ Cleanup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     return () => {
-      cancelAnimationFrame(animId)
-      window.removeEventListener('mousemove', onMouseMoveSmooth)
+      disposed = true
+      window.cancelAnimationFrame(animationFrame)
+      el.removeEventListener('mousemove', onPointerMove)
+      el.removeEventListener('mouseleave', onPointerLeave)
       window.removeEventListener('resize', onResize)
+
+      dracoLoader.dispose()
+      materialsToDispose.forEach((material) => material.dispose())
+      geometriesToDispose.forEach((geometry) => geometry.dispose())
       renderer.dispose()
+
       if (el.contains(renderer.domElement)) {
         el.removeChild(renderer.domElement)
       }
     }
   }, [])
 
-  return <div ref={mountRef} className="w-full h-full" />
+  return (
+    <div className="relative h-full w-full">
+      <div ref={mountRef} className="h-full w-full" />
+      <div className="pointer-events-none absolute left-4 top-4 z-10 bg-black/45 px-3 py-2 text-[10px] uppercase tracking-[0.22em] text-white/80 backdrop-blur-sm">
+        <div>{pressureLabel}</div>
+        <div className="mt-1 text-white/50">{nearbyLabel}</div>
+      </div>
+    </div>
+  )
 }
