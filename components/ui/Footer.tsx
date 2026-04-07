@@ -30,6 +30,7 @@ export default function Footer() {
         <nav className="flex gap-7">
           {[
             ['projects', '/projects'],
+            ['experiments', '/experiments'],
             ['about', '/about'],
             ['awards', '/awards'],
             ['publications', '/publications'],
