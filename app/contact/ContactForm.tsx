@@ -31,11 +31,17 @@ export default function ContactForm() {
 
   return (
     <div className="max-w-lg">
-      <p className="text-sm text-ink leading-relaxed mb-12">
-        Interested in collaborating or have a project in mind?{' '}
-        <a href="mailto:eren.sezer@hotmail.com" className="underline underline-offset-4 decoration-rule hover:text-muted transition-colors">
-          eren.sezer@hotmail.com
-        </a>
+      <p className="text-sm text-ink leading-relaxed mb-12 flex flex-col items-start gap-1">
+        <span>Interested in collaborating or have a project in mind?</span>
+        <span>
+          <a href="mailto:eren.sezer@hotmail.com" className="underline underline-offset-4 decoration-rule hover:text-muted transition-colors mr-3">
+            eren.sezer@hotmail.com
+          </a>
+          <span className="text-muted mr-3">—</span>
+          <a href="https://www.linkedin.com/in/erensezer/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 decoration-rule hover:text-muted transition-colors">
+            LinkedIn
+          </a>
+        </span>
       </p>
 
       {status === 'sent' ? (

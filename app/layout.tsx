@@ -44,7 +44,7 @@ export default function RootLayout({
               ],
               sameAs: [
                 'https://www.linkedin.com/in/erensezer/',
-                'https://www.instagram.com/rensezer/'
+                'https://www.instagram.com/eren.sezer/'
               ]
             })
           }}
