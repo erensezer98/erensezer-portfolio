@@ -26,6 +26,30 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Person',
+              name: 'Eren Sezer',
+              url: 'https://www.erensezer.com',
+              jobTitle: 'Architect, Designer and Researcher',
+              alumniOf: [
+                {
+                  '@type': 'CollegeOrUniversity',
+                  name: 'Politecnico di Milano'
+                }
+              ],
+              sameAs: [
+                'https://www.linkedin.com/in/erensezer/',
+                'https://www.instagram.com/rensezer/'
+              ]
+            })
+          }}
+        />
+      </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <ContentProtection />
         <Navbar />
