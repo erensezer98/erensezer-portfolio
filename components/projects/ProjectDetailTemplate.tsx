@@ -337,6 +337,60 @@ export default function ProjectDetailTemplate({
           </div>
         </div>
 
+        {hasProcessSection && (
+          <section className="mt-16 mb-16">
+            <div className="mb-8">
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'involvement' : 'process'}</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{isInvolvement ? 'scope of work' : 'development'}</h2>
+            </div>
+            {content.processText && (
+              <p className={`mb-8 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.processText}</p>
+            )}
+
+            {content.processImages.length > 0 && (
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {content.processImages.map((src, index) => (
+                  <ClickableImage
+                    key={`${src}-${index}`}
+                    src={src}
+                    alt={`${project.title} process ${index + 1}`}
+                    aspect="aspect-[4/3]"
+                    onOpen={openImage}
+                    backgroundClass={theme.warm}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {hasSchematicSection && (
+          <section className="mt-16 mb-16">
+            <div className="mb-8">
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'role' : 'schematics'}</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{isInvolvement ? 'contribution' : 'systems and diagrams'}</h2>
+            </div>
+            {content.schematicText && (
+              <p className={`mb-8 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.schematicText}</p>
+            )}
+
+            {content.schematicImages.length > 0 && (
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {content.schematicImages.map((src, index) => (
+                  <ClickableImage
+                    key={`${src}-${index}`}
+                    src={src}
+                    alt={`${project.title} schematic ${index + 1}`}
+                    aspect="aspect-[4/3]"
+                    onOpen={openImage}
+                    backgroundClass={theme.warm}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
         {hasDetailSections && (
           <section className="mt-16 mb-16">
             <div className="mb-8">
@@ -411,60 +465,6 @@ export default function ProjectDetailTemplate({
                 )
               })}
             </div>
-          </section>
-        )}
-
-        {hasProcessSection && (
-          <section className="mt-16 mb-16">
-            <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'involvement' : 'process'}</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{isInvolvement ? 'scope of work' : 'development'}</h2>
-            </div>
-            {content.processText && (
-              <p className={`mb-8 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.processText}</p>
-            )}
-
-            {content.processImages.length > 0 && (
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                {content.processImages.map((src, index) => (
-                  <ClickableImage
-                    key={`${src}-${index}`}
-                    src={src}
-                    alt={`${project.title} process ${index + 1}`}
-                    aspect="aspect-[4/3]"
-                    onOpen={openImage}
-                    backgroundClass={theme.warm}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {hasSchematicSection && (
-          <section className="mt-16 mb-16">
-            <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'role' : 'schematics'}</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{isInvolvement ? 'contribution' : 'systems and diagrams'}</h2>
-            </div>
-            {content.schematicText && (
-              <p className={`mb-8 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.schematicText}</p>
-            )}
-
-            {content.schematicImages.length > 0 && (
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                {content.schematicImages.map((src, index) => (
-                  <ClickableImage
-                    key={`${src}-${index}`}
-                    src={src}
-                    alt={`${project.title} schematic ${index + 1}`}
-                    aspect="aspect-[4/3]"
-                    onOpen={openImage}
-                    backgroundClass={theme.warm}
-                  />
-                ))}
-              </div>
-            )}
           </section>
         )}
 
