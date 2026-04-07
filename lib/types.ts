@@ -31,7 +31,7 @@ export interface Award {
 export interface Publication {
   id: string
   title: string
-  type: 'publication' | 'workshop' | 'exhibition' | 'lecture'
+  type: 'publication' | 'workshop' | 'exhibition' | 'lecture' | 'interview'
   organization: string
   year: number
   description: string | null

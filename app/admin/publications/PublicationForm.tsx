@@ -52,6 +52,7 @@ export default function PublicationForm({ publication, onCancel }: PublicationFo
           <label className="block text-[10px] tracking-widest uppercase text-muted">Type</label>
           <select name="type" defaultValue={publication?.type || 'publication'} className="w-full border border-border bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:border-charcoal transition-colors appearance-none">
             <option value="publication">Publication</option>
+            <option value="interview">Interview</option>
             <option value="workshop">Workshop</option>
             <option value="exhibition">Exhibition</option>
             <option value="lecture">Lecture</option>

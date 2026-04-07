@@ -24,6 +24,7 @@ const STATIC_PUBLICATIONS: Publication[] = [
 
 const TYPE_LABELS: Record<Publication['type'], string> = {
   publication: 'publications',
+  interview:   'interviews',
   workshop:    'workshops & activities',
   exhibition:  'exhibitions',
   lecture:     'lectures',
@@ -34,7 +35,7 @@ export default async function PublicationsPage() {
   try { pubs = await getPublications() } catch { /* fallback */ }
   if (!pubs.length) pubs = STATIC_PUBLICATIONS
 
-  const types = ['publication', 'workshop', 'exhibition', 'lecture'] as const
+  const types = ['publication', 'interview', 'workshop', 'exhibition', 'lecture'] as const
   const grouped = types.reduce<Partial<Record<Publication['type'], Publication[]>>>((acc, t) => {
     const items = pubs.filter((p) => p.type === t)
     if (items.length) acc[t] = items
