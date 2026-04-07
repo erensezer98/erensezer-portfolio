@@ -12,7 +12,7 @@ export default function InteractiveRelight() {
     const el = mountRef.current
     if (!el) return
 
-    // ─── Scene & Camera ───────────────────────────────────────────────────────
+    // â”€â”€â”€ Scene & Camera â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const scene = new THREE.Scene()
     const w = el.clientWidth
     const h = el.clientHeight
@@ -20,7 +20,7 @@ export default function InteractiveRelight() {
     camera.position.set(0, 4, 6)
     camera.lookAt(0, 1, 0)
 
-    // ─── Renderer ─────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Renderer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(w, h)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -31,7 +31,7 @@ export default function InteractiveRelight() {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     el.appendChild(renderer.domElement)
 
-    // ─── Lighting ─────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Lighting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Very dim ambient light so shadows are almost completely dark
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.05)
     scene.add(ambientLight)
@@ -45,14 +45,14 @@ export default function InteractiveRelight() {
     pointLight.shadow.mapSize.height = 1024
     scene.add(pointLight)
 
-    // ─── Dark matte material (same as original) ───────────────────────────────
+    // â”€â”€â”€ Dark matte material (same as original) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const material = new THREE.MeshStandardMaterial({
       color: 0x222222,
       roughness: 0.8,
       metalness: 0.2,
     })
 
-    // ─── Road material — low emissive glow ───────────────────────────────────
+    // â”€â”€â”€ Road material â€” low emissive glow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const roadMaterial = new THREE.MeshStandardMaterial({
       color: 0x333333,
       roughness: 0.9,
@@ -61,7 +61,7 @@ export default function InteractiveRelight() {
       emissiveIntensity: 0.25,
     })
 
-    // ─── Base plane that receives shadows ─────────────────────────────────────
+    // â”€â”€â”€ Base plane that receives shadows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const planeGeo = new THREE.PlaneGeometry(30, 30)
     const planeMenu = new THREE.Mesh(planeGeo, material)
     planeMenu.rotation.x = -Math.PI / 2
@@ -69,15 +69,15 @@ export default function InteractiveRelight() {
     planeMenu.receiveShadow = true
     scene.add(planeMenu)
 
-    // ─── Group (for slow rotation animation) ──────────────────────────────────
+    // â”€â”€â”€ Group (for slow rotation animation) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const group = new THREE.Group()
     scene.add(group)
 
-    // ─── Catch plane for mouse → light position ───────────────────────────────
+    // â”€â”€â”€ Catch plane for mouse â†’ light position â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Will be updated after model loads; default at y=2
     const catchPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -2)
 
-    // ─── Load GLB ─────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Load GLB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const dracoLoader = new DRACOLoader()
     dracoLoader.setDecoderPath('/draco/')
     const loader = new GLTFLoader()
@@ -154,7 +154,7 @@ export default function InteractiveRelight() {
       (err) => console.error('GLB load error:', err)
     )
 
-    // ─── Interaction (Mouse tracking) ─────────────────────────────────────────
+    // â”€â”€â”€ Interaction (Mouse tracking) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const raycaster = new THREE.Raycaster()
     const mouse = new THREE.Vector2()
 
@@ -171,7 +171,7 @@ export default function InteractiveRelight() {
 
     window.addEventListener('mousemove', onMouseMoveSmooth)
 
-    // ─── Resize ───────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Resize â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const onResize = () => {
       if (!el) return
       const nw = el.clientWidth
@@ -182,7 +182,7 @@ export default function InteractiveRelight() {
     }
     window.addEventListener('resize', onResize)
 
-    // ─── Animation loop ───────────────────────────────────────────────────────
+    // â”€â”€â”€ Animation loop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     let animId: number
     const clock = new THREE.Clock()
     const frustum = new THREE.Frustum()
@@ -217,7 +217,7 @@ export default function InteractiveRelight() {
     }
     animate()
 
-    // ─── Cleanup ──────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Cleanup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     return () => {
       cancelAnimationFrame(animId)
       window.removeEventListener('mousemove', onMouseMoveSmooth)

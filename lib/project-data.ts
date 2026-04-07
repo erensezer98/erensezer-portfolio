@@ -100,12 +100,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     project: createProject(
       'static-food-tower',
       'food-tower',
-      'The Food Tower',
+      'The MIND Tower',
       2022,
       'Milan, Italy',
       'academic',
       'Vertical farm and factory in the MIND district, Milan. Shortlisted for Skyhive Skyscraper Challenge 2022.',
-      'The Food Tower proposes a self-sustaining vertical farm integrated into Milan\'s MIND innovation district. The tower combines agricultural production, food processing, and public market space within a single mass-timber structure, creating a new typology that bridges the urban and the ecological.',
+      'The MIND Tower is a research project set in Milan\'s MIND district, where questions about the future of cities, food, and construction meet. Conceived as a vertical factory, the proposal brings production, processing, planning, packaging, sales, and recycling into a single timber high-rise, challenging the conventional food chain by removing long-distance logistics and compressing it into a compact architectural system.',
       ['vertical farm', 'skyscraper', 'timber structure'],
       null,
       true,
@@ -114,11 +114,11 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     page: createPageContent({
       sceneComponent: 'food-tower-explosion',
       introText:
-        'The project proposes a productive tower that merges cultivation, processing, and public exchange into one vertical urban ecosystem. Instead of separating agriculture from the city, it makes food infrastructure visible and civic.',
+        'How much could the food chain change if we redesigned it from the ground up? The MIND Tower begins with that question. Set in Milan\'s MIND district, the project rethinks the future of farming, production, and high-rise construction at once. Imagined as a vertical factory, it gathers production, processing, planning, packaging, sales, and recycling within one compact tower, reducing the chain by removing long-distance logistics and replacing it with a simple system of lifts between floors.',
       processText:
-        'The design develops through stacked environmental layers, testing how structure, daylight, logistics, and public circulation can coexist in a compact footprint. Programmatic layers separate where needed while staying visually connected.',
+        'The project was never meant as a model for mass production. Instead, it works as a built manifesto, a way of making visible the hidden steps that feed the planet and extending the conversation opened by Expo 2015. That idea shaped the exhibition lifts, which allow visitors to move through the process and understand food production as an architectural experience. At the same time, the tower became a vehicle for architectural research, testing timber as the primary structural material while integrating a ventilated facade, solar panels, and energy studies to measure both consumption and potential savings.',
       schematicText:
-        'The exploded axonometric logic clarifies the relationship between public ground, cultivation zones, processing floors, and the climatic skin. Each level performs as a legible piece of a larger ecological machine.',
+        'The envelope combines wood and aluminum in a facade system that changes with orientation. Triangular cantilevers extend from the main slab and become deeper or shallower depending on sun exposure. On facades with direct sunlight, longer projections provide shade, enlarge the ventilation cavity, and tilt the glazing horizontally so photovoltaic panels can gather more radiation. On the cooler elevations, where direct sun is limited, the facade becomes more vertical and the profiles are angled to preserve outward views without interrupting the logic of the system.',
       infoFields: [
         { label: 'Program', value: 'Mixed-Use / Vertical Agriculture' },
         { label: 'Area', value: '42,000 m2' },
@@ -146,11 +146,11 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     page: createPageContent({
       sceneComponent: 'the-log-scene',
       introText:
-        'This auditorium is imagined as an inhabited timber mass shaped by acoustic logic and grounded in the landscape. The project balances expressive form with a calm interior performance atmosphere.',
+        'This project imagines an auditorium for the Alda Merini School in Milan, born from a simple scene: students gathering in a circle on logs. That image stayed with us. We wanted to keep something that already belonged to them and turn it into architecture, carrying the log from object to idea. The result is a bright, playful auditorium where the stage can expand by folding open the back wall, allowing the performance space to stretch outward and transform with use.',
       processText:
-        'The design studies section, enclosure thickness, and circulation as one continuous architectural operation. Structure and acoustic geometry are treated together so the space reads as a single carved volume.',
+        'The Log is organized in two layers: the auditorium itself and the foyer. The foyer is conceived as an almost weightless space, light-filled and transparent beneath an ETFE roof. In contrast, the auditorium is grounded, solid, and heavy, holding the stillness and concentration of the performance room. That tension between lightness and mass came from the children themselves, from the effort of rolling heavy logs into place and turning them into a circle, then into a shared and joyful environment.',
       schematicText:
-        'The 3D scene emphasizes the project\'s volumetric character and the way the shell frames the internal performance space. The diagrammatic reading focuses on section, enclosure, and material continuity.',
+        'Inside the auditorium, acoustic panels shape the atmosphere as much as the sound. The stage is paired with a bifold door that can open the back wall completely, turning the garden into a backdrop or, even better, into an extension of the stage itself. The foyer works as a semi-conditioned buffer, helping moderate the greenhouse effect created by the polycarbonate walls while preserving its luminous, in-between character.',
       infoFields: [
         { label: 'Program', value: 'Cultural / Performance' },
         { label: 'Area', value: '8,500 m2' },
@@ -209,11 +209,11 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     page: createPageContent({
       sceneComponent: 'exploded-axonometry',
       introText:
-        'Csarda is conceived as a temporary cultural pavilion that brings hospitality, gathering, and visibility into the festival landscape. The design turns a light structure into an identifiable social landmark.',
+        'Csarda was designed as the pavilion for the 25th International Scout Jamboree, with the spirit of the event built directly into the brief. The request was clear: create something inexpensive, easy to prefabricate, compact enough to ship to South Korea in a single container, and simple enough to be assembled by the scouts themselves on site. The project became not just a pavilion for the festival, but a structure shaped by the hands and habits of the people who would use it.',
       processText:
-        'The project balances speed of assembly, modular logic, and cultural legibility. Timber elements are organized for straightforward construction while preserving a clear architectural identity.',
+        'The design began with a simple idea: a pavilion under which scouts would not feel out of place, but comfortably in the shade. That thought led us toward the image of dense forest canopies and the familiar logic of temporary camp structures. Rather than imposing a polished object onto the site, the project developed as a lightweight shelter that felt close to the culture of scouting, direct, adaptable, and intuitive to build.',
       schematicText:
-        'Assembly and structural diagrams explain the pavilion through repeatable parts, quick connections, and a lightweight roof strategy suitable for temporary occupation.',
+        'Fabrics and ropes became the main elements of the system, creating a gazebo-like structure that could be set up through gestures scouts already know well. The ropes were designed to be loosened or untied in severe weather conditions, while during the fourteen-day festival they held the canopy in place and cast a generous field of shade. The diagrams focus on that simple, resilient logic: light parts, easy assembly, and a structure that performs through tension rather than weight.',
       infoFields: [
         { label: 'Program', value: 'Temporary Pavilion / Exhibition' },
         { label: 'Area', value: '320 m2' },
