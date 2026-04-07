@@ -25,19 +25,20 @@ export const EXPERIMENTS: Experiment[] = [
   },
   {
     slug: 'dense-dot-matrix',
-    title: 'Dense Dot Matrix',
+    title: 'Tabletop Scanner',
     category: 'Networked Study',
     year: 2026,
     location: 'Desktop + mobile',
     shortDescription:
-      'A dual-device spatial field where an iPhone streams live body telemetry into a reactive point-cloud landscape.',
+      'A dual-device experiment that reads objects on a desk and turns them into a miniature city in real time.',
     description:
-      'Dense Dot Matrix splits sensing and rendering across two devices. The phone runs MediaPipe Pose and broadcasts lightweight landmark data over PeerJS, while the desktop receives that stream and translates it into a dense, glowing topography of points that swells around the moving body in real time.',
+      'Tabletop Scanner uses the iPhone as a live sensing tool and the desktop as a playful urban renderer. The phone detects objects on a desk such as books, cups, bottles, laptops, and tools, then streams those detections over PeerJS. The desktop translates them into a miniature city, where each object becomes a distinct architectural mass, street fragment, or landmark.',
     embedPath: '/experiments/dense-dot-matrix-desktop.html',
     notes: [
       'Open this page on a desktop or laptop first.',
       'Scan the QR code with your phone to launch the companion mobile page.',
-      'Allow camera access on the phone to begin streaming pose data into the desktop scene.',
+      'Point the phone at a desk or tabletop with a few recognizable objects.',
+      'Books, cups, bottles, laptops, and small tools will be translated into a live desk-city on the desktop.',
     ],
   },
 ]

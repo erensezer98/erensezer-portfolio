@@ -3,16 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dense Dot Matrix</title>
+  <title>Tabletop Scanner</title>
   <style>
-    body { margin: 0; overflow: hidden; background-color: #030408; font-family: Arial, sans-serif; color: white; }
-    #info { position: absolute; top: 20px; left: 20px; pointer-events: none; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; z-index: 10; opacity: 0.7; }
-    #overlay { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3, 4, 8, 0.9); display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 100; backdrop-filter: blur(10px); transition: opacity 1.5s ease; }
-    #qr-code { border: 10px solid white; border-radius: 8px; margin-bottom: 20px; background: white; }
+    body { margin: 0; overflow: hidden; background: #0a0e12; font-family: Arial, sans-serif; color: white; }
+    #overlay {
+      position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
+      background: rgba(10, 14, 18, 0.92); backdrop-filter: blur(10px); z-index: 20; transition: opacity 0.9s ease;
+    }
+    #qr-code { border: 10px solid white; border-radius: 8px; background: white; margin-bottom: 18px; }
+    #status-text { color: rgba(255, 255, 255, 0.58); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; line-height: 1.6; text-align: center; }
     .hidden { opacity: 0; pointer-events: none; }
-    #status-text { margin-top: 16px; color: rgba(255, 255, 255, 0.5); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; text-align: center; line-height: 1.5;}
+    #info {
+      position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none;
+      text-transform: uppercase; letter-spacing: 2px; font-size: 12px; color: rgba(255,255,255,0.74);
+    }
+    #legend {
+      position: absolute; right: 20px; bottom: 20px; z-index: 10; padding: 14px 16px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(8px);
+      max-width: 220px; font-size: 11px; line-height: 1.55; color: rgba(255,255,255,0.7);
+    }
   </style>
-
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js" crossorigin="anonymous"></script>
   <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
@@ -27,43 +37,38 @@
   </div>
 
   <div id="info">
-    Dense Dot Matrix / Silhouette Field<br>
-    <span style="font-size: 10px; color: #888;">A living point cloud shaped by the body in motion</span>
+    Tabletop Scanner / Desk City<br>
+    <span style="font-size: 10px; color: #88929b;">Point your phone at a desk to grow a miniature city</span>
+  </div>
+
+  <div id="legend">
+    Objects become city pieces.<br>
+    Books stretch into slabs, cups rise into towers, bottles become spires, and small tools turn into urban fragments.
   </div>
 
   <script type="module">
     import * as THREE from 'three'
 
-    const POSE_CONNECTIONS = [
-      [11, 12], [11, 13], [13, 15], [15, 17], [15, 19], [15, 21],
-      [12, 14], [14, 16], [16, 18], [16, 20], [16, 22],
-      [11, 23], [12, 24], [23, 24],
-      [23, 25], [25, 27], [27, 29], [29, 31],
-      [24, 26], [26, 28], [28, 30], [30, 32],
-      [11, 24], [12, 23], [0, 7], [0, 8],
-    ]
-
-    const landmarkUniforms = []
-    for (let i = 0; i < 33; i += 1) {
-      landmarkUniforms.push(new THREE.Vector2(-100, -100))
+    const objectPalette = {
+      book: { color: '#ff8b5c', height: 1.6, footprint: 1.8 },
+      laptop: { color: '#8df0ff', height: 1.2, footprint: 2.2 },
+      cup: { color: '#ffd86e', height: 2.9, footprint: 0.8 },
+      bottle: { color: '#d18cff', height: 3.6, footprint: 0.7 },
+      phone: { color: '#6effb0', height: 1.0, footprint: 1.2 },
+      keyboard: { color: '#9eb7ff', height: 0.8, footprint: 2.4 },
+      mouse: { color: '#ff95ba', height: 0.9, footprint: 0.8 },
+      remote: { color: '#c6ffa4', height: 1.0, footprint: 1.1 },
+      scissors: { color: '#ff6e6e', height: 1.3, footprint: 0.9 },
+      pen: { color: '#f4a3ff', height: 0.7, footprint: 1.7 },
+      default: { color: '#ffffff', height: 1.4, footprint: 1.1 },
     }
 
-    const segmentUniforms = POSE_CONNECTIONS.map(() => new THREE.Vector4(-100, -100, -100, -100))
-    let lastDataTime = Date.now()
+    const detections = []
+    let lastDataTime = 0
 
-    function decayLandmarks() {
-      landmarkUniforms.forEach((v) => {
-        v.x += (-100 - v.x) * 0.05
-        v.y += (-100 - v.y) * 0.05
-      })
-    }
-
-    function updateSegmentUniforms() {
-      POSE_CONNECTIONS.forEach(([aIndex, bIndex], index) => {
-        const a = landmarkUniforms[aIndex]
-        const b = landmarkUniforms[bIndex]
-        segmentUniforms[index].set(a.x, a.y, b.x, b.y)
-      })
+    function pickStyle(label) {
+      const key = Object.keys(objectPalette).find((entry) => label.includes(entry))
+      return objectPalette[key || 'default']
     }
 
     const peer = new window.Peer()
@@ -80,235 +85,184 @@
       })
 
       document.getElementById('status-text').innerText =
-        '1. Scan with your phone\n2. Open the companion page\n3. Allow camera access to stream telemetry'
+        '1. Scan with your phone\n2. Open the camera page\n3. Point it at a tabletop scene'
     })
 
     peer.on('connection', (conn) => {
-      document.getElementById('status-text').innerText = 'Secure link established\nSyncing telemetry...'
+      document.getElementById('status-text').innerText = 'Secure link established\nReceiving object detections...'
       document.getElementById('qr-code').style.display = 'none'
 
       setTimeout(() => {
         document.getElementById('overlay').classList.add('hidden')
-      }, 1500)
+      }, 1200)
 
-      conn.on('data', (data) => {
+      conn.on('data', (payload) => {
+        if (!payload || !Array.isArray(payload.objects)) return
         lastDataTime = Date.now()
-
-        if (Array.isArray(data) && data.length === 33) {
-          data.forEach((lm, i) => {
-            const targetX = (1 - lm.x) * 2 - 1
-            const targetY = -(lm.y * 2) + 1
-            landmarkUniforms[i].x += (targetX - landmarkUniforms[i].x) * 0.2
-            landmarkUniforms[i].y += (targetY - landmarkUniforms[i].y) * 0.2
-          })
-          updateSegmentUniforms()
-        } else if (data && data.empty) {
-          decayLandmarks()
-          updateSegmentUniforms()
-        }
+        detections.length = 0
+        payload.objects.slice(0, 12).forEach((item) => detections.push(item))
       })
     })
 
     const scene = new THREE.Scene()
-    scene.fog = new THREE.FogExp2(0x030408, 0.025)
+    scene.background = new THREE.Color(0x0a0e12)
+    scene.fog = new THREE.FogExp2(0x0a0e12, 0.045)
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
-    camera.position.set(0, 0, 15)
+    const camera = new THREE.PerspectiveCamera(54, window.innerWidth / window.innerHeight, 0.1, 1000)
+    camera.position.set(0, 14, 18)
     camera.lookAt(0, 0, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' })
-    renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.setClearColor(0x030408)
+    renderer.setSize(window.innerWidth, window.innerHeight)
     document.body.appendChild(renderer.domElement)
 
-    const gridWidth = 80
-    const gridHeight = 46
-    const density = 5
+    const ambient = new THREE.AmbientLight(0xffffff, 0.65)
+    scene.add(ambient)
 
-    const countX = Math.floor(gridWidth * density)
-    const countY = Math.floor(gridHeight * density)
-    const particleCount = countX * countY
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.3)
+    dirLight.position.set(10, 18, 6)
+    scene.add(dirLight)
 
-    const geometry = new THREE.BufferGeometry()
-    const positions = new Float32Array(particleCount * 3)
-    const baseSizes = new Float32Array(particleCount)
+    const grid = new THREE.GridHelper(36, 28, 0x223241, 0x16202a)
+    grid.position.y = -0.01
+    scene.add(grid)
 
-    let iter = 0
-    for (let y = 0; y < countY; y += 1) {
-      for (let x = 0; x < countX; x += 1) {
-        positions[iter * 3] = (x / countX) * gridWidth - gridWidth / 2
-        positions[iter * 3 + 1] = (y / countY) * gridHeight - gridHeight / 2
-        positions[iter * 3 + 2] = 0
-        baseSizes[iter] = 1 + Math.random() * 1.5
-        iter += 1
+    const basePlane = new THREE.Mesh(
+      new THREE.CircleGeometry(18, 96),
+      new THREE.MeshStandardMaterial({ color: 0x101820, roughness: 0.92, metalness: 0.04 })
+    )
+    basePlane.rotation.x = -Math.PI / 2
+    scene.add(basePlane)
+
+    const cityGroup = new THREE.Group()
+    scene.add(cityGroup)
+
+    const roadsGroup = new THREE.Group()
+    scene.add(roadsGroup)
+
+    const labelCanvas = document.createElement('canvas')
+    labelCanvas.width = 1024
+    labelCanvas.height = 512
+    const labelCtx = labelCanvas.getContext('2d')
+    const labelTexture = new THREE.CanvasTexture(labelCanvas)
+    const labelPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(12, 6),
+      new THREE.MeshBasicMaterial({ map: labelTexture, transparent: true, depthWrite: false })
+    )
+    labelPlane.position.set(0, 7.5, -8)
+    scene.add(labelPlane)
+
+    function clearGroup(group) {
+      while (group.children.length) {
+        const child = group.children.pop()
+        child.geometry?.dispose?.()
+        child.material?.dispose?.()
       }
     }
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    geometry.setAttribute('baseSize', new THREE.BufferAttribute(baseSizes, 1))
+    function renderLabels(items) {
+      labelCtx.clearRect(0, 0, labelCanvas.width, labelCanvas.height)
+      labelCtx.fillStyle = 'rgba(7, 10, 14, 0.0)'
+      labelCtx.fillRect(0, 0, labelCanvas.width, labelCanvas.height)
+      labelCtx.fillStyle = 'rgba(255,255,255,0.92)'
+      labelCtx.font = '28px Arial'
+      items.slice(0, 6).forEach((item, index) => {
+        const y = 64 + index * 64
+        labelCtx.fillStyle = item.color
+        labelCtx.fillRect(40, y - 20, 24, 24)
+        labelCtx.fillStyle = 'rgba(255,255,255,0.88)'
+        labelCtx.fillText(`${item.label}  ${Math.round(item.score * 100)}%`, 88, y)
+      })
+      labelTexture.needsUpdate = true
+    }
 
-    const getVisibleFrustumHeight = () => 2 * 15 * Math.tan(THREE.MathUtils.degToRad(60 / 2))
+    function buildCity(items, time) {
+      clearGroup(cityGroup)
+      clearGroup(roadsGroup)
 
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: { value: 0 },
-        uLandmarks: { value: landmarkUniforms },
-        uSegments: { value: segmentUniforms },
-        uVisibleWidth: { value: getVisibleFrustumHeight() * camera.aspect },
-        uVisibleHeight: { value: getVisibleFrustumHeight() },
-        uAspect: { value: camera.aspect },
-      },
-      vertexShader: `
-        uniform float uTime;
-        uniform vec2 uLandmarks[33];
-        uniform vec4 uSegments[26];
-        uniform float uVisibleWidth;
-        uniform float uVisibleHeight;
-        uniform float uAspect;
-        attribute float baseSize;
-        varying vec3 vColor;
-        varying float vEnergy;
+      const mapped = items.map((item) => {
+        const style = pickStyle(item.label)
+        const centerX = (item.x + item.width * 0.5 - 0.5) * 24
+        const centerZ = (item.y + item.height * 0.5 - 0.5) * 14
+        const width = Math.max(style.footprint, item.width * 16)
+        const depth = Math.max(style.footprint, item.height * 11)
+        const height = style.height + item.score * 2.2 + Math.sin(time * 1.6 + centerX * 0.15 + centerZ * 0.18) * 0.18
+        return { ...item, color: style.color, centerX, centerZ, width, depth, height }
+      })
 
-        float sdSegment(vec2 p, vec2 a, vec2 b) {
-          vec2 pa = p - a;
-          vec2 ba = b - a;
-          float denom = max(dot(ba, ba), 0.0001);
-          float h = clamp(dot(pa, ba) / denom, 0.0, 1.0);
-          return length(pa - ba * h);
-        }
+      mapped.forEach((item) => {
+        const material = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(item.color),
+          roughness: 0.35,
+          metalness: 0.18,
+          emissive: new THREE.Color(item.color).multiplyScalar(0.16),
+        })
+        const mesh = new THREE.Mesh(
+          new THREE.BoxGeometry(item.width, item.height, item.depth),
+          material
+        )
+        mesh.position.set(item.centerX, item.height / 2, item.centerZ)
+        cityGroup.add(mesh)
 
-        float roundedBoxField(vec2 p, vec2 center, vec2 halfSize, float radius, vec2 axisY) {
-          vec2 safeAxisY = normalize(axisY + vec2(0.0001, 0.0001));
-          vec2 axisX = vec2(safeAxisY.y, -safeAxisY.x);
-          vec2 local = p - center;
-          vec2 q = vec2(dot(local, axisX), dot(local, safeAxisY));
-          vec2 d = abs(q) - halfSize;
-          float outside = length(max(d, 0.0));
-          float inside = min(max(d.x, d.y), 0.0);
-          float dist = outside + inside;
-          return 1.0 - smoothstep(radius, radius + 0.12, dist);
-        }
+        const cap = new THREE.Mesh(
+          new THREE.CylinderGeometry(item.width * 0.16, item.width * 0.28, 0.24, 24),
+          new THREE.MeshStandardMaterial({
+            color: 0xf8efe2,
+            emissive: new THREE.Color(item.color).multiplyScalar(0.3),
+            roughness: 0.18,
+            metalness: 0.45,
+          })
+        )
+        cap.position.set(item.centerX, item.height + 0.12, item.centerZ)
+        cityGroup.add(cap)
+      })
 
-        float circleField(vec2 p, vec2 center, float radius) {
-          float d = length(p - center);
-          return 1.0 - smoothstep(radius, radius + 0.14, d);
-        }
+      for (let i = 0; i < mapped.length; i += 1) {
+        const a = mapped[i]
+        const b = mapped[(i + 1) % mapped.length]
+        if (!a || !b) continue
+        const start = new THREE.Vector3(a.centerX, 0.03, a.centerZ)
+        const end = new THREE.Vector3(b.centerX, 0.03, b.centerZ)
+        const distance = start.distanceTo(end)
+        if (distance < 1.4 || distance > 16) continue
+        const road = new THREE.Mesh(
+          new THREE.BoxGeometry(distance, 0.05, 0.24),
+          new THREE.MeshBasicMaterial({ color: 0x6de3ff, transparent: true, opacity: 0.42 })
+        )
+        road.position.copy(start.clone().lerp(end, 0.5))
+        road.lookAt(end)
+        road.rotateY(Math.PI / 2)
+        roadsGroup.add(road)
+      }
 
-        void main() {
-          vec3 pos = position;
-          vec2 normalizedPos = vec2(pos.x / (uVisibleWidth / 2.0), pos.y / (uVisibleHeight / 2.0));
-          float jointField = 0.0;
-
-          for (int i = 0; i < 33; i++) {
-            vec2 diff = normalizedPos - uLandmarks[i];
-            diff.x *= uAspect;
-            float d = length(diff);
-            jointField = max(jointField, 1.0 - smoothstep(0.0, 0.12, d));
-          }
-
-          float skeletonField = 0.0;
-          for (int i = 0; i < 26; i++) {
-            vec2 a = uSegments[i].xy;
-            vec2 b = uSegments[i].zw;
-            vec2 scaledPos = normalizedPos;
-            vec2 scaledA = a;
-            vec2 scaledB = b;
-            scaledPos.x *= uAspect;
-            scaledA.x *= uAspect;
-            scaledB.x *= uAspect;
-            float d = sdSegment(scaledPos, scaledA, scaledB);
-            skeletonField = max(skeletonField, 1.0 - smoothstep(0.0, 0.08, d));
-          }
-
-          vec2 shoulderCenter = (uLandmarks[11] + uLandmarks[12]) * 0.5;
-          vec2 hipCenter = (uLandmarks[23] + uLandmarks[24]) * 0.5;
-          vec2 torsoAxis = shoulderCenter - hipCenter;
-          float torsoHeight = max(length(torsoAxis), 0.16) * 0.55;
-          float torsoWidth = max(length(uLandmarks[11] - uLandmarks[12]), length(uLandmarks[23] - uLandmarks[24])) * 0.28 + 0.06;
-          float torsoField = roundedBoxField(
-            normalizedPos,
-            (shoulderCenter + hipCenter) * 0.5,
-            vec2(torsoWidth, torsoHeight),
-            0.04,
-            torsoAxis
-          );
-
-          vec2 headCenter = mix(uLandmarks[0], shoulderCenter, 0.18);
-          float headRadius = max(length(uLandmarks[7] - uLandmarks[8]), 0.08) * 0.9 + 0.05;
-          float headField = circleField(normalizedPos, headCenter, headRadius);
-
-          float totalInfluence = max(max(skeletonField, torsoField), max(headField, jointField * 0.75));
-          totalInfluence = clamp(totalInfluence, 0.0, 1.0);
-
-          float ripple = sin(pos.x * 0.55 + uTime * 1.8) * cos(pos.y * 0.45 - uTime * 1.35) * 0.28;
-          float shimmer = sin((pos.x + pos.y) * 0.35 - uTime * 2.2) * 0.12;
-          pos.z += ripple + shimmer;
-          pos.z += totalInfluence * 5.0;
-          pos.x += sin(pos.y * 0.16 + uTime) * 0.12 * totalInfluence;
-          pos.y += cos(pos.x * 0.14 - uTime * 0.85) * 0.12 * totalInfluence;
-
-          vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-          gl_PointSize = baseSize * (18.0 / -mvPosition.z) * (1.25 + totalInfluence * 6.2);
-          gl_Position = projectionMatrix * mvPosition;
-
-          float hueMix = 0.5 + 0.5 * sin(uTime * 0.9 + pos.y * 0.08);
-          vec3 idleColor = mix(vec3(0.03, 0.05, 0.09), vec3(0.10, 0.07, 0.16), hueMix);
-          vec3 contourColor = mix(vec3(0.10, 0.95, 1.0), vec3(1.0, 0.45, 0.22), hueMix);
-          vec3 coreColor = vec3(1.0, 0.96, 0.82);
-
-          vec3 finalColor = mix(idleColor, contourColor, clamp(totalInfluence * 1.3, 0.0, 1.0));
-          finalColor = mix(finalColor, coreColor, clamp((totalInfluence - 0.55) * 2.4, 0.0, 1.0));
-          vColor = finalColor;
-          vEnergy = totalInfluence;
-        }
-      `,
-      fragmentShader: `
-        varying vec3 vColor;
-        varying float vEnergy;
-
-        void main() {
-          vec2 coord = gl_PointCoord - vec2(0.5);
-          float d = length(coord);
-          if (d > 0.5) discard;
-          float halo = smoothstep(0.5, 0.0, d);
-          float core = smoothstep(0.24, 0.0, d);
-          float alpha = mix(0.28, 1.0, vEnergy) * halo;
-          vec3 color = vColor + vec3(core * 0.24);
-          gl_FragColor = vec4(color, alpha);
-        }
-      `,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    })
-
-    scene.add(new THREE.Points(geometry, material))
+      renderLabels(mapped)
+    }
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight
       camera.updateProjectionMatrix()
       renderer.setSize(window.innerWidth, window.innerHeight)
-      material.uniforms.uAspect.value = camera.aspect
-      material.uniforms.uVisibleWidth.value = getVisibleFrustumHeight() * camera.aspect
-      material.uniforms.uVisibleHeight.value = getVisibleFrustumHeight()
     })
 
     const clock = new THREE.Clock()
 
     function animate() {
       requestAnimationFrame(animate)
-      material.uniforms.uTime.value = clock.getElapsedTime()
+      const time = clock.getElapsedTime()
 
-      if (Date.now() - lastDataTime > 1500) {
-        decayLandmarks()
-        updateSegmentUniforms()
-      }
+      const activeItems = Date.now() - lastDataTime < 2400 ? detections : []
+      buildCity(activeItems, time)
+
+      cityGroup.rotation.y = Math.sin(time * 0.22) * 0.18
+      roadsGroup.rotation.y = cityGroup.rotation.y
+      camera.position.x = Math.sin(time * 0.12) * 1.6
+      camera.position.z = 18 + Math.cos(time * 0.1) * 0.8
+      camera.lookAt(0, 2.8, 0)
 
       renderer.render(scene, camera)
     }
 
-    updateSegmentUniforms()
     animate()
   </script>
 </body>
