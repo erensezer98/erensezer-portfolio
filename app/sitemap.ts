@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { getAllProjectsForDisplay } from '@/lib/project-page-data'
+import type { Project } from '@/lib/types'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.erensezer.com'
@@ -18,10 +19,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1 : 0.8,
   }))
 
-  let projects: any[] = []
+  let projects: Project[] = []
   try {
     projects = await getAllProjectsForDisplay()
-  } catch (error) {
+  } catch {
     // If supabase fails, we just don't include dynamic links
   }
 
