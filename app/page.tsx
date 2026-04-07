@@ -46,7 +46,7 @@ export default async function HomePage() {
       </section>
 
       <section className="pb-20">
-        <div className="aspect-[16/8] min-h-[280px] overflow-hidden bg-warm md:min-h-[420px]">
+        <div className="aspect-[16/8] min-h-[280px] overflow-hidden bg-white border border-rule md:min-h-[420px]">
           <ArchitecturalWireframe />
         </div>
       </section>
