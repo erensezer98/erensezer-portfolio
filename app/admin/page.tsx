@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
 import DeleteButton from './DeleteButton'
+import ResetPiazzaButton from './ResetPiazzaButton'
 import DriveFoldersPanel from './DriveFoldersPanel'
 import { deleteProject } from './actions'
 import { isPlaceholderDriveValue, PROJECT_DRIVE_FIELDS } from '@/lib/drive-folder-settings'
@@ -184,6 +185,17 @@ export default async function AdminDashboard() {
       </div>
 
       <DriveFoldersPanel initialSettings={settings} />
+
+      {/* Digital Piazza */}
+      <div className="border border-rule bg-white p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted">digital piazza</p>
+            <p className="mt-1 text-sm text-muted">Reset all accumulated cursor tallies from visitor interactions.</p>
+          </div>
+          <ResetPiazzaButton />
+        </div>
+      </div>
     </div>
   )
 }

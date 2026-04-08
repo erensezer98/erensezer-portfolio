@@ -186,6 +186,26 @@ export async function deletePublication(id: string) {
   }
 }
 
+// ─── Digital Piazza ──────────────────────────────────────────────────────────
+export async function resetPiazzaTallies() {
+  try {
+    const { error } = await db
+      .from('digital_piazza_tallies')
+      .delete()
+      .neq('box_id', '')  // deletes all rows
+
+    if (error) {
+      console.error('resetPiazzaTallies error:', error)
+      return { error: error.message }
+    }
+    revalidatePath('/')
+    return { success: true }
+  } catch (err) {
+    console.error('resetPiazzaTallies unexpected error:', err)
+    return { error: String(err) }
+  }
+}
+
 // ─── Messages ────────────────────────────────────────────────────────────────
 export async function deleteMessage(id: string) {
   try {

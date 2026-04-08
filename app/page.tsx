@@ -22,11 +22,7 @@ export default async function HomePage() {
   }
 
   const mergedProjects = mergeProjectWithStatic(projects).sort((a, b) => {
-    if ((b.year ?? 0) !== (a.year ?? 0)) {
-      return (b.year ?? 0) - (a.year ?? 0)
-    }
-
-    return (b.order_index ?? 0) - (a.order_index ?? 0)
+    return (a.order_index ?? 0) - (b.order_index ?? 0)
   })
   const displayProjects = await Promise.all(mergedProjects.map(resolveProjectDisplayMedia))
 
