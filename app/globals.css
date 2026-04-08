@@ -39,7 +39,6 @@
   body.content-protected [data-protect-content="true"] img {
     -webkit-user-drag: none;
     user-drag: none;
-    pointer-events: none;
   }
 }
 

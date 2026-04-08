@@ -29,10 +29,6 @@ export default function ContentProtection() {
       event.preventDefault()
     }
 
-    function handleContextMenu(event: MouseEvent) {
-      if (!isProtectedTarget(event.target)) return
-      event.preventDefault()
-    }
 
     function handleDragStart(event: DragEvent) {
       if (!isProtectedTarget(event.target)) return
@@ -41,14 +37,12 @@ export default function ContentProtection() {
 
     document.addEventListener('copy', handleCopy)
     document.addEventListener('cut', handleCut)
-    document.addEventListener('contextmenu', handleContextMenu)
     document.addEventListener('dragstart', handleDragStart)
 
     return () => {
       document.body.classList.remove('content-protected')
       document.removeEventListener('copy', handleCopy)
       document.removeEventListener('cut', handleCut)
-      document.removeEventListener('contextmenu', handleContextMenu)
       document.removeEventListener('dragstart', handleDragStart)
     }
   }, [isAdminRoute])
