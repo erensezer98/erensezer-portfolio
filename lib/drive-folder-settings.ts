@@ -38,6 +38,7 @@ export const PROJECT_DRIVE_FIELDS = [
       gallery: 'drive_food_tower_gallery_folder',
       process: 'drive_food_tower_process_folder',
       wide: 'drive_food_tower_wide_folder',
+      chapterReferences: 'drive_food_tower_chapter_references_folder',
     },
   },
   {
@@ -49,6 +50,7 @@ export const PROJECT_DRIVE_FIELDS = [
       gallery: 'drive_istanbul_a_way_out_gallery_folder',
       process: 'drive_istanbul_a_way_out_process_folder',
       wide: 'drive_istanbul_a_way_out_wide_folder',
+      chapterReferences: 'drive_istanbul_a_way_out_chapter_references_folder',
     },
   },
   {
@@ -60,6 +62,7 @@ export const PROJECT_DRIVE_FIELDS = [
       gallery: 'drive_the_log_gallery_folder',
       process: 'drive_the_log_process_folder',
       wide: 'drive_the_log_wide_folder',
+      chapterReferences: 'drive_the_log_chapter_references_folder',
     },
   },
   {
@@ -71,6 +74,7 @@ export const PROJECT_DRIVE_FIELDS = [
       gallery: 'drive_halic_co_op_gallery_folder',
       process: 'drive_halic_co_op_process_folder',
       wide: 'drive_halic_co_op_wide_folder',
+      chapterReferences: 'drive_halic_co_op_chapter_references_folder',
     },
   },
   {
@@ -82,6 +86,7 @@ export const PROJECT_DRIVE_FIELDS = [
       gallery: 'drive_csarda_gallery_folder',
       process: 'drive_csarda_process_folder',
       wide: 'drive_csarda_wide_folder',
+      chapterReferences: 'drive_csarda_chapter_references_folder',
     },
   },
   {
@@ -93,6 +98,7 @@ export const PROJECT_DRIVE_FIELDS = [
       gallery: 'drive_unfolding_landscapes_gallery_folder',
       process: 'drive_unfolding_landscapes_process_folder',
       wide: 'drive_unfolding_landscapes_wide_folder',
+      chapterReferences: 'drive_unfolding_landscapes_chapter_references_folder',
     },
   },
   {
@@ -104,6 +110,7 @@ export const PROJECT_DRIVE_FIELDS = [
       gallery: 'drive_toor_toor_school_gallery_folder',
       process: 'drive_toor_toor_school_process_folder',
       wide: 'drive_toor_toor_school_wide_folder',
+      chapterReferences: 'drive_toor_toor_school_chapter_references_folder',
     },
   },
   {
@@ -115,6 +122,7 @@ export const PROJECT_DRIVE_FIELDS = [
       gallery: 'drive_mondadori_gallery_folder',
       process: 'drive_mondadori_process_folder',
       wide: 'drive_mondadori_wide_folder',
+      chapterReferences: 'drive_mondadori_chapter_references_folder',
     },
   },
   {
@@ -126,6 +134,7 @@ export const PROJECT_DRIVE_FIELDS = [
       gallery: 'drive_biennale_gallery_folder',
       process: 'drive_biennale_process_folder',
       wide: 'drive_biennale_wide_folder',
+      chapterReferences: 'drive_biennale_chapter_references_folder',
     },
   },
   {
@@ -137,6 +146,7 @@ export const PROJECT_DRIVE_FIELDS = [
       gallery: 'drive_aquapraca_gallery_folder',
       process: 'drive_aquapraca_process_folder',
       wide: 'drive_aquapraca_wide_folder',
+      chapterReferences: 'drive_aquapraca_chapter_references_folder',
     },
   },
 ] as const

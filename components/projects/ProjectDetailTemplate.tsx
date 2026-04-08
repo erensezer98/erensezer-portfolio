@@ -309,8 +309,8 @@ export default function ProjectDetailTemplate({
         <div className="mt-16 mb-16 grid gap-x-16 gap-y-12 md:grid-cols-[1fr_280px]">
           <div>
             <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>overview</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>project narrative</h2>
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.introLabel || 'overview'}</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.introTitle || 'project narrative'}</h2>
             </div>
             <p className={`mb-5 text-sm leading-relaxed ${theme.text}`}>
               {content.introText || project.description || project.short_description}
@@ -344,8 +344,8 @@ export default function ProjectDetailTemplate({
         {hasProcessSection && (
           <section className="mt-16 mb-16">
             <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'involvement' : 'process'}</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{isInvolvement ? 'scope of work' : 'development'}</h2>
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.processLabel || (isInvolvement ? 'involvement' : 'process')}</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.processTitle || (isInvolvement ? 'scope of work' : 'development')}</h2>
             </div>
             {content.processText && (
               <p className={`mb-8 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.processText}</p>
@@ -371,8 +371,8 @@ export default function ProjectDetailTemplate({
         {hasDetailSections && (
           <section className="mt-16 mb-16">
             <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>thesis chapters</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>read the project deeper</h2>
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.chaptersLabel || 'thesis chapters'}</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.chaptersTitle || 'read the project deeper'}</h2>
             </div>
 
             <div className={`border-t ${theme.border}`}>
@@ -457,8 +457,8 @@ export default function ProjectDetailTemplate({
                   className="flex w-full items-start justify-between gap-6 py-6 text-left"
                 >
                   <div className="max-w-3xl">
-                    <p className={`mb-2 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'role' : 'schematics'}</p>
-                    <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{isInvolvement ? 'contribution' : 'systems and diagrams'}</h2>
+                    <p className={`mb-2 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.schematicLabel || (isInvolvement ? 'role' : 'schematics')}</p>
+                    <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.schematicTitle || (isInvolvement ? 'contribution' : 'systems and diagrams')}</h2>
                   </div>
                   <span
                     className={`mt-1 text-xl leading-none transition-transform ${theme.accent} ${schematicOpen ? 'rotate-90' : ''}`}
@@ -498,8 +498,8 @@ export default function ProjectDetailTemplate({
         {hasGallerySection && (
           <section className="mt-16">
             <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>gallery</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>project images</h2>
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.galleryLabel || 'gallery'}</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.galleryTitle || 'project images'}</h2>
             </div>
             {galleryImages.length > 0 ? (
               <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -525,8 +525,8 @@ export default function ProjectDetailTemplate({
         {hasAwards && (
           <section className="mt-16">
             <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>awards</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>recognition</h2>
+              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.awardsLabel || 'awards'}</p>
+              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.awardsTitle || 'recognition'}</h2>
             </div>
             <div className={`border-t ${theme.border}`}>
               {content.awards

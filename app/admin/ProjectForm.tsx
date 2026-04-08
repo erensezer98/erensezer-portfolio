@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { saveProject, saveProjectPageContent, toggleProjectFeatured } from './actions'
 import { DRIVE_FOLDERS } from '@/lib/project-images'
 import type { Project, ProjectCategory } from '@/lib/types'
-import type { ProjectPageContent, ProjectSceneComponent } from '@/lib/project-data'
+import type { ProjectPageContent, ProjectSceneComponent, ProjectDetailSection } from '@/lib/project-data'
 
 interface ProjectFormProps {
   project?: Partial<Project>
@@ -55,6 +55,7 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
   const [featured, setFeatured] = useState(project?.featured ?? false)
   const [featuredLoading, setFeaturedLoading] = useState(false)
   const [slugPreview, setSlugPreview] = useState(project?.slug ?? '')
+  const [detailSections, setDetailSections] = useState<ProjectDetailSection[]>(templateContent.detailSections || [])
 
   const infoFields = useMemo(() => {
     if (templateContent.infoFields.length) return templateContent.infoFields
@@ -109,6 +110,22 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
         value: ((formData.get(`info_${field.label.toLowerCase()}`) as string) || '').trim(),
       })),
       awards: parseLineSeparated(formData.get('awards') as string),
+      detailSections: detailSections.map(section => ({
+        ...section,
+        paragraphs: section.paragraphs.filter(p => p.trim() !== '') // remove empty lines
+      })),
+      introLabel: (formData.get('introLabel') as string).trim(),
+      introTitle: (formData.get('introTitle') as string).trim(),
+      processLabel: (formData.get('processLabel') as string).trim(),
+      processTitle: (formData.get('processTitle') as string).trim(),
+      schematicLabel: (formData.get('schematicLabel') as string).trim(),
+      schematicTitle: (formData.get('schematicTitle') as string).trim(),
+      chaptersLabel: (formData.get('chaptersLabel') as string).trim(),
+      chaptersTitle: (formData.get('chaptersTitle') as string).trim(),
+      galleryLabel: (formData.get('galleryLabel') as string).trim(),
+      galleryTitle: (formData.get('galleryTitle') as string).trim(),
+      awardsLabel: (formData.get('awardsLabel') as string).trim(),
+      awardsTitle: (formData.get('awardsTitle') as string).trim(),
     }
 
     const { error: saveProjectError } = await saveProject(data)
@@ -411,6 +428,148 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
               placeholder="Shortlisted for..."
               className="w-full resize-none border border-border bg-transparent px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
             />
+          </div>
+        </section>
+
+        <section className="space-y-6 border-t border-border pt-8">
+          <div>
+            <h3 className="text-xl font-light text-charcoal">Section Labels & Titles</h3>
+            <p className="mt-2 text-sm text-muted">Customize the labels (small text) and titles for each section of the page.</p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Overview Label</label>
+              <input name="introLabel" defaultValue={templateContent.introLabel || 'overview'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Overview Title</label>
+              <input name="introTitle" defaultValue={templateContent.introTitle || 'project narrative'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Process Label</label>
+              <input name="processLabel" defaultValue={templateContent.processLabel || 'process'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Process Title</label>
+              <input name="processTitle" defaultValue={templateContent.processTitle || 'development'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Schematics Label</label>
+              <input name="schematicLabel" defaultValue={templateContent.schematicLabel || 'schematics'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Schematics Title</label>
+              <input name="schematicTitle" defaultValue={templateContent.schematicTitle || 'systems and diagrams'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Chapters Label</label>
+              <input name="chaptersLabel" defaultValue={templateContent.chaptersLabel || 'thesis chapters'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Chapters Title</label>
+              <input name="chaptersTitle" defaultValue={templateContent.chaptersTitle || 'read the project deeper'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Gallery Label</label>
+              <input name="galleryLabel" defaultValue={templateContent.galleryLabel || 'gallery'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Gallery Title</label>
+              <input name="galleryTitle" defaultValue={templateContent.galleryTitle || 'project images'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Awards Label</label>
+              <input name="awardsLabel" defaultValue={templateContent.awardsLabel || 'awards'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-[10px] uppercase tracking-widest text-muted">Awards Title</label>
+              <input name="awardsTitle" defaultValue={templateContent.awardsTitle || 'recognition'} className="w-full border border-border bg-transparent px-4 py-2 text-sm text-charcoal focus:border-charcoal focus:outline-none" />
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-6 border-t border-border pt-8">
+          <div>
+            <h3 className="text-xl font-light text-charcoal">Read the Project Deeper (Chapters)</h3>
+            <p className="mt-2 text-sm text-muted">
+              Add detail chapters. <b>They will only appear if there are images found in their Drive folder.</b>
+            </p>
+          </div>
+
+          <div className="space-y-8">
+            {detailSections.map((section, index) => (
+              <div key={section.id || index} className="space-y-4 border border-rule bg-warm/10 p-6">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-[13px] font-medium text-ink">Chapter {index + 1}</h4>
+                  <button
+                    type="button"
+                    onClick={() => setDetailSections(ds => ds.filter((_, i) => i !== index))}
+                    className="text-[10px] uppercase tracking-widest text-red-500 hover:text-red-700 transition"
+                  >
+                    remove
+                  </button>
+                </div>
+                
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="block text-[10px] uppercase tracking-widest text-muted">Eyebrow (e.g. Chapter 01)</label>
+                    <input
+                      value={section.eyebrow || ''}
+                      onChange={(e) => setDetailSections(ds => ds.map((s, i) => i === index ? { ...s, eyebrow: e.target.value } : s))}
+                      className="w-full border border-border bg-white px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-[10px] uppercase tracking-widest text-muted">Title</label>
+                    <input
+                      required
+                      value={section.title || ''}
+                      onChange={(e) => setDetailSections(ds => ds.map((s, i) => i === index ? { ...s, title: e.target.value } : s))}
+                      className="w-full border border-border bg-white px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-[10px] uppercase tracking-widest text-muted">Summary</label>
+                  <input
+                    value={section.summary || ''}
+                    onChange={(e) => setDetailSections(ds => ds.map((s, i) => i === index ? { ...s, summary: e.target.value } : s))}
+                    className="w-full border border-border bg-white px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-[10px] uppercase tracking-widest text-muted">Paragraphs (one per line)</label>
+                  <textarea
+                    rows={5}
+                    value={(section.paragraphs || []).join('\n')}
+                    onChange={(e) => setDetailSections(ds => ds.map((s, i) => i === index ? { ...s, paragraphs: e.target.value.split('\n') } : s))}
+                    className="w-full resize-none border border-border bg-white px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-[10px] uppercase tracking-widest text-muted">Drive Folder ID (Images)</label>
+                  <input
+                    value={section.driveFolderId || ''}
+                    onChange={(e) => setDetailSections(ds => ds.map((s, i) => i === index ? { ...s, driveFolderId: e.target.value } : s))}
+                    placeholder="e.g. 1a2b3c4d5e..."
+                    className="w-full border border-border bg-white px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
+                  />
+                  <p className="text-[11px] text-muted">Paste the exact Drive Folder ID for this chapter's images. If it is empty or has no images, this chapter won't be shown.</p>
+                </div>
+              </div>
+            ))}
+            
+            <button
+              type="button"
+              onClick={() => setDetailSections(ds => [...ds, { id: `chapter-${Date.now()}`, title: '', summary: '', paragraphs: [], images: [], eyebrow: `chapter ${String(ds.length + 1).padStart(2, '0')}` }])}
+              className="border border-border px-6 py-3 text-[10px] uppercase tracking-widest transition-all duration-300 hover:bg-cream/50"
+            >
+              + Add Chapter
+            </button>
           </div>
         </section>
 

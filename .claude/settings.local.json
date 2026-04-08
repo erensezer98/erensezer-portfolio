@@ -7,7 +7,8 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(git -C \"C:/Users/Eren Sezer/Documents/Claude/Projects/Portfolio/portfolio\" add app/page.tsx \"app/projects/[slug]/page.tsx\" app/projects/page.tsx)",
       "Bash(git -C:*)",
-      "Bash(git -C \"C:/Users/Eren Sezer/Documents/Claude/Projects/Portfolio/portfolio\" push origin main)"
+      "Bash(git -C \"C:/Users/Eren Sezer/Documents/Claude/Projects/Portfolio/portfolio\" push origin main)",
+      "WebFetch(domain:www.rpbw.com)"
     ]
   }
 }

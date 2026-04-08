@@ -1,4 +1,4 @@
-import { getProjectDriveMedia, resolveProjectDisplayMedia } from '@/lib/drive-folder-media'
+import { getProjectDriveMedia, resolveProjectDisplayMedia, listPublicFolderImages } from '@/lib/drive-folder-media'
 import {
   getDefaultProjectPageContent,
   getStaticProjectBySlug,
@@ -52,30 +52,41 @@ export async function getResolvedProjectPageDataBySlug(slug: string): Promise<Re
     ? savedPageContent.detailSections
     : defaultContent.detailSections
 
-  if (detailSections && driveMedia.chapterImages && driveMedia.chapterImages.length > 0) {
-    detailSections = detailSections.map((section, index) => {
-      const sectionDriveImages = driveMedia.chapterImages![index] || []
-      
-      if (sectionDriveImages.length > 0) {
-        const filledImages = section.images.map((img, imgIndex) => ({
-          ...img,
-          src: sectionDriveImages[imgIndex] || img.src,
-        }))
-        const extraImages = sectionDriveImages.slice(section.images.length).map((src) => ({
-          src,
-          alt: section.title,
-          aspectRatio: '4/3' as const,
-        }))
-        return {
-          ...section,
-          images: [...filledImages, ...extraImages],
-        }
-      }
-      return section
-    })
-  }
+  const isPlaceholderUrl = (url: string) => !url || url.includes('PLACEHOLDER_') || url.includes('USERFILE')
 
-  const isPlaceholderUrl = (url: string) => url.includes('PLACEHOLDER_')
+  if (detailSections) {
+    const fromFolderIdImages = await Promise.all(
+      detailSections.map((section) =>
+        section.driveFolderId
+          ? listPublicFolderImages(section.driveFolderId, 10).catch(() => [])
+          : Promise.resolve([])
+      )
+    )
+
+    detailSections = detailSections.map((section, index) => {
+      let sectionDriveImages = fromFolderIdImages[index]
+      if (!sectionDriveImages || sectionDriveImages.length === 0) {
+        sectionDriveImages = driveMedia.chapterImages?.[index] || []
+      }
+
+      const filledImages = section.images.map((img, imgIndex) => ({
+        ...img,
+        src: sectionDriveImages[imgIndex] || img.src,
+      }))
+      const extraImages = sectionDriveImages.slice(section.images.length).map((src) => ({
+        src,
+        alt: section.title,
+        aspectRatio: '4/3' as const,
+      }))
+
+      const finalImages = [...filledImages, ...extraImages].filter(img => !isPlaceholderUrl(img.src as string))
+
+      return {
+        ...section,
+        images: finalImages,
+      }
+    }).filter(section => section.images.length > 0)
+  }
 
   const filterPlaceholders = (urls: string[]) => urls.filter((url) => !isPlaceholderUrl(url))
 

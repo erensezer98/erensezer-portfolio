@@ -56,7 +56,7 @@ function getDriveFoldersForSlug(slug: string): DriveProjectFolders | null {
   return entry
 }
 
-async function listPublicFolderImages(folderId: string, limit = 24) {
+export async function listPublicFolderImages(folderId: string, limit = 24) {
   const apiKey = process.env.GOOGLE_DRIVE_API_KEY
   if (!apiKey || isPlaceholderDriveValue(folderId)) return []
 

@@ -30,6 +30,7 @@ export interface ProjectDetailSection {
   images: ProjectDetailSectionImage[]
   defaultOpen?: boolean
   includeScene?: boolean
+  driveFolderId?: string
 }
 
 export interface ProjectPageContent {
@@ -43,6 +44,19 @@ export interface ProjectPageContent {
   infoFields: ProjectInfoField[]
   awards: string[]
   detailSections?: ProjectDetailSection[]
+  // Labels
+  introLabel?: string
+  introTitle?: string
+  processLabel?: string
+  processTitle?: string
+  schematicLabel?: string
+  schematicTitle?: string
+  chaptersLabel?: string
+  chaptersTitle?: string
+  galleryLabel?: string
+  galleryTitle?: string
+  awardsLabel?: string
+  awardsTitle?: string
 }
 
 export interface StaticProjectRecord {
@@ -113,6 +127,18 @@ function createPageContent(content: Partial<ProjectPageContent> = {}): ProjectPa
     infoFields: [],
     awards: [],
     detailSections: [],
+    introLabel: 'overview',
+    introTitle: 'project narrative',
+    processLabel: 'process',
+    processTitle: 'development',
+    schematicLabel: 'schematics',
+    schematicTitle: 'systems and diagrams',
+    chaptersLabel: 'thesis chapters',
+    chaptersTitle: 'read the project deeper',
+    galleryLabel: 'gallery',
+    galleryTitle: 'project images',
+    awardsLabel: 'awards',
+    awardsTitle: 'recognition',
     ...content,
   }
 }
@@ -184,7 +210,6 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
               aspectRatio: '4/3',
             },
           ],
-          defaultOpen: true,
         },
         {
           id: 'architecture',
