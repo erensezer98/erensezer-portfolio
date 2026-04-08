@@ -1,0 +1,35 @@
+Command failed: npx next build
+
+Failed to compile.
+
+./app/api/piazza/route.ts
+20:12  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/page.tsx
+1:8  Error: 'dynamic' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/three/DigitalPiazza.tsx
+44:31  Error: 'text' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+
+Failed to compile.
+
+./app/api/piazza/route.ts
+20:12  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/page.tsx
+1:8  Error: 'dynamic' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/three/DigitalPiazza.tsx
+44:31  Error: 'text' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules

@@ -262,3 +262,36 @@ export async function getProjectPageContent(slug: string): Promise<ProjectPageCo
     return null
   }
 }
+
+// ─── Digital Piazza ──────────────────────────────────────────────────────────
+
+export async function getPiazzaTallies(): Promise<{ box_id: string, total_tally: number }[]> {
+  try {
+    const { data, error } = await supabase
+      .from('digital_piazza_tallies')
+      .select('*')
+
+    if (error) {
+      logDataAccessError('Error fetching piazza tallies:', error.message)
+      return []
+    }
+    return data ?? []
+  } catch (err) {
+    logDataAccessError('Unexpected error in getPiazzaTallies:', err)
+    return []
+  }
+}
+
+export async function batchIncrementPiazzaTallies(increments: { box_id: string, increments: number }[]): Promise<void> {
+  try {
+    const { error } = await supabase.rpc('batch_increment_piazza_tallies', {
+      increments
+    })
+    
+    if (error) {
+      console.error('Error batch incrementing piazza tallies:', error.message)
+    }
+  } catch (err) {
+    console.error('Unexpected error in batchIncrementPiazzaTallies:', err)
+  }
+}

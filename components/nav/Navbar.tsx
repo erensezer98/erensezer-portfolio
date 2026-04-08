@@ -39,7 +39,7 @@ export default function Navbar() {
       <div className="px-6 md:px-10 h-12 flex items-center justify-between">
         <Link
           href="/"
-          className={`text-[13px] transition-colors duration-200 ${
+          className={`text-[16px] transition-colors duration-200 ${
             isDark ? 'text-zinc-100 hover:text-zinc-500 font-medium tracking-[-0.02em] lowercase' : 'text-ink hover:text-muted font-medium tracking-[-0.02em] lowercase'
           }`}
         >
