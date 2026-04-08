@@ -248,7 +248,8 @@ export default function ProjectDetailTemplate({
 
   return (
     <>
-      <article className={`min-h-screen px-6 pb-32 pt-28 md:px-10 ${theme.bg}`}>
+      <div className={`${theme.bg}`}>
+      <article className={`min-h-screen w-full px-6 pb-32 pt-28 md:mx-auto md:max-w-[1200px] md:px-10 ${theme.bg}`}>
         <Link
           href="/projects"
           aria-label="Back to projects"
@@ -533,6 +534,7 @@ export default function ProjectDetailTemplate({
           </Link>
         </div>
       </article>
+      </div>
 
       {activeImageIndex !== null && lightboxImages[activeImageIndex] && (
         <div

@@ -57,12 +57,18 @@ export async function getResolvedProjectPageDataBySlug(slug: string): Promise<Re
       const sectionDriveImages = driveMedia.chapterImages![index] || []
       
       if (sectionDriveImages.length > 0) {
+        const filledImages = section.images.map((img, imgIndex) => ({
+          ...img,
+          src: sectionDriveImages[imgIndex] || img.src,
+        }))
+        const extraImages = sectionDriveImages.slice(section.images.length).map((src) => ({
+          src,
+          alt: section.title,
+          aspectRatio: '4/3' as const,
+        }))
         return {
           ...section,
-          images: section.images.map((img, imgIndex) => ({
-            ...img,
-            src: sectionDriveImages[imgIndex] || img.src,
-          })),
+          images: [...filledImages, ...extraImages],
         }
       }
       return section
