@@ -24,18 +24,27 @@ export default function Footer() {
   return (
     <footer className={`mt-24 border-t px-6 py-12 transition-colors duration-700 md:px-10 ${theme.border} ${theme.bg}`}>
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-        <div className="flex flex-col gap-2">
-          <p className={`text-xs font-medium lowercase ${theme.muted}`}>
-            © {new Date().getFullYear()} eren sezer
-          </p>
-          <a
-            href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`text-[10px] font-medium uppercase tracking-wider transition-colors duration-200 ${theme.muted} ${theme.hover}`}
-          >
-            CC BY-NC-SA 4.0
-          </a>
+        <div className={`text-[11px] font-medium leading-relaxed lowercase ${theme.muted}`}>
+          <div className="flex flex-wrap items-center gap-x-1">
+            <Link href="/" className={`${theme.hover} transition-colors`}>Portfolio</Link>
+            <span>© {new Date().getFullYear()} by</span>
+            <Link href="/" className={`${theme.hover} transition-colors`}>Eren Sezer</Link>
+            <span>is licensed under</span>
+            <a
+              href="https://creativecommons.org/licenses/by-nc-nd/4.0/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${theme.hover} transition-colors`}
+            >
+              CC BY-NC-ND 4.0
+            </a>
+            <div className="ml-1 flex items-center gap-1 opacity-75 grayscale invert-[0.3]" style={{ filter: isDark ? 'invert(1) grayscale(1)' : 'grayscale(1)' }}>
+              <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" className="h-4 w-4" />
+              <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" className="h-4 w-4" />
+              <img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" className="h-4 w-4" />
+              <img src="https://mirrors.creativecommons.org/presskit/icons/nd.svg" alt="" className="h-4 w-4" />
+            </div>
+          </div>
         </div>
         <nav className="flex gap-7">
           {[

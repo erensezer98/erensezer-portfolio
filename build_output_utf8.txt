@@ -1,0 +1,101 @@
+﻿
+> eren-sezer-portfolio@0.1.0 build
+> next build
+
+  Γû▓ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+node.exe : Failed to compil
+e.
+At line:1 char:1
++ & "C:\Program Files\nodej
+s/node.exe" "C:\Program Fil
+es\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Fai  
+  led to compile.:String   
+ ) [], RemoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+
+./components/three/Architec
+turalWireframe.tsx
+Module not found: Can't res
+olve 'three'
+
+https://nextjs.org/docs/mes
+sages/module-not-found
+
+Import trace for requested 
+module:
+./components/projects/Proje
+ctScene.tsx
+./components/projects/Proje
+ctDetailTemplate.tsx
+
+./components/three/DigitalP
+iazza.tsx
+Module not found: Can't res
+olve 'three'
+
+https://nextjs.org/docs/mes
+sages/module-not-found
+
+Import trace for requested 
+module:
+./components/hero/DigitalPi
+azzaHero.tsx
+
+./components/three/Exploded
+Axonometry.tsx
+Module not found: Can't res
+olve 'three'
+
+https://nextjs.org/docs/mes
+sages/module-not-found
+
+Import trace for requested 
+module:
+./components/projects/Proje
+ctScene.tsx
+./components/projects/Proje
+ctDetailTemplate.tsx
+
+./components/three/FoodTowe
+rExplosion.tsx
+Module not found: Can't res
+olve 'three'
+
+https://nextjs.org/docs/mes
+sages/module-not-found
+
+Import trace for requested 
+module:
+./components/projects/Proje
+ctScene.tsx
+./components/projects/Proje
+ctDetailTemplate.tsx
+
+./components/three/Interact
+iveRelight.tsx
+Module not found: Can't res
+olve 'three'
+
+https://nextjs.org/docs/mes
+sages/module-not-found
+
+Import trace for requested 
+module:
+./components/projects/Proje
+ctScene.tsx
+./components/projects/Proje
+ctDetailTemplate.tsx
+
+
+> Build failed because of w
+ebpack errors
