@@ -17,8 +17,8 @@ export default function ToorToorScene() {
 
     // ── Scene ──────────────────────────────────────────────────────────────
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color('#f7f1ea')
-    scene.fog = new THREE.Fog('#f7f1ea', 60, 120)
+    scene.background = new THREE.Color('#ffffff')
+    scene.fog = new THREE.Fog('#ffffff', 60, 120)
 
     // ── Camera ─────────────────────────────────────────────────────────────
     const camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 500)
@@ -66,7 +66,7 @@ export default function ToorToorScene() {
     // ── Ground plane ───────────────────────────────────────────────────────
     const groundGeo = new THREE.PlaneGeometry(100, 100)
     const groundMat = new THREE.MeshStandardMaterial({
-      color: '#d8c8a8',
+      color: '#ffffff',
       roughness: 1.0,
     })
     const groundPlane = new THREE.Mesh(groundGeo, groundMat)
