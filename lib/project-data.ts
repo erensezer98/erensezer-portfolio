@@ -198,6 +198,7 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
             'Positioned between Viale Isonzo, Corso Lodi, and Piazzale Lodi, the project closes an urban gap while opening new civic possibilities. It works with transport, nearby institutions, and the regeneration of the former rail-yard to turn the site into a point of arrival rather than a boundary.',
             'This is why the library is imagined less as an isolated building and more as an urban hinge. It gathers movement, culture, and public life into one place and gives Porta Romana a new face toward the city.',
           ],
+          driveFolderId: '18KxuqQLdHAE6VF54GvyNJd0-Bo7pHSBq',
           images: [
             {
               alt: 'The Wall of Porta Romana urban analysis',
@@ -222,6 +223,7 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
             'That contrast allows the project to handle a demanding program without losing clarity. Departments, forum spaces, auditorium functions, and collective interiors are not stacked mechanically, but tied together through a continuous spatial journey.',
             'The result is a library that is meant to be experienced in sequence. You do not just enter it, find a room, and leave. You move through it, discover it, and slowly understand it as a public interior carved into the thickness of the wall.',
           ],
+          driveFolderId: '1KJ0GZ5cfB8f-wLmRM6FA27IhhYXesSGk',
           images: [
             {
               alt: 'The Wall of Porta Romana composition diagram',
@@ -247,6 +249,7 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
             'The chosen solution is a spatial armature built through reinforced concrete cores, steel members, and tension cables. This system distributes loads efficiently while freeing the interior from repetitive supports and making room for double heights, gaps, and changing spatial configurations.',
             'CLT slabs help lighten the floors and sharpen the overall logic of the structure. What remains is an armature that stays mostly hidden, but quietly gives the project its range, its generosity, and its ability to evolve over time.',
           ],
+          driveFolderId: '1at2nWxOYGhnNg9H2-xjqP-CE0cpPBe3n',
           images: [
             {
               alt: 'The Wall of Porta Romana structural evolution',
@@ -271,6 +274,7 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
             'Double glazing, photovoltaic collection, controlled daylight, natural and cross ventilation, concealed services, and rainwater harvesting are woven into the design to improve both performance and daily use. The goal is not simply efficiency, but a building that feels intelligent in the way it works.',
             'This chapter also grounds the project in detail. BIM coordination and assembly studies translate the thesis from concept into something buildable, precise, and technically credible.',
           ],
+          driveFolderId: '1F9AmFGX1pkAdRmBaiPkyAMX0_i_wAO8K',
           images: [
             {
               alt: 'The Wall of Porta Romana facade development',
@@ -295,6 +299,7 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
             'At the same time, the thesis looks carefully at fabrication. CNC-milled components, plywood studies, custom integrated elements, and digitally controlled production methods test how the project\'s organic language can be translated into precise parts.',
             'That is what gives the project credibility. The wall is not only imagined as a powerful figure in the city, but as something that could be assembled, detailed, and built with care.',
           ],
+          driveFolderId: '1iYFaENM2OFkQ2GBFvJVxjzyjGkne572P',
           images: [
             {
               alt: 'The Wall of Porta Romana sustainability diagram',

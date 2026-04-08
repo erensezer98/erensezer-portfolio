@@ -20,7 +20,6 @@ interface DriveProjectFolders {
   gallery: string
   process: string
   wide: string
-  chapterReferences?: string
 }
 
 export interface ProjectDriveMedia {
@@ -28,7 +27,6 @@ export interface ProjectDriveMedia {
   galleryImages: string[]
   processImages: string[]
   schematicImages: string[]
-  chapterImages?: string[][]
 }
 
 function normalizeImageUrl(value: string | null | undefined) {
@@ -87,37 +85,6 @@ export async function listPublicFolderImages(folderId: string, limit = 24) {
   }
 }
 
-export async function listPublicSubfolders(folderId: string, limit = 10): Promise<string[]> {
-  const apiKey = process.env.GOOGLE_DRIVE_API_KEY
-  if (!apiKey || isPlaceholderDriveValue(folderId)) return []
-
-  const query = `'${folderId}' in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'`
-  const params = new URLSearchParams({
-    key: apiKey,
-    q: query,
-    fields: 'files(id,name)',
-    orderBy: 'name_natural',
-    pageSize: String(limit),
-    includeItemsFromAllDrives: 'true',
-    supportsAllDrives: 'true',
-  })
-
-  try {
-    const response = await fetch(`https://www.googleapis.com/drive/v3/files?${params.toString()}`, {
-      cache: 'no-store',
-    })
-
-    if (!response.ok) {
-      return []
-    }
-
-    const data = (await response.json()) as GoogleDriveListResponse
-    return (data.files ?? []).map((file) => file.id)
-  } catch {
-    return []
-  }
-}
-
 async function getConfiguredProjectFolders(slug: string): Promise<DriveProjectFolders | null> {
   const defaults = getDriveFoldersForSlug(slug)
   if (!defaults) return null
@@ -138,10 +105,6 @@ async function getConfiguredProjectFolders(slug: string): Promise<DriveProjectFo
     gallery: resolveVal(config.fields.gallery, defaults.gallery),
     process: resolveVal(config.fields.process, defaults.process),
     wide: resolveVal(config.fields.wide, defaults.wide),
-    ...('chapterReferences' in config.fields ? {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      chapterReferences: resolveVal((config.fields as any).chapterReferences, (defaults as any).chapterReferences)
-    } : {}),
   }
 }
 
@@ -163,18 +126,11 @@ export async function getProjectDriveMedia(slug: string): Promise<ProjectDriveMe
     listPublicFolderImages(folders.wide, 24),
   ])
 
-  let chapterImages: string[][] | undefined = undefined
-  if (folders.chapterReferences && !isPlaceholderDriveValue(folders.chapterReferences)) {
-    const subfolders = await listPublicSubfolders(folders.chapterReferences, 10)
-    chapterImages = await Promise.all(subfolders.map((id) => listPublicFolderImages(id, 10)))
-  }
-
   return {
     coverImage: coverImages[0] ?? null,
     galleryImages,
     processImages,
     schematicImages,
-    chapterImages,
   }
 }
 

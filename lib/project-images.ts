@@ -51,7 +51,6 @@ export const DRIVE_FOLDERS = {
     gallery:            '1B_QgHLoKEw6XTvvkQMMFPJ5Sodz4XUND',
     process:            '1_HKg8kRODxw-GYpM-kmyixFmfH7LHrbu',
     wide:               '1TxWILj5IyyhKCtstHAAU1ZbaRDVKt-OY',
-    chapterReferences:  '1oNWGSSVBIeCVGFsVSGtlXPbO51p3kcyG',
   },
   'istanbul-a-way-out': {
     folder:             '1s7xzeiCewoHXTh41-BgpPnrSZOh5g4g6',

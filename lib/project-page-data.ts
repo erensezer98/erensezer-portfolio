@@ -64,10 +64,7 @@ export async function getResolvedProjectPageDataBySlug(slug: string): Promise<Re
     )
 
     detailSections = detailSections.map((section, index) => {
-      let sectionDriveImages = fromFolderIdImages[index]
-      if (!sectionDriveImages || sectionDriveImages.length === 0) {
-        sectionDriveImages = driveMedia.chapterImages?.[index] || []
-      }
+      const sectionDriveImages = fromFolderIdImages[index] || []
 
       const filledImages = section.images.map((img, imgIndex) => ({
         ...img,
