@@ -8,126 +8,146 @@ import { getProjectCategoryLabel } from '@/lib/project-data'
 import type { ProjectDetailSectionImage, ProjectPageContent } from '@/lib/project-data'
 import type { Project } from '@/lib/types'
 
-function ClickableImage({
-  src,
-  alt,
-  aspect,
-  priority = false,
-  onOpen,
-  backgroundClass,
-}: {
-  src: string
-  alt: string
-  aspect: string
-  priority?: boolean
-  onOpen: (src: string, alt: string) => void
-  backgroundClass: string
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onOpen(src, alt)}
-      aria-label={`Open large view of ${alt}`}
-      className={`${aspect} relative overflow-hidden ${backgroundClass} text-left transition-opacity hover:opacity-95`}
-    >
-      <Image
-        src={src}
-        alt={alt}
-        width={1600}
-        height={1200}
-        priority={priority}
-        className="h-full w-full object-cover"
-      />
-    </button>
-  )
-}
+// ─── RPBW-style image row composition ──────────────────────────────────────
 
-function getAspectClass(aspectRatio?: string) {
-  switch (aspectRatio) {
-    case '16/9':
-      return 'aspect-[16/9]'
-    case '1/1':
-      return 'aspect-square'
-    case '3/4':
-      return 'aspect-[3/4]'
-    case '21/9':
-      return 'aspect-[21/9]'
-    case '4/3':
-    default:
-      return 'aspect-[4/3]'
+// Distributes items into flex rows cycling through RPBW compositions:
+// [1,2], [2,1], [1,1,1], [1,2], [2,1] …
+function composeRows<T>(items: T[]): Array<{ items: T[]; sizes: number[] }> {
+  if (items.length === 0) return []
+  const comps = [[1, 2], [2, 1], [1, 1, 1], [1, 2], [2, 1]]
+  const rows: Array<{ items: T[]; sizes: number[] }> = []
+  let i = 0
+  let ci = 0
+  while (i < items.length) {
+    const remaining = items.length - i
+    if (remaining === 1) {
+      rows.push({ items: [items[i]], sizes: [1] })
+      i++
+    } else {
+      const comp = comps[ci % comps.length]
+      const count = Math.min(comp.length, remaining)
+      rows.push({ items: items.slice(i, i + count), sizes: comp.slice(0, count) })
+      i += count
+      ci++
+    }
   }
+  return rows
 }
 
-function PlaceholderImage({
-  aspect,
-  caption,
-  backgroundClass,
-  borderClass,
-  textClass,
+// ─── Simple image rows (gallery / process / schematic) ─────────────────────
+// Images render at their natural aspect ratio – no cropping.
+
+function SimpleImageRows({
+  srcs,
+  altPrefix,
+  onOpen,
 }: {
-  aspect: string
-  caption?: string
-  backgroundClass: string
-  borderClass: string
-  textClass: string
+  srcs: string[]
+  altPrefix: string
+  onOpen: (src: string, alt: string) => void
 }) {
+  const items = srcs.map((src, i) => ({ src, alt: `${altPrefix} ${i + 1}` }))
+  const rows = composeRows(items)
+
   return (
-    <div className={`${aspect} flex items-center justify-center border border-dashed ${backgroundClass} ${borderClass}`}>
-      <p className={`px-6 text-center text-[11px] tracking-[0.18em] lowercase ${textClass}`}>
-        {caption || 'image slot'}
-      </p>
+    <div className="space-y-3">
+      {rows.map((row, rowIndex) => (
+        <div key={rowIndex} className="flex items-start gap-3">
+          {row.items.map((item, itemIndex) => (
+            <button
+              key={`${item.src}-${itemIndex}`}
+              type="button"
+              onClick={() => onOpen(item.src, item.alt)}
+              aria-label={`Open large view of ${item.alt}`}
+              style={{ flex: row.sizes[itemIndex] }}
+              className="min-w-0 block text-left transition-opacity hover:opacity-95"
+            >
+              <Image
+                src={item.src}
+                alt={item.alt}
+                width={1200}
+                height={800}
+                style={{ width: '100%', height: 'auto', display: 'block' }}
+              />
+            </button>
+          ))}
+        </div>
+      ))}
     </div>
   )
 }
 
-function MediaTile({
-  image,
-  fallbackAlt,
-  priority = false,
+// ─── Detail section image rows (with admin-set aspect ratios / captions) ───
+
+function DetailImageRows({
+  images,
+  fallbackPrefix,
   onOpen,
   backgroundClass,
   borderClass,
   textClass,
+  priority = false,
 }: {
-  image: ProjectDetailSectionImage
-  fallbackAlt: string
-  priority?: boolean
+  images: ProjectDetailSectionImage[]
+  fallbackPrefix: string
   onOpen: (src: string, alt: string) => void
   backgroundClass: string
   borderClass: string
   textClass: string
+  priority?: boolean
 }) {
-  const aspect = getAspectClass(image.aspectRatio)
-
-  if (image.src) {
-    return (
-      <div className="space-y-2">
-        <ClickableImage
-          src={image.src}
-          alt={image.alt || fallbackAlt}
-          aspect={aspect}
-          priority={priority}
-          onOpen={onOpen}
-          backgroundClass={backgroundClass}
-        />
-        {image.caption && <p className={`text-[11px] leading-relaxed ${textClass}`}>{image.caption}</p>}
-      </div>
-    )
-  }
+  const rows = composeRows(images)
 
   return (
-    <div className="space-y-2">
-      <PlaceholderImage
-        aspect={aspect}
-        caption={image.caption}
-        backgroundClass={backgroundClass}
-        borderClass={borderClass}
-        textClass={textClass}
-      />
-      {image.caption && <p className={`text-[11px] leading-relaxed ${textClass}`}>{image.caption}</p>}
+    <div className="space-y-3">
+      {rows.map((row, rowIndex) => (
+        <div key={rowIndex} className="flex items-start gap-3">
+          {row.items.map((image, itemIndex) => {
+            const isFirst = priority && rowIndex === 0 && itemIndex === 0
+            return (
+              <div
+                key={`${image.alt}-${itemIndex}`}
+                style={{ flex: row.sizes[itemIndex] }}
+                className="min-w-0 space-y-2"
+              >
+                {image.src ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => onOpen(image.src as string, image.alt || `${fallbackPrefix} ${itemIndex + 1}`)}
+                      aria-label={`Open large view of ${image.alt}`}
+                      className="block w-full text-left transition-opacity hover:opacity-95"
+                    >
+                      <Image
+                        src={image.src}
+                        alt={image.alt || `${fallbackPrefix} ${itemIndex + 1}`}
+                        width={1200}
+                        height={800}
+                        priority={isFirst}
+                        style={{ width: '100%', height: 'auto', display: 'block' }}
+                      />
+                    </button>
+                    {image.caption && (
+                      <p className={`text-[11px] leading-relaxed ${textClass}`}>{image.caption}</p>
+                    )}
+                  </>
+                ) : (
+                  <div className={`aspect-[4/3] flex items-center justify-center border border-dashed ${backgroundClass} ${borderClass}`}>
+                    <p className={`px-6 text-center text-[11px] tracking-[0.18em] lowercase ${textClass}`}>
+                      {image.caption || 'image slot'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      ))}
     </div>
   )
 }
+
+// ─── Main template ──────────────────────────────────────────────────────────
 
 export default function ProjectDetailTemplate({
   project,
@@ -145,6 +165,7 @@ export default function ProjectDetailTemplate({
   const hasProcessSection = Boolean(content.processText || content.processImages.length)
   const hasSchematicSection = Boolean(content.schematicText || content.schematicImages.length)
   const hasGallerySection = galleryImages.length > 0 || isInvolvement
+
   const lightboxImages = [
     ...content.processImages.map((src, index) => ({ src, alt: `${project.title} process ${index + 1}` })),
     ...content.schematicImages.map((src, index) => ({ src, alt: `${project.title} schematic ${index + 1}` })),
@@ -158,11 +179,13 @@ export default function ProjectDetailTemplate({
     ),
     ...galleryImages.map((src, index) => ({ src, alt: `${project.title} image ${index + 1}` })),
   ]
+
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(
     Object.fromEntries((content.detailSections ?? []).map((section) => [section.id, Boolean(section.defaultOpen)]))
   )
   const [schematicOpen, setSchematicOpen] = useState(false)
+
   const theme = isIstanbul
     ? {
         bg: 'bg-black',
@@ -195,17 +218,13 @@ export default function ProjectDetailTemplate({
     if (activeImageIndex === null) return
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setActiveImageIndex(null)
-      }
-
+      if (event.key === 'Escape') setActiveImageIndex(null)
       if (event.key === 'ArrowRight') {
         setActiveImageIndex((current) => {
           if (current === null || lightboxImages.length === 0) return null
           return (current + 1) % lightboxImages.length
         })
       }
-
       if (event.key === 'ArrowLeft') {
         setActiveImageIndex((current) => {
           if (current === null || lightboxImages.length === 0) return null
@@ -216,7 +235,6 @@ export default function ProjectDetailTemplate({
 
     document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', handleKeyDown)
-
     return () => {
       document.body.style.overflow = ''
       window.removeEventListener('keydown', handleKeyDown)
@@ -231,11 +249,7 @@ export default function ProjectDetailTemplate({
   function moveImage(direction: 'prev' | 'next') {
     setActiveImageIndex((current) => {
       if (current === null || lightboxImages.length === 0) return null
-
-      if (direction === 'next') {
-        return (current + 1) % lightboxImages.length
-      }
-
+      if (direction === 'next') return (current + 1) % lightboxImages.length
       return (current - 1 + lightboxImages.length) % lightboxImages.length
     })
   }
@@ -250,315 +264,307 @@ export default function ProjectDetailTemplate({
   return (
     <>
       <div className={`${theme.bg}`}>
-      <article className={`min-h-screen w-full px-6 pb-32 pt-28 md:mx-auto md:max-w-[1200px] md:px-10 ${theme.bg}`}>
-        <Link
-          href="/projects"
-          aria-label="Back to projects"
-          className={`mb-14 inline-block text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
-        >
-          {'<- projects'}
-        </Link>
+        <article className={`min-h-screen w-full px-6 pb-32 pt-28 md:mx-auto md:max-w-[1200px] md:px-10 ${theme.bg}`}>
 
-        <div className="mb-16 grid gap-12 md:grid-cols-2">
-          <header>
-            <p className={`mb-3 text-xs font-medium lowercase ${theme.muted}`}>{getProjectCategoryLabel(project.category)}</p>
-            <h1 className={`mb-4 text-3xl font-medium leading-tight md:text-5xl ${theme.text}`}>{project.title}</h1>
-            <p className={`mb-6 text-xs ${theme.muted}`}>
-              {project.year} - {project.location}
-            </p>
-            {project.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 text-xs">
-                {project.tags.map((tag) => (
-                  <span key={tag} className={`border px-3 py-1 text-[11px] font-medium lowercase ${theme.muted} ${theme.border}`}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </header>
-          <div>
-            <p className={`text-sm leading-relaxed ${theme.text}`}>
-              {content.introText || project.description || project.short_description}
-            </p>
-          </div>
-        </div>
-
-        {content.sceneComponent !== 'none' && !hasDetailSections && (
-          <div className={`mb-8 aspect-[16/7] w-full overflow-hidden border ${theme.surface} ${theme.border}`}>
-            <ProjectScene component={content.sceneComponent} />
-          </div>
-        )}
-
-        {coverImage ? (
-          <div className={`mb-3 aspect-[16/9] overflow-hidden ${theme.warm}`}>
-            <Image
-              src={coverImage}
-              alt={project.title}
-              width={1600}
-              height={900}
-              priority
-              className="h-full w-full object-cover"
-            />
-          </div>
-        ) : (
-          <div className={`flex aspect-[16/9] items-center justify-center ${theme.warm}`}>
-            <p className={`text-[11px] tracking-widest lowercase ${theme.subtle}`}>cover image</p>
-          </div>
-        )}
-
-        <div className="mt-16 mb-16 grid gap-x-16 gap-y-12 md:grid-cols-[1fr_280px]">
-          <div>
-            <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.introLabel || 'overview'}</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.introTitle || 'project narrative'}</h2>
-            </div>
-            <p className={`mb-5 text-sm leading-relaxed ${theme.text}`}>
-              {content.introText || project.description || project.short_description}
-            </p>
-            {hasDetailSections && content.processText ? (
-              <p className={`text-sm leading-relaxed ${theme.text}`}>{content.processText}</p>
-            ) : (
-              project.description &&
-              content.introText !== project.description && (
-              <p className={`text-sm leading-relaxed ${theme.text}`}>{project.description}</p>
-              )
-            )}
-          </div>
-
-          <div>
-            <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>project info</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>details</h2>
-            </div>
-            <div className={`border-t ${theme.border}`}>
-              {content.infoFields.map((field) => (
-                <div key={field.label} className={`flex items-baseline justify-between border-b py-3 ${theme.border}`}>
-                  <span className={`text-[11px] font-medium lowercase ${theme.muted}`}>{field.label}</span>
-                  <span className={`max-w-[60%] text-right text-[11px] ${theme.text}`}>{field.value || '-'}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {hasProcessSection && (
-          <section className="mt-16 mb-16">
-            <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.processLabel || (isInvolvement ? 'involvement' : 'process')}</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.processTitle || (isInvolvement ? 'scope of work' : 'development')}</h2>
-            </div>
-            {content.processText && (
-              <p className={`mb-8 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.processText}</p>
-            )}
-
-            {content.processImages.length > 0 && (
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                {content.processImages.map((src, index) => (
-                  <ClickableImage
-                    key={`${src}-${index}`}
-                    src={src}
-                    alt={`${project.title} process ${index + 1}`}
-                    aspect="aspect-[4/3]"
-                    onOpen={openImage}
-                    backgroundClass={theme.warm}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {hasDetailSections && (
-          <section className="mt-16 mb-16">
-            <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.chaptersLabel || 'thesis chapters'}</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.chaptersTitle || 'read the project deeper'}</h2>
-            </div>
-
-            <div className={`border-t ${theme.border}`}>
-              {(content.detailSections ?? []).map((section, sectionIndex) => {
-                const isOpen = Boolean(openSections[section.id])
-
-                return (
-                  <div key={section.id} className={`border-b ${theme.border}`}>
-                    <button
-                      type="button"
-                      onClick={() => toggleSection(section.id)}
-                      aria-expanded={isOpen}
-                      className="flex w-full items-start justify-between gap-6 py-6 text-left"
-                    >
-                      <div className="max-w-3xl">
-                        {section.eyebrow && (
-                          <p className={`mb-2 text-[11px] tracking-widest lowercase ${theme.muted}`}>{section.eyebrow}</p>
-                        )}
-                        <h3 className={`text-xl font-medium lowercase md:text-2xl ${theme.text}`}>{section.title}</h3>
-                        <p className={`mt-3 text-sm leading-relaxed ${theme.text}`}>{section.summary}</p>
-                      </div>
-                      <span
-                        className={`mt-1 text-xl leading-none transition-transform ${theme.accent} ${isOpen ? 'rotate-90' : ''}`}
-                        aria-hidden="true"
-                      >
-                        {'->'}
-                      </span>
-                    </button>
-
-                    {isOpen && (
-                      <div className="pb-8">
-                        <div className="grid gap-8 lg:grid-cols-2 lg:gap-10">
-                          <div>
-                            {section.paragraphs.map((paragraph) => (
-                              <p key={paragraph} className={`mb-5 text-sm leading-relaxed ${theme.text}`}>
-                                {paragraph}
-                              </p>
-                            ))}
-                          </div>
-
-                          <div className="space-y-4">
-                            {section.includeScene && content.sceneComponent !== 'none' && (
-                              <div className="space-y-2">
-                                <div className={`aspect-[4/3] overflow-hidden border ${theme.surface} ${theme.border}`}>
-                                  <ProjectScene component={content.sceneComponent} />
-                                </div>
-                                <p className={`text-[11px] leading-relaxed ${theme.muted}`}>Interactive three.js study</p>
-                              </div>
-                            )}
-
-                            {section.images.map((image, imageIndex) => (
-                              <MediaTile
-                                key={`${section.id}-${image.alt}-${imageIndex}`}
-                                image={image}
-                                fallbackAlt={`${project.title} ${section.title} ${imageIndex + 1}`}
-                                priority={sectionIndex === 0 && imageIndex === 0}
-                                onOpen={openImage}
-                                backgroundClass={theme.warm}
-                                borderClass={theme.border}
-                                textClass={theme.muted}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </section>
-        )}
-
-        {hasSchematicSection && (
-          <section className="mt-16 mb-16">
-            <div className={`border-t ${theme.border}`}>
-              <div className={`border-b ${theme.border}`}>
-                <button
-                  type="button"
-                  onClick={() => setSchematicOpen(!schematicOpen)}
-                  aria-expanded={schematicOpen}
-                  className="flex w-full items-start justify-between gap-6 py-6 text-left"
-                >
-                  <div className="max-w-3xl">
-                    <p className={`mb-2 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.schematicLabel || (isInvolvement ? 'role' : 'schematics')}</p>
-                    <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.schematicTitle || (isInvolvement ? 'contribution' : 'systems and diagrams')}</h2>
-                  </div>
-                  <span
-                    className={`mt-1 text-xl leading-none transition-transform ${theme.accent} ${schematicOpen ? 'rotate-90' : ''}`}
-                    aria-hidden="true"
-                  >
-                    {'->'}
-                  </span>
-                </button>
-
-                {schematicOpen && (
-                  <div className="pb-8">
-                    {content.schematicText && (
-                      <p className={`mb-8 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.schematicText}</p>
-                    )}
-
-                    {content.schematicImages.length > 0 && (
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        {content.schematicImages.map((src, index) => (
-                          <ClickableImage
-                            key={`${src}-${index}`}
-                            src={src}
-                            alt={`${project.title} schematic ${index + 1}`}
-                            aspect="aspect-[4/3]"
-                            onOpen={openImage}
-                            backgroundClass={theme.warm}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {hasGallerySection && (
-          <section className="mt-16">
-            <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.galleryLabel || 'gallery'}</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.galleryTitle || 'project images'}</h2>
-            </div>
-            {galleryImages.length > 0 ? (
-              <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                {galleryImages.map((src, index) => (
-                  <ClickableImage
-                    key={`${src}-${index}`}
-                    src={src}
-                    alt={`${project.title} image ${index + 1}`}
-                    aspect="aspect-[4/3]"
-                    onOpen={openImage}
-                    backgroundClass={theme.warm}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className={`mt-3 flex aspect-[16/9] items-center justify-center ${theme.warm}`}>
-                <p className={`text-[11px] tracking-widest lowercase ${theme.subtle}`}>gallery images coming soon</p>
-              </div>
-            )}
-          </section>
-        )}
-
-        {hasAwards && (
-          <section className="mt-16">
-            <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.awardsLabel || 'awards'}</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.awardsTitle || 'recognition'}</h2>
-            </div>
-            <div className={`border-t ${theme.border}`}>
-              {content.awards
-                .filter((award) => award.trim())
-                .map((award) => (
-                  <div key={award} className={`border-b py-6 ${theme.border}`}>
-                    <p className={`text-[13px] leading-relaxed ${theme.text}`}>{award}</p>
-                  </div>
-                ))}
-            </div>
-          </section>
-        )}
-
-        <div className={`mt-20 flex items-center justify-between border-t pt-10 ${theme.border}`}>
+          {/* ── Back link ── */}
           <Link
             href="/projects"
-            aria-label="Back to all projects"
-            className={`text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
+            aria-label="Back to projects"
+            className={`mb-14 inline-block text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
           >
-            {'<- all projects'}
+            {'<- projects'}
           </Link>
-          <Link
-            href="/contact"
-            aria-label="Contact page"
-            className={`text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
-          >
-            {'get in touch ->'}
-          </Link>
-        </div>
-      </article>
+
+          {/* ── Header: title + intro ── */}
+          <div className="mb-16 grid gap-12 md:grid-cols-2">
+            <header>
+              <p className={`mb-3 text-xs font-medium lowercase ${theme.muted}`}>{getProjectCategoryLabel(project.category)}</p>
+              <h1 className={`mb-4 text-3xl font-medium leading-tight md:text-5xl ${theme.text}`}>{project.title}</h1>
+              <p className={`mb-6 text-xs ${theme.muted}`}>
+                {project.year} - {project.location}
+              </p>
+              {project.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 text-xs">
+                  {project.tags.map((tag) => (
+                    <span key={tag} className={`border px-3 py-1 text-[11px] font-medium lowercase ${theme.muted} ${theme.border}`}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </header>
+            <div>
+              <p className={`text-sm leading-relaxed ${theme.text}`}>
+                {content.introText || project.description || project.short_description}
+              </p>
+            </div>
+          </div>
+
+          {/* ── Three.js scene (standalone, no detail sections) ── */}
+          {content.sceneComponent !== 'none' && !hasDetailSections && (
+            <div className={`mb-8 aspect-[16/7] w-full overflow-hidden border ${theme.surface} ${theme.border}`}>
+              <ProjectScene component={content.sceneComponent} />
+            </div>
+          )}
+
+          {/* ── Cover image ── */}
+          {coverImage ? (
+            <div className={`mb-3 aspect-[16/9] overflow-hidden ${theme.warm}`}>
+              <Image
+                src={coverImage}
+                alt={project.title}
+                width={1600}
+                height={900}
+                priority
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className={`flex aspect-[16/9] items-center justify-center ${theme.warm}`}>
+              <p className={`text-[11px] tracking-widest lowercase ${theme.subtle}`}>cover image</p>
+            </div>
+          )}
+
+          {/* ── Overview + info fields ── */}
+          <div className="mt-16 mb-16 grid gap-x-16 gap-y-12 md:grid-cols-[1fr_280px]">
+            <div>
+              <div className="mb-8">
+                <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.introLabel || 'overview'}</p>
+                <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.introTitle || 'project narrative'}</h2>
+              </div>
+              <p className={`mb-5 text-sm leading-relaxed ${theme.text}`}>
+                {content.introText || project.description || project.short_description}
+              </p>
+              {hasDetailSections && content.processText ? (
+                <p className={`text-sm leading-relaxed ${theme.text}`}>{content.processText}</p>
+              ) : (
+                project.description &&
+                content.introText !== project.description && (
+                  <p className={`text-sm leading-relaxed ${theme.text}`}>{project.description}</p>
+                )
+              )}
+            </div>
+
+            <div>
+              <div className="mb-8">
+                <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>project info</p>
+                <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>details</h2>
+              </div>
+              <div className={`border-t ${theme.border}`}>
+                {content.infoFields.map((field) => (
+                  <div key={field.label} className={`flex items-baseline justify-between border-b py-3 ${theme.border}`}>
+                    <span className={`text-[11px] font-medium lowercase ${theme.muted}`}>{field.label}</span>
+                    <span className={`max-w-[60%] text-right text-[11px] ${theme.text}`}>{field.value || '-'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Process section ── */}
+          {hasProcessSection && (
+            <section className="mt-16 mb-16">
+              <div className="mb-8">
+                <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.processLabel || (isInvolvement ? 'involvement' : 'process')}</p>
+                <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.processTitle || (isInvolvement ? 'scope of work' : 'development')}</h2>
+              </div>
+              {content.processText && (
+                <p className={`mb-10 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.processText}</p>
+              )}
+              {content.processImages.length > 0 && (
+                <SimpleImageRows
+                  srcs={content.processImages}
+                  altPrefix={`${project.title} process`}
+                  onOpen={openImage}
+                />
+              )}
+            </section>
+          )}
+
+          {/* ── Detail sections (accordion chapters) ── */}
+          {hasDetailSections && (
+            <section className="mt-16 mb-16">
+              <div className="mb-8">
+                <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.chaptersLabel || 'thesis chapters'}</p>
+                <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.chaptersTitle || 'read the project deeper'}</h2>
+              </div>
+
+              <div className={`border-t ${theme.border}`}>
+                {(content.detailSections ?? []).map((section, sectionIndex) => {
+                  const isOpen = Boolean(openSections[section.id])
+
+                  return (
+                    <div key={section.id} className={`border-b ${theme.border}`}>
+                      {/* Accordion trigger */}
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(section.id)}
+                        aria-expanded={isOpen}
+                        className="flex w-full items-start justify-between gap-6 py-6 text-left"
+                      >
+                        <div className="max-w-3xl">
+                          {section.eyebrow && (
+                            <p className={`mb-2 text-[11px] tracking-widest lowercase ${theme.muted}`}>{section.eyebrow}</p>
+                          )}
+                          <h3 className={`text-xl font-medium lowercase md:text-2xl ${theme.text}`}>{section.title}</h3>
+                          <p className={`mt-3 text-sm leading-relaxed ${theme.text}`}>{section.summary}</p>
+                        </div>
+                        <span
+                          className={`mt-1 text-xl leading-none transition-transform ${theme.accent} ${isOpen ? 'rotate-90' : ''}`}
+                          aria-hidden="true"
+                        >
+                          {'->'}
+                        </span>
+                      </button>
+
+                      {/* Accordion content */}
+                      {isOpen && (
+                        <div className="pb-10">
+                          {/* Three.js scene – full content width */}
+                          {section.includeScene && content.sceneComponent !== 'none' && (
+                            <div className="mb-8">
+                              <div className={`w-full overflow-hidden border ${theme.surface} ${theme.border}`} style={{ aspectRatio: '16/7' }}>
+                                <ProjectScene component={content.sceneComponent} />
+                              </div>
+                              <p className={`mt-2 text-[11px] leading-relaxed ${theme.muted}`}>Interactive three.js study</p>
+                            </div>
+                          )}
+
+                          {/* Text paragraphs */}
+                          {section.paragraphs.length > 0 && (
+                            <div className="mb-10 max-w-3xl">
+                              {section.paragraphs.map((paragraph) => (
+                                <p key={paragraph} className={`mb-5 text-sm leading-relaxed ${theme.text}`}>
+                                  {paragraph}
+                                </p>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Images in RPBW scattered rows */}
+                          {section.images.length > 0 && (
+                            <DetailImageRows
+                              images={section.images}
+                              fallbackPrefix={`${project.title} ${section.title}`}
+                              onOpen={openImage}
+                              backgroundClass={theme.warm}
+                              borderClass={theme.border}
+                              textClass={theme.muted}
+                              priority={sectionIndex === 0}
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* ── Schematic section (accordion) ── */}
+          {hasSchematicSection && (
+            <section className="mt-16 mb-16">
+              <div className={`border-t ${theme.border}`}>
+                <div className={`border-b ${theme.border}`}>
+                  <button
+                    type="button"
+                    onClick={() => setSchematicOpen(!schematicOpen)}
+                    aria-expanded={schematicOpen}
+                    className="flex w-full items-start justify-between gap-6 py-6 text-left"
+                  >
+                    <div className="max-w-3xl">
+                      <p className={`mb-2 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.schematicLabel || (isInvolvement ? 'role' : 'schematics')}</p>
+                      <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.schematicTitle || (isInvolvement ? 'contribution' : 'systems and diagrams')}</h2>
+                    </div>
+                    <span
+                      className={`mt-1 text-xl leading-none transition-transform ${theme.accent} ${schematicOpen ? 'rotate-90' : ''}`}
+                      aria-hidden="true"
+                    >
+                      {'->'}
+                    </span>
+                  </button>
+
+                  {schematicOpen && (
+                    <div className="pb-10">
+                      {content.schematicText && (
+                        <p className={`mb-10 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.schematicText}</p>
+                      )}
+                      {content.schematicImages.length > 0 && (
+                        <SimpleImageRows
+                          srcs={content.schematicImages}
+                          altPrefix={`${project.title} schematic`}
+                          onOpen={openImage}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ── Gallery section ── */}
+          {hasGallerySection && (
+            <section className="mt-16">
+              <div className="mb-8">
+                <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.galleryLabel || 'gallery'}</p>
+                <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.galleryTitle || 'project images'}</h2>
+              </div>
+              {galleryImages.length > 0 ? (
+                <SimpleImageRows
+                  srcs={galleryImages}
+                  altPrefix={`${project.title} image`}
+                  onOpen={openImage}
+                />
+              ) : (
+                <div className={`mt-3 flex aspect-[16/9] items-center justify-center ${theme.warm}`}>
+                  <p className={`text-[11px] tracking-widest lowercase ${theme.subtle}`}>gallery images coming soon</p>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* ── Awards ── */}
+          {hasAwards && (
+            <section className="mt-16">
+              <div className="mb-8">
+                <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{content.awardsLabel || 'awards'}</p>
+                <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{content.awardsTitle || 'recognition'}</h2>
+              </div>
+              <div className={`border-t ${theme.border}`}>
+                {content.awards
+                  .filter((award) => award.trim())
+                  .map((award) => (
+                    <div key={award} className={`border-b py-6 ${theme.border}`}>
+                      <p className={`text-[13px] leading-relaxed ${theme.text}`}>{award}</p>
+                    </div>
+                  ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── Footer nav ── */}
+          <div className={`mt-20 flex items-center justify-between border-t pt-10 ${theme.border}`}>
+            <Link
+              href="/projects"
+              aria-label="Back to all projects"
+              className={`text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
+            >
+              {'<- all projects'}
+            </Link>
+            <Link
+              href="/contact"
+              aria-label="Contact page"
+              className={`text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
+            >
+              {'get in touch ->'}
+            </Link>
+          </div>
+        </article>
       </div>
 
+      {/* ── Lightbox ── */}
       {activeImageIndex !== null && lightboxImages[activeImageIndex] && (
         <div
           role="dialog"
