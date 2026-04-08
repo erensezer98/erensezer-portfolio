@@ -7,6 +7,9 @@ import Image from 'next/image'
 export const metadata: Metadata = {
   title: 'Awards',
   description: 'Awards, recognitions, and certificates received by Eren Sezer.',
+  alternates: {
+    canonical: '/awards',
+  },
 }
 
 export const dynamic = 'force-dynamic'
@@ -36,14 +39,15 @@ export default async function AwardsPage() {
 
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
-
-      <p className="text-[13px] font-medium lowercase text-muted mb-16">awards</p>
+      <header className="mb-16">
+        <h1 className="text-[13px] font-medium lowercase text-muted">awards</h1>
+      </header>
 
       <div className="grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)] lg:items-start">
         <div className="max-w-2xl">
           {years.map((year) => (
             <div key={year} className="grid md:grid-cols-4 gap-4 mb-0">
-              <p className="text-xs text-muted pt-7">{year}</p>
+              <h2 className="text-xs text-muted pt-7">{year}</h2>
               <div className="md:col-span-3">
                 {byYear[year].map((award) => (
                   <div key={award.id} className="border-t border-rule py-7 last:border-b">

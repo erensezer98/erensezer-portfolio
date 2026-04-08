@@ -5,6 +5,9 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Publications',
   description: 'Publications, workshops, and activities by Eren Sezer.',
+  alternates: {
+    canonical: '/publications',
+  },
 }
 
 export const dynamic = 'force-dynamic'
@@ -44,13 +47,14 @@ export default async function PublicationsPage() {
 
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
-
-      <p className="text-[13px] font-medium lowercase text-muted mb-16">publications</p>
+      <header className="mb-16">
+        <h1 className="text-[13px] font-medium lowercase text-muted">publications</h1>
+      </header>
 
       <div className="space-y-20 max-w-2xl">
         {(Object.keys(grouped) as Publication['type'][]).map((type) => (
           <section key={type}>
-            <p className="text-xs font-medium lowercase text-muted mb-8">{TYPE_LABELS[type]}</p>
+            <h2 className="text-xs font-medium lowercase text-muted mb-8">{TYPE_LABELS[type]}</h2>
             {grouped[type]!.map((pub) => (
               <div key={pub.id} className="border-t border-rule py-7 last:border-b">
                 <div className="flex items-start justify-between gap-6">

@@ -221,6 +221,7 @@ function SlideshowBlock({
             src={img.src}
             alt={img.alt || ''}
             fill
+            loading="lazy"
             className={`object-cover transition-opacity duration-1000 ${
               i === currentIndex ? 'opacity-100' : 'opacity-0'
             }`}
@@ -232,7 +233,9 @@ function SlideshowBlock({
           {props.images.map((_, i) => (
             <button
               key={i}
+              type="button"
               onClick={() => setCurrentIndex(i)}
+              aria-label={`Go to slide ${i + 1}`}
               className={`w-2 h-2 rounded-full transition-colors ${
                 i === currentIndex ? 'bg-white' : 'bg-white/40 hover:bg-white/70'
               }`}

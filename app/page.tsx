@@ -28,15 +28,16 @@ export default async function HomePage() {
 
   return (
     <div>
+      <h1 className="sr-only">Eren Sezer - Portfolio of Architect, Designer and Researcher</h1>
       <DigitalPiazzaHero />
 
       <section className="bg-white px-6 md:px-10 pb-32 pt-20">
-        <div className="mb-10 flex items-end justify-between gap-6">
-          <p className="text-[13px] font-medium lowercase text-muted">selected work</p>
+        <header className="mb-10 flex items-end justify-between gap-6">
+          <h2 className="text-[13px] font-medium lowercase text-muted">selected work</h2>
           <Link href="/projects" className="text-[13px] font-medium lowercase text-muted transition-colors hover:text-ink">
             all projects
           </Link>
-        </div>
+        </header>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
           {displayProjects.filter((p) => p.featured).map((project) => {

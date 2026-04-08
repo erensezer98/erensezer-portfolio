@@ -21,6 +21,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: experiment.title,
     description: experiment.shortDescription,
+    alternates: {
+      canonical: `/experiments/${params.slug}`,
+    },
   }
 }
 
@@ -31,8 +34,50 @@ export default function ExperimentDetailPage({ params }: Props) {
     notFound()
   }
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Experiments',
+        item: 'https://www.erensezer.com/experiments',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: experiment.title,
+        item: `https://www.erensezer.com/experiments/${experiment.slug}`,
+      },
+    ],
+  }
+
+  const creativeWorkJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: experiment.title,
+    description: experiment.shortDescription,
+    author: {
+      '@type': 'Person',
+      name: 'Eren Sezer',
+      url: 'https://www.erensezer.com',
+    },
+    datePublished: '2024-01-01', // Stable date as requested
+    genre: 'Interactive Technology',
+  }
+
   return (
-    <div className="px-6 pb-32 pt-28 md:px-10">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(creativeWorkJsonLd) }}
+      />
+      <article className="px-6 pb-32 pt-28 md:px-10">
       <Link href="/experiments" className="text-[13px] font-medium lowercase text-muted transition-colors hover:text-ink">
         {'<- experiments'}
       </Link>
@@ -48,19 +93,23 @@ export default function ExperimentDetailPage({ params }: Props) {
         </div>
 
         <div className="mt-12 max-w-3xl">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted">{experiment.category}</p>
-          <h1 className="mt-3 text-4xl font-medium tracking-[-0.05em] text-ink">{experiment.title}</h1>
-          <p className="mt-4 text-sm leading-7 text-muted">{experiment.description}</p>
-          {experiment.notes?.length ? (
-            <div className="mt-6">
-              {experiment.notes.map((note) => (
-                <p key={note} className="mt-2 text-sm leading-7 text-muted">
-                  {note}
-                </p>
-              ))}
-            </div>
-          ) : null}
-          <div className="mt-8 flex flex-wrap gap-6 text-xs text-muted">
+          <header>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-muted">{experiment.category}</p>
+            <h1 className="mt-3 text-4xl font-medium tracking-[-0.05em] text-ink">{experiment.title}</h1>
+          </header>
+          <div className="mt-4 text-sm leading-7 text-muted">
+            <p>{experiment.description}</p>
+            {experiment.notes?.length ? (
+              <div className="mt-6">
+                {experiment.notes.map((note) => (
+                  <p key={note} className="mt-2">
+                    {note}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          <footer className="mt-8 flex flex-wrap gap-6 text-xs text-muted">
             <span>{experiment.year}</span>
             <span>{experiment.location}</span>
             <a
@@ -71,9 +120,10 @@ export default function ExperimentDetailPage({ params }: Props) {
             >
               open fullscreen
             </a>
-          </div>
+          </footer>
         </div>
       </div>
-    </div>
+    </article>
+    </>
   )
 }

@@ -27,6 +27,7 @@ function ClickableImage({
     <button
       type="button"
       onClick={() => onOpen(src, alt)}
+      aria-label={`Open large view of ${alt}`}
       className={`${aspect} relative overflow-hidden ${backgroundClass} text-left transition-opacity hover:opacity-95`}
     >
       <Image
@@ -250,20 +251,21 @@ export default function ProjectDetailTemplate({
       <article className={`min-h-screen px-6 pb-32 pt-28 md:px-10 ${theme.bg}`}>
         <Link
           href="/projects"
+          aria-label="Back to projects"
           className={`mb-14 inline-block text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
         >
           {'<- projects'}
         </Link>
 
         <div className="mb-16 grid gap-12 md:grid-cols-2">
-          <div>
+          <header>
             <p className={`mb-3 text-xs font-medium lowercase ${theme.muted}`}>{getProjectCategoryLabel(project.category)}</p>
             <h1 className={`mb-4 text-3xl font-medium leading-tight md:text-5xl ${theme.text}`}>{project.title}</h1>
             <p className={`mb-6 text-xs ${theme.muted}`}>
               {project.year} - {project.location}
             </p>
             {project.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 text-xs">
                 {project.tags.map((tag) => (
                   <span key={tag} className={`border px-3 py-1 text-[11px] font-medium lowercase ${theme.muted} ${theme.border}`}>
                     {tag}
@@ -271,7 +273,7 @@ export default function ProjectDetailTemplate({
                 ))}
               </div>
             )}
-          </div>
+          </header>
           <div>
             <p className={`text-sm leading-relaxed ${theme.text}`}>
               {content.introText || project.description || project.short_description}
@@ -407,6 +409,7 @@ export default function ProjectDetailTemplate({
                     <button
                       type="button"
                       onClick={() => toggleSection(section.id)}
+                      aria-expanded={isOpen}
                       className="flex w-full items-start justify-between gap-6 py-6 text-left"
                     >
                       <div className="max-w-3xl">
@@ -516,12 +519,14 @@ export default function ProjectDetailTemplate({
         <div className={`mt-20 flex items-center justify-between border-t pt-10 ${theme.border}`}>
           <Link
             href="/projects"
+            aria-label="Back to all projects"
             className={`text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
           >
             {'<- all projects'}
           </Link>
           <Link
             href="/contact"
+            aria-label="Contact page"
             className={`text-xs font-medium lowercase transition-colors ${theme.muted} ${isIstanbul ? 'hover:text-white' : 'hover:text-ink'}`}
           >
             {'get in touch ->'}
@@ -531,12 +536,16 @@ export default function ProjectDetailTemplate({
 
       {activeImageIndex !== null && lightboxImages[activeImageIndex] && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image lightbox"
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 md:p-8"
           onClick={() => setActiveImageIndex(null)}
         >
           <button
             type="button"
             onClick={() => setActiveImageIndex(null)}
+            aria-label="Close lightbox"
             className="absolute right-4 top-4 text-xs font-medium lowercase text-white transition-opacity hover:opacity-70"
           >
             close
@@ -549,6 +558,7 @@ export default function ProjectDetailTemplate({
                   event.stopPropagation()
                   moveImage('prev')
                 }}
+                aria-label="Previous image"
                 className="absolute left-4 top-1/2 z-[101] -translate-y-1/2 border border-white/20 bg-black/40 px-4 py-3 text-xs font-medium lowercase text-white transition-colors hover:bg-black/60"
               >
                 {'<- prev'}
@@ -559,6 +569,7 @@ export default function ProjectDetailTemplate({
                   event.stopPropagation()
                   moveImage('next')
                 }}
+                aria-label="Next image"
                 className="absolute right-4 top-1/2 z-[101] -translate-y-1/2 border border-white/20 bg-black/40 px-4 py-3 text-xs font-medium lowercase text-white transition-colors hover:bg-black/60"
               >
                 {'next ->'}

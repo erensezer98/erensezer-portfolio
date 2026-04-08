@@ -5,6 +5,9 @@ import { getAboutDriveMedia } from '@/lib/site-drive-media'
 export const metadata: Metadata = {
   title: 'About',
   description: 'Eren Sezer — architect, researcher, and technologist. Project Manager at Maestro Technologies in Carlo Ratti Group.',
+  alternates: {
+    canonical: '/about',
+  },
 }
 
 const work = [
@@ -31,7 +34,9 @@ export default async function AboutPage() {
   return (
     <div className="px-6 md:px-10 pt-28 pb-32">
 
-      <p className="text-[13px] font-medium lowercase text-muted mb-16">about</p>
+      <header className="mb-16">
+        <h1 className="text-[13px] font-medium lowercase text-muted">about</h1>
+      </header>
 
       {/* Bio */}
       <div className="mb-24 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)] lg:items-start">
