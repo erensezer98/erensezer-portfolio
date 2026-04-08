@@ -39,8 +39,8 @@ export default async function AwardsPage() {
 
       <p className="text-[13px] font-medium lowercase text-muted mb-16">awards</p>
 
-      <div className="grid md:grid-cols-2 gap-16">
-        <div>
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)] lg:items-start">
+        <div className="max-w-2xl">
           {years.map((year) => (
             <div key={year} className="grid md:grid-cols-4 gap-4 mb-0">
               <p className="text-xs text-muted pt-7">{year}</p>
@@ -59,17 +59,15 @@ export default async function AwardsPage() {
           ))}
         </div>
 
-        <div>
-          <div className="relative aspect-[3/4] w-[70%] justify-self-start overflow-hidden bg-warm">
+        <div className="relative aspect-[3/4] w-[70%] justify-self-start overflow-hidden bg-warm">
             <Image
               src={media.coverImage || "https://lh3.googleusercontent.com/d/17MQfO_SoqA_jkgDO2LiyNMMuNAe8tVyJ"}
               alt="Eren Sezer"
               fill
-              sizes="(max-width: 768px) 75vw, 37vw"
+              sizes="(max-width: 1024px) 100vw, 28vw"
               className="object-cover"
               quality={90}
             />
-          </div>
         </div>
       </div>
 
