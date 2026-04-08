@@ -162,6 +162,7 @@ export default function ProjectDetailTemplate({
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(
     Object.fromEntries((content.detailSections ?? []).map((section) => [section.id, Boolean(section.defaultOpen)]))
   )
+  const [schematicOpen, setSchematicOpen] = useState(false)
   const theme = isIstanbul
     ? {
         bg: 'bg-black',
@@ -367,33 +368,6 @@ export default function ProjectDetailTemplate({
           </section>
         )}
 
-        {hasSchematicSection && (
-          <section className="mt-16 mb-16">
-            <div className="mb-8">
-              <p className={`mb-3 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'role' : 'schematics'}</p>
-              <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{isInvolvement ? 'contribution' : 'systems and diagrams'}</h2>
-            </div>
-            {content.schematicText && (
-              <p className={`mb-8 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.schematicText}</p>
-            )}
-
-            {content.schematicImages.length > 0 && (
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                {content.schematicImages.map((src, index) => (
-                  <ClickableImage
-                    key={`${src}-${index}`}
-                    src={src}
-                    alt={`${project.title} schematic ${index + 1}`}
-                    aspect="aspect-[4/3]"
-                    onOpen={openImage}
-                    backgroundClass={theme.warm}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
         {hasDetailSections && (
           <section className="mt-16 mb-16">
             <div className="mb-8">
@@ -430,7 +404,7 @@ export default function ProjectDetailTemplate({
 
                     {isOpen && (
                       <div className="pb-8">
-                        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:gap-10">
+                        <div className="grid gap-8 lg:grid-cols-2 lg:gap-10">
                           <div>
                             {section.paragraphs.map((paragraph) => (
                               <p key={paragraph} className={`mb-5 text-sm leading-relaxed ${theme.text}`}>
@@ -468,6 +442,55 @@ export default function ProjectDetailTemplate({
                   </div>
                 )
               })}
+            </div>
+          </section>
+        )}
+
+        {hasSchematicSection && (
+          <section className="mt-16 mb-16">
+            <div className={`border-t ${theme.border}`}>
+              <div className={`border-b ${theme.border}`}>
+                <button
+                  type="button"
+                  onClick={() => setSchematicOpen(!schematicOpen)}
+                  aria-expanded={schematicOpen}
+                  className="flex w-full items-start justify-between gap-6 py-6 text-left"
+                >
+                  <div className="max-w-3xl">
+                    <p className={`mb-2 text-[11px] tracking-widest lowercase ${theme.muted}`}>{isInvolvement ? 'role' : 'schematics'}</p>
+                    <h2 className={`text-2xl font-medium lowercase md:text-3xl ${theme.text}`}>{isInvolvement ? 'contribution' : 'systems and diagrams'}</h2>
+                  </div>
+                  <span
+                    className={`mt-1 text-xl leading-none transition-transform ${theme.accent} ${schematicOpen ? 'rotate-90' : ''}`}
+                    aria-hidden="true"
+                  >
+                    {'->'}
+                  </span>
+                </button>
+
+                {schematicOpen && (
+                  <div className="pb-8">
+                    {content.schematicText && (
+                      <p className={`mb-8 max-w-3xl text-sm leading-relaxed ${theme.text}`}>{content.schematicText}</p>
+                    )}
+
+                    {content.schematicImages.length > 0 && (
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        {content.schematicImages.map((src, index) => (
+                          <ClickableImage
+                            key={`${src}-${index}`}
+                            src={src}
+                            alt={`${project.title} schematic ${index + 1}`}
+                            aspect="aspect-[4/3]"
+                            onOpen={openImage}
+                            backgroundClass={theme.warm}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </section>
         )}
