@@ -558,7 +558,7 @@ export default function ProjectForm({ project, templateContent }: ProjectFormPro
                     placeholder="e.g. 1a2b3c4d5e..."
                     className="w-full border border-border bg-white px-4 py-3 text-sm text-charcoal focus:border-charcoal focus:outline-none"
                   />
-                  <p className="text-[11px] text-muted">Paste the exact Drive Folder ID for this chapter's images. If it is empty or has no images, this chapter won't be shown.</p>
+                  <p className="text-[11px] text-muted">Paste the exact Drive Folder ID for this chapter&apos;s images. If it is empty or has no images, this chapter won&apos;t be shown.</p>
                 </div>
               </div>
             ))}
