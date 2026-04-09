@@ -1,12 +1,25 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js'
 
 export default function ToorToorScene() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const roofMeshesRef = useRef<THREE.Object3D[]>([])
+  const roofStructureMeshesRef = useRef<THREE.Object3D[]>([])
+  const [showRoof, setShowRoof] = useState(true)
+  const [showRoofStructure, setShowRoofStructure] = useState(true)
+
+  useEffect(() => {
+    roofMeshesRef.current.forEach((m) => { m.visible = showRoof })
+  }, [showRoof])
+
+  useEffect(() => {
+    roofStructureMeshesRef.current.forEach((m) => { m.visible = showRoofStructure })
+  }, [showRoofStructure])
 
   useEffect(() => {
     const el = containerRef.current
@@ -17,32 +30,42 @@ export default function ToorToorScene() {
 
     // ── Scene ──────────────────────────────────────────────────────────────
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color('#ffffff')
-    scene.fog = new THREE.Fog('#ffffff', 60, 120)
+    // Background is a CSS gradient on the container — bypasses tone mapping
+    // so sampled colors render exactly as-is.
+    scene.fog = new THREE.Fog('rgb(211,197,201)', 42, 105)
 
     // ── Camera ─────────────────────────────────────────────────────────────
     const camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 500)
     camera.position.set(18, 12, 18)
 
     // ── Renderer ───────────────────────────────────────────────────────────
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    renderer.setClearColor(0x000000, 0) // transparent — CSS gradient shows through
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setSize(W, H)
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.1
+    renderer.toneMappingExposure = 1.3
     renderer.outputColorSpace = THREE.SRGBColorSpace
     el.appendChild(renderer.domElement)
 
+    // ── CSS2D Renderer for labels ──────────────────────────────────────────
+    const labelRenderer = new CSS2DRenderer()
+    labelRenderer.setSize(W, H)
+    labelRenderer.domElement.style.position = 'absolute'
+    labelRenderer.domElement.style.top = '0'
+    labelRenderer.domElement.style.left = '0'
+    labelRenderer.domElement.style.pointerEvents = 'none'
+    el.appendChild(labelRenderer.domElement)
+
     // ── Lights ─────────────────────────────────────────────────────────────
-    // Warm ambient (sky)
-    const ambient = new THREE.AmbientLight('#ffe8c8', 0.7)
+    // African noon — low ambient, brutal overhead sun, warm ground bounce
+    const ambient = new THREE.AmbientLight('#ffe0b0', 0.35)
     scene.add(ambient)
 
-    // Main sun — warm, from upper left (Senegalese high sun)
-    const sun = new THREE.DirectionalLight('#fff0d0', 2.2)
-    sun.position.set(12, 20, 8)
+    const sun = new THREE.DirectionalLight('#fff8e0', 3.8)
+    sun.position.set(6, 32, 4) // nearly overhead, slight south angle
     sun.castShadow = true
     sun.shadow.mapSize.set(2048, 2048)
     sun.shadow.camera.near = 1
@@ -54,25 +77,15 @@ export default function ToorToorScene() {
     sun.shadow.bias = -0.001
     scene.add(sun)
 
-    // Soft fill from opposite side (sky bounce)
-    const fill = new THREE.DirectionalLight('#c8e0ff', 0.5)
+    // Minimal blue sky fill — noon sky is nearly white overhead
+    const fill = new THREE.DirectionalLight('#d0d8ff', 0.15)
     fill.position.set(-8, 6, -6)
     scene.add(fill)
 
-    // Ground bounce
-    const bounce = new THREE.HemisphereLight('#ffe0a0', '#c8b090', 0.4)
+    // Strong warm ground bounce — ochre soil reflects heat upward
+    const bounce = new THREE.HemisphereLight('#ffd890', '#c88020', 0.6)
     scene.add(bounce)
 
-    // ── Ground plane ───────────────────────────────────────────────────────
-    const groundGeo = new THREE.PlaneGeometry(100, 100)
-    const groundMat = new THREE.MeshStandardMaterial({
-      color: '#ffffff',
-      roughness: 1.0,
-    })
-    const groundPlane = new THREE.Mesh(groundGeo, groundMat)
-    groundPlane.rotation.x = -Math.PI / 2
-    groundPlane.receiveShadow = true
-    scene.add(groundPlane)
 
     // ── OrbitControls ──────────────────────────────────────────────────────
     const controls = new OrbitControls(camera, renderer.domElement)
@@ -85,9 +98,17 @@ export default function ToorToorScene() {
     controls.autoRotateSpeed = 0.6
     controls.target.set(0, 0, 0)
 
-    // Stop auto-rotate on user interaction
     const stopAuto = () => { controls.autoRotate = false }
     el.addEventListener('pointerdown', stopAuto)
+
+    // ── Ground plane ───────────────────────────────────────────────────────
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(200, 200),
+      new THREE.MeshStandardMaterial({ color: '#c8b888', roughness: 0.95, metalness: 0 })
+    )
+    ground.rotation.x = -Math.PI / 2
+    ground.receiveShadow = true
+    scene.add(ground)
 
     // ── Load GLB ───────────────────────────────────────────────────────────
     const loader = new GLTFLoader()
@@ -96,14 +117,24 @@ export default function ToorToorScene() {
       (gltf) => {
         const model = gltf.scene
 
-        // Enable shadows on every mesh
         model.traverse((child) => {
+          // Collect roof meshes by material name (reliable through Rhino GLTF export)
+          if ((child as THREE.Mesh).isMesh) {
+            const mesh = child as THREE.Mesh
+            const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+            mats.forEach((mat) => {
+              const matName = mat.name.toLowerCase().replace(/[\s_-]/g, '')
+              if (matName === 'roof') roofMeshesRef.current.push(mesh)
+              if (matName === 'roofstructure') roofStructureMeshesRef.current.push(mesh)
+            })
+          }
+
+          // Shadows + materials
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh
             mesh.castShadow = true
             mesh.receiveShadow = true
 
-            // Ensure materials respond well to the lighting
             if (mesh.material) {
               const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
               mats.forEach((mat) => {
@@ -114,6 +145,31 @@ export default function ToorToorScene() {
                 }
               })
             }
+          }
+
+          // Build CSS2D labels for label_ prefixed objects
+          if (child.name.startsWith('label_')) {
+            const text = child.name
+              .replace('label_', '')
+              .replace(/_/g, ' ')
+              .replace(/\b\w/g, (c) => c.toUpperCase())
+
+            const div = document.createElement('div')
+            div.textContent = text
+            div.style.cssText = [
+              'background: #ffffff',
+              'border: 1px solid #000000',
+              'padding: 3px 8px',
+              'font-size: 9px',
+              'letter-spacing: 0.15em',
+              'text-transform: uppercase',
+              'font-family: var(--font-sans, sans-serif)',
+              'white-space: nowrap',
+              'line-height: 1.4',
+            ].join(';')
+
+            const label = new CSS2DObject(div)
+            child.add(label)
           }
         })
 
@@ -147,6 +203,7 @@ export default function ToorToorScene() {
         )
         camera.lookAt(fittedCenter)
         controls.update()
+
       },
       undefined,
       (err) => console.error('GLB load error:', err)
@@ -158,6 +215,7 @@ export default function ToorToorScene() {
       animId = requestAnimationFrame(animate)
       controls.update()
       renderer.render(scene, camera)
+      labelRenderer.render(scene, camera)
     }
     animate()
 
@@ -168,22 +226,51 @@ export default function ToorToorScene() {
       camera.aspect = w / h
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
+      labelRenderer.setSize(w, h)
     }
     window.addEventListener('resize', onResize)
 
     return () => {
+      roofMeshesRef.current = []
+      roofStructureMeshesRef.current = []
       cancelAnimationFrame(animId)
       window.removeEventListener('resize', onResize)
       el.removeEventListener('pointerdown', stopAuto)
       controls.dispose()
       renderer.dispose()
       if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement)
+      if (el.contains(labelRenderer.domElement)) el.removeChild(labelRenderer.domElement)
     }
   }, [])
 
   return (
     <div className="relative w-full" style={{ height: '520px' }}>
-      <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+      <div
+        ref={containerRef}
+        className="w-full h-full cursor-grab active:cursor-grabbing"
+        style={{ background: 'linear-gradient(to bottom, rgb(168,157,161) 0%, rgb(211,197,201) 50%, rgb(219,204,176) 100%)' }}
+      />
+
+      {/* Roof toggles */}
+      <div className="absolute top-4 right-4 flex flex-col gap-1.5 pointer-events-auto">
+        <button
+          onClick={() => setShowRoof((v) => !v)}
+          className={`text-[9px] tracking-[0.15em] uppercase px-3 py-1.5 border transition-colors ${
+            showRoof ? 'border-foreground text-foreground' : 'border-muted-foreground/30 text-muted-foreground/40'
+          }`}
+        >
+          Roof
+        </button>
+        <button
+          onClick={() => setShowRoofStructure((v) => !v)}
+          className={`text-[9px] tracking-[0.15em] uppercase px-3 py-1.5 border transition-colors ${
+            showRoofStructure ? 'border-foreground text-foreground' : 'border-muted-foreground/30 text-muted-foreground/40'
+          }`}
+        >
+          Roof Structure
+        </button>
+      </div>
+
       <div className="absolute bottom-4 left-5 pointer-events-none select-none">
         <p className="text-[9px] tracking-[0.18em] uppercase text-muted">
           Drag to orbit · Scroll to zoom
