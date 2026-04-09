@@ -78,7 +78,7 @@ export async function listPublicFolderImages(folderId: string, limit = 24) {
       return []
     }
 
-    const data = (await response.json()) as any
+    const data = (await response.json()) as GoogleDriveListResponse & { error?: { message: string } }
 
     if (data.error) {
       console.error(`[Drive] API Error for folder ${folderId}:`, data.error.message)
@@ -92,7 +92,7 @@ export async function listPublicFolderImages(folderId: string, limit = 24) {
       return []
     }
 
-    return data.files.map((file: any) => gdriveThumbnailUrl(file.id))
+    return data.files.map((file) => gdriveThumbnailUrl(file.id))
   } catch {
     return []
   }
