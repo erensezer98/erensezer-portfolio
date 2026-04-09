@@ -346,6 +346,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Client', value: 'Politecnico di Milano' },
       ],
       awards: ['Shortlisted for Skyhive Skyscraper Challenge 2022'],
+      processImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_FOOD_TOWER_PROCESS_1',
+      ],
+      schematicImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_FOOD_TOWER_WIDE_1',
+      ],
     }),
   },
   {
@@ -376,6 +382,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Area', value: '8,500 m2' },
         { label: 'Status', value: 'Academic Project' },
         { label: 'Client', value: 'Politecnico di Milano' },
+      ],
+      processImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_THE_LOG_PROCESS_1',
+      ],
+      schematicImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_THE_LOG_WIDE_1',
       ],
     }),
   },
@@ -409,6 +421,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Client', value: 'Istanbul Technical University' },
       ],
       awards: ['Selected by Mimdap Architecture Magazine'],
+      processImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_HALIC_PROCESS_1',
+      ],
+      schematicImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_HALIC_WIDE_1',
+      ],
     }),
   },
   {
@@ -439,6 +457,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Area', value: '320 m2' },
         { label: 'Status', value: 'Completed' },
         { label: 'Client', value: 'Freelance Commission' },
+      ],
+      processImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_CSARDA_PROCESS_1',
+      ],
+      schematicImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_CSARDA_WIDE_1',
       ],
     }),
   },
@@ -471,6 +495,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Status', value: 'Academic Project' },
         { label: 'Client', value: 'Politecnico di Milano' },
       ],
+      processImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_ISTANBUL_PROCESS_1',
+      ],
+      schematicImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_ISTANBUL_WIDE_1',
+      ],
     }),
   },
   {
@@ -501,6 +531,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Area', value: 'N/A' },
         { label: 'Status', value: 'Academic Project' },
         { label: 'Client', value: 'N/A' },
+      ],
+      processImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_TOOR_TOOR_PROCESS_1',
+      ],
+      schematicImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_TOOR_TOOR_WIDE_1',
       ],
     }),
   },
@@ -533,6 +569,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Status', value: 'Competition Entry' },
         { label: 'Client', value: 'Reuse Italy' },
       ],
+      processImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_UNFOLDING_PROCESS_1',
+      ],
+      schematicImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_UNFOLDING_WIDE_1',
+      ],
     }),
   },
   {
@@ -562,6 +604,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Role', value: 'Designer & Assistant Project Manager' },
         { label: 'Year', value: '2024' },
         { label: 'Photo credits', value: 'CRA & DSL Studio' },
+      ],
+      processImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_MONDADORI_PROCESS_1',
+      ],
+      schematicImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_MONDADORI_WIDE_1',
       ],
     }),
   },
@@ -594,6 +642,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Location', value: 'Venice' },
       ],
       awards: ['Golden Lion Award to Canal Cafe, which I was involved in during the executive design phase.'],
+      processImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_BIENNALE_PROCESS_1',
+      ],
+      schematicImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_BIENNALE_WIDE_1',
+      ],
     }),
   },
   {
@@ -624,6 +678,12 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
         { label: 'Year', value: '2025' },
         { label: 'Location', value: 'Venice, Italy / Belem, Brazil' },
         { label: 'Photo credits', value: 'Leonardo Finotti' },
+      ],
+      processImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_AQUAPRACA_PROCESS_1',
+      ],
+      schematicImages: [
+        'https://lh3.googleusercontent.com/d/PLACEHOLDER_AQUAPRACA_WIDE_1',
       ],
     }),
   },

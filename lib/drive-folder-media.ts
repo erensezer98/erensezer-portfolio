@@ -78,8 +78,21 @@ export async function listPublicFolderImages(folderId: string, limit = 24) {
       return []
     }
 
-    const data = (await response.json()) as GoogleDriveListResponse
-    return (data.files ?? []).map((file) => gdriveThumbnailUrl(file.id))
+    const data = (await response.json()) as any
+
+    if (data.error) {
+      console.error(`[Drive] API Error for folder ${folderId}:`, data.error.message)
+      return []
+    }
+
+    if (!data.files || data.files.length === 0) {
+      if (folderId && !folderId.includes('PLACEHOLDER')) {
+        console.warn(`[Drive] No images found in folder: ${folderId}. Check sharing permissions.`)
+      }
+      return []
+    }
+
+    return data.files.map((file: any) => gdriveThumbnailUrl(file.id))
   } catch {
     return []
   }
