@@ -304,8 +304,8 @@ export default function ProjectDetailTemplate({
           {content.sceneComponent !== 'none' && (
             <div className={`mb-12 overflow-hidden border ${theme.surface} ${theme.border} ${
               isIstanbul 
-                ? 'w-full aspect-[16/7]' 
-                : 'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] aspect-[21/9] md:aspect-[24/9] !border-x-0'
+                ? 'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] aspect-[21/9] md:aspect-[24/9] !border-x-0'
+                : 'w-full aspect-[16/7]'
             }`}>
               <ProjectScene component={content.sceneComponent} />
             </div>
@@ -429,8 +429,8 @@ export default function ProjectDetailTemplate({
                             <div className="mb-12">
                               <div className={`overflow-hidden border ${theme.surface} ${theme.border} ${
                                 isIstanbul 
-                                  ? 'w-full aspect-[16/7]' 
-                                  : 'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] aspect-[21/9] md:aspect-[24/9] !border-x-0'
+                                  ? 'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] aspect-[21/9] md:aspect-[24/9] !border-x-0'
+                                  : 'w-full aspect-[16/7]'
                               }`}>
                                 <ProjectScene component={content.sceneComponent} />
                               </div>
