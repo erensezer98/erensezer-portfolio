@@ -1,4 +1,5 @@
 import { getProjectDriveMedia, resolveProjectDisplayMedia, listPublicFolderImages } from '@/lib/drive-folder-media'
+import { protectGoogleDriveImageUrl } from '@/lib/gdrive'
 import {
   getDefaultProjectPageContent,
   getStaticProjectBySlug,
@@ -86,6 +87,8 @@ export async function getResolvedProjectPageDataBySlug(slug: string): Promise<Re
   }
 
   const filterPlaceholders = (urls: string[]) => urls.filter((url) => !isPlaceholderUrl(url))
+  const normalizeUrls = (urls: string[]) =>
+    filterPlaceholders(urls).map((url) => protectGoogleDriveImageUrl(url) ?? url)
 
   const content: ProjectPageContent = {
     ...defaultContent,
@@ -93,17 +96,17 @@ export async function getResolvedProjectPageDataBySlug(slug: string): Promise<Re
     detailSections,
     processImages: driveMedia.processImages.length
       ? driveMedia.processImages
-      : filterPlaceholders(savedPageContent?.processImages?.length
+      : normalizeUrls(savedPageContent?.processImages?.length
         ? savedPageContent.processImages
         : defaultContent.processImages),
     schematicImages: driveMedia.schematicImages.length
       ? driveMedia.schematicImages
-      : filterPlaceholders(savedPageContent?.schematicImages?.length
+      : normalizeUrls(savedPageContent?.schematicImages?.length
         ? savedPageContent.schematicImages
         : defaultContent.schematicImages),
     galleryImages: driveMedia.galleryImages.length
       ? driveMedia.galleryImages
-      : filterPlaceholders(savedPageContent?.galleryImages?.length
+      : normalizeUrls(savedPageContent?.galleryImages?.length
         ? savedPageContent.galleryImages
         : defaultContent.galleryImages),
     infoFields: savedPageContent?.infoFields?.length ? savedPageContent.infoFields : defaultContent.infoFields,

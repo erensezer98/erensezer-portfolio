@@ -33,6 +33,16 @@ const ToorToorScene = dynamic(
   { ssr: false }
 )
 
+const TheWallScene = dynamic(
+  () => import('@/components/three/TheWallScene'),
+  { ssr: false }
+)
+
+const IstanbulScene = dynamic(
+  () => import('@/components/three/IstanbulScene'),
+  { ssr: false }
+)
+
 const SCENE_COMPONENTS = {
   'architectural-wireframe': ArchitecturalWireframe,
   'exploded-axonometry': ExplodedAxonometry,
@@ -40,6 +50,8 @@ const SCENE_COMPONENTS = {
   'interactive-relight': InteractiveRelight,
   'the-log-scene': TheLogScene,
   'toor-toor-scene': ToorToorScene,
+  'the-wall-scene': TheWallScene,
+  'istanbul-scene': IstanbulScene,
 } as const
 
 export default function ProjectScene({ component }: { component: ProjectSceneComponent }) {

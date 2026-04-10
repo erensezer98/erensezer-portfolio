@@ -302,10 +302,10 @@ export default function ProjectDetailTemplate({
 
           {/* ── Three.js scene ── */}
           {content.sceneComponent !== 'none' && (
-            <div className={`mb-12 overflow-hidden border ${theme.surface} ${theme.border} ${
-              isIstanbul 
-                ? 'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] aspect-[21/9] md:aspect-[24/9] !border-x-0'
-                : 'w-full aspect-[16/7]'
+            <div className={`mb-12 overflow-hidden ${theme.surface} ${
+              isIstanbul
+                ? 'w-full aspect-[21/9] md:aspect-[24/9]'
+                : `border ${theme.border} w-full aspect-[16/7]`
             }`}>
               <ProjectScene component={content.sceneComponent} />
             </div>
@@ -427,10 +427,10 @@ export default function ProjectDetailTemplate({
                           {/* Three.js scene – full content width or screen width */}
                           {section.includeScene && content.sceneComponent !== 'none' && (
                             <div className="mb-12">
-                              <div className={`overflow-hidden border ${theme.surface} ${theme.border} ${
-                                isIstanbul 
-                                  ? 'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] aspect-[21/9] md:aspect-[24/9] !border-x-0'
-                                  : 'w-full aspect-[16/7]'
+                              <div className={`overflow-hidden ${theme.surface} ${
+                                isIstanbul
+                                  ? 'w-full aspect-[21/9] md:aspect-[24/9]'
+                                  : `border ${theme.border} w-full aspect-[16/7]`
                               }`}>
                                 <ProjectScene component={content.sceneComponent} />
                               </div>

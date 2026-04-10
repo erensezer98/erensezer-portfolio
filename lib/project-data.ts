@@ -6,8 +6,10 @@ export type ProjectSceneComponent =
   | 'exploded-axonometry'
   | 'food-tower-explosion'
   | 'interactive-relight'
+  | 'istanbul-scene'
   | 'the-log-scene'
   | 'toor-toor-scene'
+  | 'the-wall-scene'
 
 export interface ProjectInfoField {
   label: string
@@ -160,6 +162,7 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
       11
     ),
     page: createPageContent({
+      sceneComponent: 'the-wall-scene',
       introText:
         'The Wall of Porta Romana started with a question: what should a library be now? Not a silent container, but a civic instrument for culture, exchange, and public life. Set in Milan at the threshold of Porta Romana, the project treats the future library as both urban landmark and shared interior world, shaped as much by the city around it as by the people moving through it.',
       processText:
@@ -482,7 +485,7 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
       5
     ),
     page: createPageContent({
-      sceneComponent: 'interactive-relight',
+      sceneComponent: 'istanbul-scene',
       introText:
         'Istanbul: A Way Out began with a blunt question: what happens after the earthquake, when the buildings that remain standing still leave no room to escape or to be reached? Rather than focusing only on collapse, the project looks at the everyday elements of the city, parked cars, narrow roads, street furniture, cumbas, pavements, and urban clutter, and asks how they might become deadly obstacles in a moment of emergency. The result is a different reading of resilience, one rooted in access, delay, and survival.',
       processText:

@@ -20,6 +20,8 @@ const SCENE_OPTIONS: { value: ProjectSceneComponent; label: string }[] = [
   { value: 'interactive-relight', label: 'Interactive Relight' },
   { value: 'the-log-scene', label: 'The Log Scene' },
   { value: 'toor-toor-scene', label: 'Toor-Toor Scene' },
+  { value: 'the-wall-scene', label: 'The Wall Scene' },
+  { value: 'istanbul-scene', label: 'Istanbul Scene' },
 ]
 
 const DEFAULT_INFO_FIELDS = [
