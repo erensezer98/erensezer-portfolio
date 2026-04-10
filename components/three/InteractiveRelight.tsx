@@ -278,9 +278,6 @@ export default function InteractiveRelight() {
     controls.update()
 
     currentScene.add(new THREE.AmbientLight(0xffffff, 2.0))
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.5)
-    sunLight.position.set(50, 100, 50)
-    currentScene.add(sunLight)
     
     const cursorLight = new THREE.SpotLight(0xffffff, 15)
     cursorLight.angle = Math.PI / 6
