@@ -8,6 +8,8 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 type TileEntry = {
   x: number
   z: number
+  influence: number
+  phase: number
 }
 
 type ObstacleEntry = {
@@ -16,6 +18,7 @@ type ObstacleEntry = {
   center: THREE.Vector3
   influenceRadius: number
   material: THREE.MeshBasicMaterial
+  influence: number
 }
 
 const TILE_GREEN = new THREE.Color(0x2f7a4f)
@@ -80,6 +83,7 @@ export default function InteractiveRelight() {
     const tempMatrix = new THREE.Matrix4()
     const tempQuaternion = new THREE.Quaternion()
     const tempScale = new THREE.Vector3()
+    const tempPosition = new THREE.Vector3()
     const activeObstacleCenters: Array<{ center: THREE.Vector3; strength: number }> = []
 
     loader.load(
@@ -155,6 +159,7 @@ export default function InteractiveRelight() {
             center: box.getCenter(new THREE.Vector3()),
             influenceRadius: Math.max(boxSize.x, boxSize.z) * 0.4 + 0.28,
             material,
+            influence: 0,
           })
         })
 
@@ -162,7 +167,7 @@ export default function InteractiveRelight() {
           const tileSpacing = 0.95
           for (let x = modelBounds.min.x - 0.5; x <= modelBounds.max.x + 0.5; x += tileSpacing) {
             for (let z = modelBounds.min.z - 0.5; z <= modelBounds.max.z + 0.5; z += tileSpacing) {
-              tileEntries.push({ x, z })
+              tileEntries.push({ x, z, influence: 0, phase: Math.random() * Math.PI * 2 })
             }
           }
 
@@ -172,8 +177,9 @@ export default function InteractiveRelight() {
 
           tileEntries.forEach((tile, index) => {
             tempScale.set(0.92, 1, 0.92)
+            tempPosition.set(tile.x, groundY + 0.04, tile.z)
             tempMatrix.compose(
-              new THREE.Vector3(tile.x, groundY + 0.04, tile.z),
+              tempPosition,
               tempQuaternion,
               tempScale
             )
@@ -243,44 +249,55 @@ export default function InteractiveRelight() {
       let pressureSum = 0
 
       for (const obstacle of obstacleEntries) {
-        const distance = Math.hypot(obstacle.center.x - hoverPoint.x, obstacle.center.z - hoverPoint.z)
-        const rawInfluence = Math.max(0, 1 - distance / obstacle.influenceRadius)
-        const influence = rawInfluence * rawInfluence * (3 - 2 * rawInfluence)
+        let targetInfluence = 0
+        if (targetMouse.x > -99) {
+          const distance = Math.hypot(obstacle.center.x - hoverPoint.x, obstacle.center.z - hoverPoint.z)
+          const rawInfluence = Math.max(0, 1 - distance / obstacle.influenceRadius)
+          targetInfluence = rawInfluence * rawInfluence * (3 - 2 * rawInfluence)
+        }
 
-        if (influence > 0.02) {
-          activeObstacleCenters.push({ center: obstacle.center, strength: influence })
+        obstacle.influence += (targetInfluence - obstacle.influence) * 0.1
+
+        if (obstacle.influence > 0.02) {
+          activeObstacleCenters.push({ center: obstacle.center, strength: obstacle.influence })
           nearbyCount += 1
         }
 
-        pressureSum += influence
+        pressureSum += obstacle.influence
 
-        const lift = influence * 1.15
+        const lift = obstacle.influence * 1.15
         obstacle.mesh.position.y = obstacle.basePosition.y + lift
-        obstacle.material.color.copy(tempColor.copy(OBJECT_IDLE).lerp(OBJECT_HOT, influence))
-        obstacle.material.opacity = 0.72 + influence * 0.22
+        obstacle.material.color.copy(tempColor.copy(OBJECT_IDLE).lerp(OBJECT_HOT, obstacle.influence))
+        obstacle.material.opacity = 0.72 + obstacle.influence * 0.22
       }
 
       if (tileMesh) {
         const currentTileMesh = tileMesh
         tileEntries.forEach((tile, index) => {
-          let tileInfluence = 0
+          let targetTileInfluence = 0
 
           for (const active of activeObstacleCenters) {
             const distance = Math.hypot(tile.x - active.center.x, tile.z - active.center.z)
             const spread = 1.2
             const raw = Math.max(0, 1 - distance / spread)
-            tileInfluence = Math.max(tileInfluence, raw * active.strength)
+            targetTileInfluence = Math.max(targetTileInfluence, raw * active.strength)
           }
 
-          const lift = tileInfluence * 0.8
-          tempScale.set(0.92, 1 + tileInfluence * 7.5, 0.92)
+          tile.influence += (targetTileInfluence - tile.influence) * 0.12
+
+          const wave = Math.sin(t * 2 + tile.phase) * 0.03
+          const baseHeight = groundY + 0.04 + wave
+          const lift = tile.influence * 0.8
+          
+          tempScale.set(0.92, 1 + tile.influence * 7.5, 0.92)
+          tempPosition.set(tile.x, baseHeight + lift * 0.5, tile.z)
           tempMatrix.compose(
-            new THREE.Vector3(tile.x, groundY + 0.04 + lift * 0.5, tile.z),
+            tempPosition,
             tempQuaternion,
             tempScale
           )
           currentTileMesh.setMatrixAt(index, tempMatrix)
-          currentTileMesh.setColorAt(index, tempColor.copy(TILE_GREEN).lerp(TILE_HOT, tileInfluence))
+          currentTileMesh.setColorAt(index, tempColor.copy(TILE_GREEN).lerp(TILE_HOT, tile.influence))
         })
 
         currentTileMesh.instanceMatrix.needsUpdate = true
