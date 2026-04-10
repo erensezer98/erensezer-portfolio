@@ -5,349 +5,233 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 
-type TileEntry = {
-  x: number
-  z: number
-  influence: number
-  phase: number
-}
+// --- Tactical Color Palette ---
+const COLOR_SAFE = new THREE.Color(0x00ffcc)    // Cyber Cyan
+const COLOR_HAZARD = new THREE.Color(0xff3300)  // Emergency Red
+const COLOR_SCANNER = new THREE.Color(0x0066ff) // Deep Scan Blue
+const COLOR_IDLE = new THREE.Color(0x1a1a1a)   // Dark Slate
 
 type ObstacleEntry = {
   mesh: THREE.Mesh
   basePosition: THREE.Vector3
   center: THREE.Vector3
   influenceRadius: number
-  material: THREE.MeshBasicMaterial
-  influence: number
+  material: THREE.MeshStandardMaterial
+  detectionLevel: number
+  hazardType: string
 }
-
-const TILE_GREEN = new THREE.Color(0x2f7a4f)
-const TILE_HOT = new THREE.Color(0xd16a4b)
-const OBJECT_IDLE = new THREE.Color(0xb9f0c5)
-const OBJECT_HOT = new THREE.Color(0xffd0b2)
 
 export default function InteractiveRelight() {
   const mountRef = useRef<HTMLDivElement>(null)
-  const [pressureLabel, setPressureLabel] = useState('waiting')
-  const [nearbyLabel, setNearbyLabel] = useState('0 active objects')
+  const [scanStatus, setScanStatus] = useState('IDLE')
+  const [hazardCount, setHazardCount] = useState(0)
+  const [activeHazard, setActiveHazard] = useState<string | null>(null)
 
   useEffect(() => {
     const el = mountRef.current
     if (!el) return
 
     const scene = new THREE.Scene()
-    scene.fog = new THREE.FogExp2(0x050505, 0.045)
+    scene.background = new THREE.Color(0x050508)
+    scene.fog = new THREE.FogExp2(0x050508, 0.05)
 
-    const camera = new THREE.PerspectiveCamera(52, el.clientWidth / el.clientHeight, 0.1, 1000)
-    camera.position.set(0, 11.5, 16)
-    camera.lookAt(0, 0.5, 0)
+    const camera = new THREE.PerspectiveCamera(45, el.clientWidth / el.clientHeight, 0.1, 1000)
+    camera.position.set(0, 15, 20)
+    camera.lookAt(0, 0, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(el.clientWidth, el.clientHeight)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1))
-    renderer.setClearColor(0x050505)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     el.appendChild(renderer.domElement)
+
+    // Lighting for the "Tactical" feel
+    const ambientLight = new THREE.AmbientLight(0x404040, 1.5)
+    scene.add(ambientLight)
+
+    const scannerLight = new THREE.PointLight(COLOR_SCANNER, 20, 15)
+    scene.add(scannerLight)
 
     const modelGroup = new THREE.Group()
     scene.add(modelGroup)
 
-    const tileGeometry = new THREE.BoxGeometry(0.95, 0.08, 0.95)
-    const tileMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.9,
-      vertexColors: true,
-    })
-
-    const tileEntries: TileEntry[] = []
-    let tileMesh: THREE.InstancedMesh | null = null
-    let modelBounds: THREE.Box3 | null = null
-    let groundY = -0.5
-    let modelLoaded = false
+    // Scanner Ring Visual
+    const ringGeo = new THREE.RingGeometry(1.9, 2.0, 64)
+    const ringMat = new THREE.MeshBasicMaterial({ color: COLOR_SCANNER, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
+    const scannerRing = new THREE.Mesh(ringGeo, ringMat)
+    scannerRing.rotation.x = -Math.PI / 2
+    scene.add(scannerRing)
 
     const obstacleEntries: ObstacleEntry[] = []
-    const materialsToDispose: THREE.Material[] = [tileMaterial]
-    const geometriesToDispose: THREE.BufferGeometry[] = [tileGeometry]
-
     const dracoLoader = new DRACOLoader()
     dracoLoader.setDecoderPath('/draco/')
     const loader = new GLTFLoader()
     loader.setDRACOLoader(dracoLoader)
 
     const raycaster = new THREE.Raycaster()
-    const mouse = new THREE.Vector2()
-    const targetMouse = new THREE.Vector2()
-    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0.5)
+    const mouse = new THREE.Vector2(-10, -10)
+    const targetMouse = new THREE.Vector2(-10, -10)
+    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
     const hoverPoint = new THREE.Vector3()
-    const tempColor = new THREE.Color()
-    const tempMatrix = new THREE.Matrix4()
-    const tempQuaternion = new THREE.Quaternion()
-    const tempScale = new THREE.Vector3()
-    const tempPosition = new THREE.Vector3()
-    const activeObstacleCenters: Array<{ center: THREE.Vector3; strength: number }> = []
 
     loader.load(
       '/models/objects.glb',
       (gltf) => {
         const model = gltf.scene
-        let roadMesh: THREE.Mesh | null = null
-        let largestArea = 0
-
-        model.traverse((child) => {
-          const mesh = child as THREE.Mesh
-          if (!mesh.isMesh) return
-          mesh.geometry.computeBoundingBox()
-          const box = mesh.geometry.boundingBox
-          if (!box) return
-
-          const sx = box.max.x - box.min.x
-          const sy = box.max.y - box.min.y
-          const sz = box.max.z - box.min.z
-          const area = sx * sz
-
-          if (area > largestArea && sy < Math.max(sx, sz) * 0.1) {
-            largestArea = area
-            roadMesh = mesh
-          }
-        })
-
-        const overallBox = new THREE.Box3().setFromObject(model)
-        const center = overallBox.getCenter(new THREE.Vector3())
-        const size = overallBox.getSize(new THREE.Vector3())
-        const maxDim = Math.max(size.x, size.y, size.z)
-        const scale = 15 / maxDim
-
+        
+        // Scale and center the city fragment
+        const box = new THREE.Box3().setFromObject(model)
+        const size = box.getSize(new THREE.Vector3())
+        const scale = 25 / Math.max(size.x, size.z)
         model.scale.setScalar(scale)
-        model.position.sub(center.multiplyScalar(scale))
-
-        const fittedBox = new THREE.Box3().setFromObject(model)
-        model.position.y -= fittedBox.min.y + 0.5
+        model.position.y = -box.min.y * scale
         modelGroup.add(model)
-        model.updateMatrixWorld(true)
 
-        modelBounds = new THREE.Box3().setFromObject(model)
-        groundY = modelBounds.min.y
-        groundPlane.constant = -groundY
+        const hazardLabels = ['DEBRIS BLOCKAGE', 'UNSTABLE STRUCTURE', 'VEHICLE ABANDONMENT', 'STREET DAMAGE']
 
         model.traverse((child) => {
-          const mesh = child as THREE.Mesh
-          if (!mesh.isMesh) return
+          if ((child as THREE.Mesh).isMesh) {
+            const mesh = child as THREE.Mesh
+            const isRoad = mesh.name.toLowerCase().includes('road') || mesh.name.toLowerCase().includes('ground')
 
-          geometriesToDispose.push(mesh.geometry)
+            const material = new THREE.MeshStandardMaterial({
+              color: isRoad ? 0x222222 : 0x444444,
+              wireframe: !isRoad,
+              transparent: true,
+              opacity: isRoad ? 0.8 : 0.4,
+              emissive: new THREE.Color(0x000000),
+            })
+            mesh.material = material
 
-          if (mesh === roadMesh) {
-            mesh.visible = false
-            return
-          }
-
-          const material = new THREE.MeshBasicMaterial({
-            color: OBJECT_IDLE.clone(),
-            wireframe: true,
-            transparent: true,
-            opacity: 0.8,
-          })
-          mesh.material = material
-          materialsToDispose.push(material)
-
-          const box = new THREE.Box3().setFromObject(mesh)
-          const boxSize = box.getSize(new THREE.Vector3())
-          if (boxSize.lengthSq() < 0.0001) return
-
-          obstacleEntries.push({
-            mesh,
-            basePosition: mesh.position.clone(),
-            center: box.getCenter(new THREE.Vector3()),
-            influenceRadius: Math.max(boxSize.x, boxSize.z) * 0.4 + 0.28,
-            material,
-            influence: 0,
-          })
-        })
-
-        if (modelBounds) {
-          const tileSpacing = 0.95
-          for (let x = modelBounds.min.x - 0.5; x <= modelBounds.max.x + 0.5; x += tileSpacing) {
-            for (let z = modelBounds.min.z - 0.5; z <= modelBounds.max.z + 0.5; z += tileSpacing) {
-              tileEntries.push({ x, z, influence: 0, phase: Math.random() * Math.PI * 2 })
+            if (!isRoad) {
+              const b = new THREE.Box3().setFromObject(mesh)
+              obstacleEntries.push({
+                mesh,
+                basePosition: mesh.position.clone(),
+                center: b.getCenter(new THREE.Vector3()),
+                influenceRadius: 2.5,
+                material,
+                detectionLevel: 0,
+                hazardType: hazardLabels[Math.floor(Math.random() * hazardLabels.length)]
+              })
             }
           }
-
-          tileMesh = new THREE.InstancedMesh(tileGeometry, tileMaterial, tileEntries.length)
-          tileMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
-          tileMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(tileEntries.length * 3), 3)
-
-          tileEntries.forEach((tile, index) => {
-            tempScale.set(0.92, 1, 0.92)
-            tempPosition.set(tile.x, groundY + 0.04, tile.z)
-            tempMatrix.compose(
-              tempPosition,
-              tempQuaternion,
-              tempScale
-            )
-            tileMesh?.setMatrixAt(index, tempMatrix)
-            tileMesh?.setColorAt(index, TILE_GREEN)
-          })
-
-          tileMesh.instanceMatrix.needsUpdate = true
-          if (tileMesh.instanceColor) tileMesh.instanceColor.needsUpdate = true
-          modelGroup.add(tileMesh)
-        }
-
-        modelLoaded = true
-      },
-      undefined,
-      (error) => console.error('GLB load error:', error)
+        })
+      }
     )
 
-    const onPointerMove = (event: MouseEvent) => {
-      const bounds = el.getBoundingClientRect()
-      targetMouse.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1
-      targetMouse.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1
-    }
-
-    const onPointerLeave = () => {
-      targetMouse.set(-100, -100)
-    }
-
-    const onResize = () => {
-      camera.aspect = el.clientWidth / el.clientHeight
-      camera.updateProjectionMatrix()
-      renderer.setSize(el.clientWidth, el.clientHeight)
+    const onPointerMove = (e: MouseEvent) => {
+      const b = el.getBoundingClientRect()
+      targetMouse.x = ((e.clientX - b.left) / b.width) * 2 - 1
+      targetMouse.y = -((e.clientY - b.top) / b.height) * 2 + 1
     }
 
     el.addEventListener('mousemove', onPointerMove)
-    el.addEventListener('mouseleave', onPointerLeave)
-    window.addEventListener('resize', onResize)
 
-    let disposed = false
-    let animationFrame = 0
     const clock = new THREE.Clock()
-    let lastHudUpdate = performance.now()
-
     const animate = () => {
-      if (disposed) return
-      animationFrame = window.requestAnimationFrame(animate)
-
+      requestAnimationFrame(animate)
       const t = clock.getElapsedTime()
-      mouse.lerp(targetMouse, 0.08)
+      mouse.lerp(targetMouse, 0.1)
 
-      if (modelLoaded) {
-        raycaster.setFromCamera(mouse, camera)
-        const hit = new THREE.Vector3()
-        if (raycaster.ray.intersectPlane(groundPlane, hit)) {
-          if (modelBounds) {
-            hoverPoint.x = THREE.MathUtils.clamp(hit.x, modelBounds.min.x, modelBounds.max.x)
-            hoverPoint.z = THREE.MathUtils.clamp(hit.z, modelBounds.min.z, modelBounds.max.z)
-          } else {
-            hoverPoint.copy(hit)
-          }
-          hoverPoint.y = groundY
-        }
+      raycaster.setFromCamera(mouse, camera)
+      if (raycaster.ray.intersectPlane(groundPlane, hoverPoint)) {
+        scannerLight.position.copy(hoverPoint).y = 2
+        scannerRing.position.set(hoverPoint.x, 0.05, hoverPoint.z)
+        scannerRing.scale.setScalar(1 + Math.sin(t * 4) * 0.1)
+        scannerRing.material.opacity = 0.3 + Math.sin(t * 4) * 0.2
       }
 
-      activeObstacleCenters.length = 0
-      let nearbyCount = 0
-      let pressureSum = 0
+      let detectedThisFrame = 0
+      let topHazard: string | null = null
 
-      for (const obstacle of obstacleEntries) {
-        let targetInfluence = 0
-        if (targetMouse.x > -99) {
-          const distance = Math.hypot(obstacle.center.x - hoverPoint.x, obstacle.center.z - hoverPoint.z)
-          const rawInfluence = Math.max(0, 1 - distance / obstacle.influenceRadius)
-          targetInfluence = rawInfluence * rawInfluence * (3 - 2 * rawInfluence)
-        }
+      obstacleEntries.forEach((obj) => {
+        const dist = hoverPoint.distanceTo(obj.center)
+        const inRange = dist < obj.influenceRadius
 
-        obstacle.influence += (targetInfluence - obstacle.influence) * 0.1
-
-        if (obstacle.influence > 0.02) {
-          activeObstacleCenters.push({ center: obstacle.center, strength: obstacle.influence })
-          nearbyCount += 1
-        }
-
-        pressureSum += obstacle.influence
-
-        const lift = obstacle.influence * 1.15
-        obstacle.mesh.position.y = obstacle.basePosition.y + lift
-        obstacle.material.color.copy(tempColor.copy(OBJECT_IDLE).lerp(OBJECT_HOT, obstacle.influence))
-        obstacle.material.opacity = 0.72 + obstacle.influence * 0.22
-      }
-
-      if (tileMesh) {
-        const currentTileMesh = tileMesh
-        tileEntries.forEach((tile, index) => {
-          let targetTileInfluence = 0
-
-          for (const active of activeObstacleCenters) {
-            const distance = Math.hypot(tile.x - active.center.x, tile.z - active.center.z)
-            const spread = 1.2
-            const raw = Math.max(0, 1 - distance / spread)
-            targetTileInfluence = Math.max(targetTileInfluence, raw * active.strength)
-          }
-
-          tile.influence += (targetTileInfluence - tile.influence) * 0.12
-
-          const wave = Math.sin(t * 2 + tile.phase) * 0.03
-          const baseHeight = groundY + 0.04 + wave
-          const lift = tile.influence * 0.8
+        // Smoothly transition detection state
+        obj.detectionLevel += ((inRange ? 1 : 0) - obj.detectionLevel) * 0.1
+        
+        if (obj.detectionLevel > 0.01) {
+          detectedThisFrame++
+          const alertColor = COLOR_HAZARD.clone().lerp(COLOR_SCANNER, 1 - obj.detectionLevel)
+          obj.material.emissive.copy(alertColor)
+          obj.material.emissiveIntensity = obj.detectionLevel * 2
+          obj.material.opacity = 0.4 + obj.detectionLevel * 0.6
           
-          tempScale.set(0.92, 1 + tile.influence * 7.5, 0.92)
-          tempPosition.set(tile.x, baseHeight + lift * 0.5, tile.z)
-          tempMatrix.compose(
-            tempPosition,
-            tempQuaternion,
-            tempScale
-          )
-          currentTileMesh.setMatrixAt(index, tempMatrix)
-          currentTileMesh.setColorAt(index, tempColor.copy(TILE_GREEN).lerp(TILE_HOT, tile.influence))
-        })
-
-        currentTileMesh.instanceMatrix.needsUpdate = true
-        if (currentTileMesh.instanceColor) currentTileMesh.instanceColor.needsUpdate = true
-      }
-
-      const normalizedPressure = THREE.MathUtils.clamp(pressureSum / 5.5, 0, 1)
-      if (performance.now() - lastHudUpdate > 220) {
-        if (normalizedPressure > 0.66) {
-          setPressureLabel('high pressure')
-        } else if (normalizedPressure > 0.28) {
-          setPressureLabel('moderate pressure')
+          // Subtle pulse and lift
+          obj.mesh.position.y = obj.basePosition.y + Math.sin(t * 10 + obj.detectionLevel) * 0.05 * obj.detectionLevel
+          
+          if (obj.detectionLevel > 0.8) topHazard = obj.hazardType
         } else {
-          setPressureLabel('low pressure')
+          obj.material.emissiveIntensity = 0
+          obj.material.opacity = 0.4
+          obj.mesh.position.y = obj.basePosition.y
         }
-        setNearbyLabel(`${nearbyCount} active objects`)
-        lastHudUpdate = performance.now()
-      }
+      })
 
-      modelGroup.rotation.y = Math.sin(t * 0.05) * 0.15
+      setScanStatus(detectedThisFrame > 0 ? 'WARNING: HAZARD DETECTED' : 'SYSTEM SCANNING')
+      setHazardCount(detectedThisFrame)
+      setActiveHazard(topHazard)
+
+      modelGroup.rotation.y += 0.001
       renderer.render(scene, camera)
     }
 
     animate()
 
     return () => {
-      disposed = true
-      window.cancelAnimationFrame(animationFrame)
       el.removeEventListener('mousemove', onPointerMove)
-      el.removeEventListener('mouseleave', onPointerLeave)
-      window.removeEventListener('resize', onResize)
-
-      dracoLoader.dispose()
-      materialsToDispose.forEach((material) => material.dispose())
-      geometriesToDispose.forEach((geometry) => geometry.dispose())
       renderer.dispose()
-
-      if (el.contains(renderer.domElement)) {
-        el.removeChild(renderer.domElement)
-      }
     }
   }, [])
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full overflow-hidden bg-[#050508] font-mono">
       <div ref={mountRef} className="h-full w-full" />
-      <div className="pointer-events-none absolute left-4 top-4 z-10 bg-black/45 px-3 py-2 text-[10px] uppercase tracking-[0.22em] text-white/80 backdrop-blur-sm">
-        <div>{pressureLabel}</div>
-        <div className="mt-1 text-white/50">{nearbyLabel}</div>
+      
+      {/* Tactical HUD Overlay */}
+      <div className="pointer-events-none absolute inset-0 border-[1px] border-white/5 p-6">
+        {/* Top Left: Scanner Status */}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <div className={`h-2 w-2 rounded-full ${hazardCount > 0 ? 'animate-pulse bg-red-500' : 'bg-cyan-400'}`} />
+            <span className="text-[10px] tracking-[0.3em] text-white/90">{scanStatus}</span>
+          </div>
+          <div className="h-[1px] w-32 bg-white/20" />
+        </div>
+
+        {/* Bottom Left: Data Stream */}
+        <div className="absolute bottom-10 left-10">
+          <div className="text-[9px] leading-relaxed text-white/40 uppercase">
+            <div>Sector: Istanbul_Fatih_Z3</div>
+            <div>Detected_Objects: {hazardCount}</div>
+            <div>Risk_Factor: {hazardCount > 0 ? 'CRITICAL' : 'MINIMAL'}</div>
+          </div>
+        </div>
+
+        {/* Center Prompt: Only stays when hovering over a hazard */}
+        {activeHazard && (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+            <div className="mb-2 text-[10px] tracking-[0.5em] text-red-500/80">IDENTIFIED</div>
+            <div className="bg-red-500/10 px-4 py-1 text-xs tracking-widest text-red-500 backdrop-blur-md outline outline-1 outline-red-500/50">
+              {activeHazard}
+            </div>
+          </div>
+        </div>
+
+        {/* Corner Decors */}
+        <div className="absolute right-6 top-6 h-12 w-12 border-r border-t border-white/20" />
+        <div className="absolute bottom-6 left-6 h-12 w-12 border-b border-l border-white/20" />
       </div>
+
+      {/* Vignette effect */}
+      <div className="pointer-events-none absolute inset-0 bg-radial-vignette opacity-60" />
+      
+      <style jsx>{`
+        .bg-radial-vignette {
+          background: radial-gradient(circle, transparent 20%, #000 100%);
+        }
+      `}</style>
     </div>
   )
 }
