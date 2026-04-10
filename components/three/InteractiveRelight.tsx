@@ -1,15 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 
 // --- Tactical Color Palette ---
-const COLOR_SAFE = new THREE.Color(0x00ffcc)    // Cyber Cyan
 const COLOR_HAZARD = new THREE.Color(0xff3300)  // Emergency Red
 const COLOR_SCANNER = new THREE.Color(0x0066ff) // Deep Scan Blue
-const COLOR_IDLE = new THREE.Color(0x1a1a1a)   // Dark Slate
 
 type ObstacleEntry = {
   mesh: THREE.Mesh
@@ -44,7 +42,6 @@ export default function InteractiveRelight() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     el.appendChild(renderer.domElement)
 
-    // Lighting for the "Tactical" feel
     const ambientLight = new THREE.AmbientLight(0x404040, 1.5)
     scene.add(ambientLight)
 
@@ -54,7 +51,6 @@ export default function InteractiveRelight() {
     const modelGroup = new THREE.Group()
     scene.add(modelGroup)
 
-    // Scanner Ring Visual
     const ringGeo = new THREE.RingGeometry(1.9, 2.0, 64)
     const ringMat = new THREE.MeshBasicMaterial({ color: COLOR_SCANNER, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
     const scannerRing = new THREE.Mesh(ringGeo, ringMat)
@@ -77,8 +73,6 @@ export default function InteractiveRelight() {
       '/models/objects.glb',
       (gltf) => {
         const model = gltf.scene
-        
-        // Scale and center the city fragment
         const box = new THREE.Box3().setFromObject(model)
         const size = box.getSize(new THREE.Vector3())
         const scale = 25 / Math.max(size.x, size.z)
@@ -128,8 +122,10 @@ export default function InteractiveRelight() {
     el.addEventListener('mousemove', onPointerMove)
 
     const clock = new THREE.Clock()
+    let animationId: number
+
     const animate = () => {
-      requestAnimationFrame(animate)
+      animationId = requestAnimationFrame(animate)
       const t = clock.getElapsedTime()
       mouse.lerp(targetMouse, 0.1)
 
@@ -148,7 +144,6 @@ export default function InteractiveRelight() {
         const dist = hoverPoint.distanceTo(obj.center)
         const inRange = dist < obj.influenceRadius
 
-        // Smoothly transition detection state
         obj.detectionLevel += ((inRange ? 1 : 0) - obj.detectionLevel) * 0.1
         
         if (obj.detectionLevel > 0.01) {
@@ -157,10 +152,7 @@ export default function InteractiveRelight() {
           obj.material.emissive.copy(alertColor)
           obj.material.emissiveIntensity = obj.detectionLevel * 2
           obj.material.opacity = 0.4 + obj.detectionLevel * 0.6
-          
-          // Subtle pulse and lift
           obj.mesh.position.y = obj.basePosition.y + Math.sin(t * 10 + obj.detectionLevel) * 0.05 * obj.detectionLevel
-          
           if (obj.detectionLevel > 0.8) topHazard = obj.hazardType
         } else {
           obj.material.emissiveIntensity = 0
@@ -180,6 +172,7 @@ export default function InteractiveRelight() {
     animate()
 
     return () => {
+      cancelAnimationFrame(animationId)
       el.removeEventListener('mousemove', onPointerMove)
       renderer.dispose()
     }
@@ -189,9 +182,7 @@ export default function InteractiveRelight() {
     <div className="relative h-full w-full overflow-hidden bg-[#050508] font-mono">
       <div ref={mountRef} className="h-full w-full" />
       
-      {/* Tactical HUD Overlay */}
       <div className="pointer-events-none absolute inset-0 border-[1px] border-white/5 p-6">
-        {/* Top Left: Scanner Status */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <div className={`h-2 w-2 rounded-full ${hazardCount > 0 ? 'animate-pulse bg-red-500' : 'bg-cyan-400'}`} />
@@ -200,7 +191,6 @@ export default function InteractiveRelight() {
           <div className="h-[1px] w-32 bg-white/20" />
         </div>
 
-        {/* Bottom Left: Data Stream */}
         <div className="absolute bottom-10 left-10">
           <div className="text-[9px] leading-relaxed text-white/40 uppercase">
             <div>Sector: Istanbul_Fatih_Z3</div>
@@ -209,7 +199,6 @@ export default function InteractiveRelight() {
           </div>
         </div>
 
-        {/* Center Prompt: Only stays when hovering over a hazard */}
         {activeHazard && (
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
             <div className="mb-2 text-[10px] tracking-[0.5em] text-red-500/80">IDENTIFIED</div>
@@ -217,21 +206,16 @@ export default function InteractiveRelight() {
               {activeHazard}
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Corner Decors */}
         <div className="absolute right-6 top-6 h-12 w-12 border-r border-t border-white/20" />
         <div className="absolute bottom-6 left-6 h-12 w-12 border-b border-l border-white/20" />
       </div>
 
-      {/* Vignette effect */}
-      <div className="pointer-events-none absolute inset-0 bg-radial-vignette opacity-60" />
-      
-      <style jsx>{`
-        .bg-radial-vignette {
-          background: radial-gradient(circle, transparent 20%, #000 100%);
-        }
-      `}</style>
+      <div 
+        className="pointer-events-none absolute inset-0 opacity-60" 
+        style={{ background: 'radial-gradient(circle, transparent 20%, #000 100%)' }}
+      />
     </div>
   )
 }
