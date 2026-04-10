@@ -8,20 +8,21 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 // --- Tactical Color Palette ---
 const COLOR_HAZARD = new THREE.Color(0xff3300)  // Emergency Red
 const COLOR_SCANNER = new THREE.Color(0x0066ff) // Deep Scan Blue
+const COLOR_IDLE_OBJ = new THREE.Color(0x333333) // Dim Grey
 
 type ObstacleEntry = {
   mesh: THREE.Mesh
   basePosition: THREE.Vector3
   center: THREE.Vector3
   influenceRadius: number
-  material: THREE.MeshStandardMaterial
+  material: THREE.MeshBasicMaterial
   detectionLevel: number
   hazardType: string
 }
 
 export default function InteractiveRelight() {
   const mountRef = useRef<HTMLDivElement>(null)
-  const [scanStatus, setScanStatus] = useState('IDLE')
+  const [scanStatus, setScanStatus] = useState('SYSTEM SCANNING')
   const [hazardCount, setHazardCount] = useState(0)
   const [activeHazard, setActiveHazard] = useState<string | null>(null)
 
@@ -42,17 +43,17 @@ export default function InteractiveRelight() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     el.appendChild(renderer.domElement)
 
-    const ambientLight = new THREE.AmbientLight(0x404040, 1.5)
-    scene.add(ambientLight)
-
-    const scannerLight = new THREE.PointLight(COLOR_SCANNER, 20, 15)
-    scene.add(scannerLight)
-
     const modelGroup = new THREE.Group()
     scene.add(modelGroup)
 
+    // Scanner Ring Visual
     const ringGeo = new THREE.RingGeometry(1.9, 2.0, 64)
-    const ringMat = new THREE.MeshBasicMaterial({ color: COLOR_SCANNER, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
+    const ringMat = new THREE.MeshBasicMaterial({ 
+      color: COLOR_SCANNER, 
+      transparent: true, 
+      opacity: 0.4, 
+      side: THREE.DoubleSide 
+    })
     const scannerRing = new THREE.Mesh(ringGeo, ringMat)
     scannerRing.rotation.x = -Math.PI / 2
     scene.add(scannerRing)
@@ -73,11 +74,20 @@ export default function InteractiveRelight() {
       '/models/objects.glb',
       (gltf) => {
         const model = gltf.scene
+        
+        // Scale and center properly
         const box = new THREE.Box3().setFromObject(model)
         const size = box.getSize(new THREE.Vector3())
-        const scale = 25 / Math.max(size.x, size.z)
+        const scale = 22 / Math.max(size.x, size.z)
         model.scale.setScalar(scale)
-        model.position.y = -box.min.y * scale
+        
+        // Center the model horizontally and ground it vertically
+        const centeredBox = new THREE.Box3().setFromObject(model)
+        const center = centeredBox.getCenter(new THREE.Vector3())
+        model.position.x -= center.x
+        model.position.z -= center.z
+        model.position.y = -centeredBox.min.y
+        
         modelGroup.add(model)
 
         const hazardLabels = ['DEBRIS BLOCKAGE', 'UNSTABLE STRUCTURE', 'VEHICLE ABANDONMENT', 'STREET DAMAGE']
@@ -85,14 +95,16 @@ export default function InteractiveRelight() {
         model.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh
-            const isRoad = mesh.name.toLowerCase().includes('road') || mesh.name.toLowerCase().includes('ground')
+            // Detect road/ground meshes
+            const isRoad = mesh.name.toLowerCase().includes('road') || 
+                           mesh.name.toLowerCase().includes('ground') || 
+                           mesh.name.toLowerCase().includes('plane')
 
-            const material = new THREE.MeshStandardMaterial({
-              color: isRoad ? 0x222222 : 0x444444,
+            const material = new THREE.MeshBasicMaterial({
+              color: isRoad ? 0x111111 : COLOR_IDLE_OBJ,
               wireframe: !isRoad,
               transparent: true,
-              opacity: isRoad ? 0.8 : 0.4,
-              emissive: new THREE.Color(0x000000),
+              opacity: isRoad ? 0.9 : 0.6,
             })
             mesh.material = material
 
@@ -102,7 +114,7 @@ export default function InteractiveRelight() {
                 mesh,
                 basePosition: mesh.position.clone(),
                 center: b.getCenter(new THREE.Vector3()),
-                influenceRadius: 2.5,
+                influenceRadius: 2.8,
                 material,
                 detectionLevel: 0,
                 hazardType: hazardLabels[Math.floor(Math.random() * hazardLabels.length)]
@@ -110,7 +122,9 @@ export default function InteractiveRelight() {
             }
           }
         })
-      }
+      },
+      undefined,
+      (err) => console.error('Error loading hazard model:', err)
     )
 
     const onPointerMove = (e: MouseEvent) => {
@@ -131,50 +145,61 @@ export default function InteractiveRelight() {
 
       raycaster.setFromCamera(mouse, camera)
       if (raycaster.ray.intersectPlane(groundPlane, hoverPoint)) {
-        scannerLight.position.copy(hoverPoint).y = 2
         scannerRing.position.set(hoverPoint.x, 0.05, hoverPoint.z)
         scannerRing.scale.setScalar(1 + Math.sin(t * 4) * 0.1)
-        scannerRing.material.opacity = 0.3 + Math.sin(t * 4) * 0.2
+        scannerRing.material.opacity = 0.2 + Math.sin(t * 4) * 0.2
       }
 
-      let detectedThisFrame = 0
+      let detectedCount = 0
       let topHazard: string | null = null
 
       obstacleEntries.forEach((obj) => {
         const dist = hoverPoint.distanceTo(obj.center)
         const inRange = dist < obj.influenceRadius
 
-        obj.detectionLevel += ((inRange ? 1 : 0) - obj.detectionLevel) * 0.1
+        // Smoothly transition detection state
+        obj.detectionLevel += ((inRange ? 1 : 0) - obj.detectionLevel) * 0.08
         
         if (obj.detectionLevel > 0.01) {
-          detectedThisFrame++
-          const alertColor = COLOR_HAZARD.clone().lerp(COLOR_SCANNER, 1 - obj.detectionLevel)
-          obj.material.emissive.copy(alertColor)
-          obj.material.emissiveIntensity = obj.detectionLevel * 2
-          obj.material.opacity = 0.4 + obj.detectionLevel * 0.6
+          detectedCount++
+          // Interpolate between idle color and emergency red
+          obj.material.color.copy(COLOR_IDLE_OBJ).lerp(COLOR_HAZARD, obj.detectionLevel)
+          obj.material.opacity = 0.6 + obj.detectionLevel * 0.4
+          
+          // Subtle pulse and lift
           obj.mesh.position.y = obj.basePosition.y + Math.sin(t * 10 + obj.detectionLevel) * 0.05 * obj.detectionLevel
-          if (obj.detectionLevel > 0.8) topHazard = obj.hazardType
+          
+          if (obj.detectionLevel > 0.75) topHazard = obj.hazardType
         } else {
-          obj.material.emissiveIntensity = 0
-          obj.material.opacity = 0.4
+          obj.material.color.copy(COLOR_IDLE_OBJ)
+          obj.material.opacity = 0.6
           obj.mesh.position.y = obj.basePosition.y
         }
       })
 
-      setScanStatus(detectedThisFrame > 0 ? 'WARNING: HAZARD DETECTED' : 'SYSTEM SCANNING')
-      setHazardCount(detectedThisFrame)
+      setScanStatus(detectedCount > 0 ? 'WARNING: HAZARD DETECTED' : 'SYSTEM SCANNING')
+      setHazardCount(detectedCount)
       setActiveHazard(topHazard)
 
-      modelGroup.rotation.y += 0.001
+      modelGroup.rotation.y = Math.sin(t * 0.1) * 0.05
       renderer.render(scene, camera)
     }
 
     animate()
 
+    const onResize = () => {
+      camera.aspect = el.clientWidth / el.clientHeight
+      camera.updateProjectionMatrix()
+      renderer.setSize(el.clientWidth, el.clientHeight)
+    }
+    window.addEventListener('resize', onResize)
+
     return () => {
       cancelAnimationFrame(animationId)
       el.removeEventListener('mousemove', onPointerMove)
+      window.removeEventListener('resize', onResize)
       renderer.dispose()
+      dracoLoader.dispose()
     }
   }, [])
 
@@ -182,17 +207,18 @@ export default function InteractiveRelight() {
     <div className="relative h-full w-full overflow-hidden bg-[#050508] font-mono">
       <div ref={mountRef} className="h-full w-full" />
       
+      {/* Tactical HUD Overlay */}
       <div className="pointer-events-none absolute inset-0 border-[1px] border-white/5 p-6">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <div className={`h-2 w-2 rounded-full ${hazardCount > 0 ? 'animate-pulse bg-red-500' : 'bg-cyan-400'}`} />
-            <span className="text-[10px] tracking-[0.3em] text-white/90">{scanStatus}</span>
+            <div className={`h-2 w-2 rounded-full ${hazardCount > 0 ? 'animate-pulse bg-red-500' : 'bg-cyan-400 opacity-50'}`} />
+            <span className="text-[10px] tracking-[0.3em] text-white/70">{scanStatus}</span>
           </div>
-          <div className="h-[1px] w-32 bg-white/20" />
+          <div className="h-[1px] w-32 bg-white/10" />
         </div>
 
         <div className="absolute bottom-10 left-10">
-          <div className="text-[9px] leading-relaxed text-white/40 uppercase">
+          <div className="text-[9px] leading-relaxed text-white/30 uppercase tracking-widest">
             <div>Sector: Istanbul_Fatih_Z3</div>
             <div>Detected_Objects: {hazardCount}</div>
             <div>Risk_Factor: {hazardCount > 0 ? 'CRITICAL' : 'MINIMAL'}</div>
@@ -201,20 +227,20 @@ export default function InteractiveRelight() {
 
         {activeHazard && (
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-            <div className="mb-2 text-[10px] tracking-[0.5em] text-red-500/80">IDENTIFIED</div>
-            <div className="bg-red-500/10 px-4 py-1 text-xs tracking-widest text-red-500 backdrop-blur-md outline outline-1 outline-red-500/50">
+            <div className="mb-2 text-[10px] tracking-[0.5em] text-red-500/60 font-bold">IDENTIFIED</div>
+            <div className="bg-red-500/20 px-4 py-1 text-[11px] tracking-widest text-red-500 backdrop-blur-md border border-red-500/30">
               {activeHazard}
             </div>
           </div>
         )}
 
-        <div className="absolute right-6 top-6 h-12 w-12 border-r border-t border-white/20" />
-        <div className="absolute bottom-6 left-6 h-12 w-12 border-b border-l border-white/20" />
+        <div className="absolute right-6 top-6 h-12 w-12 border-r border-t border-white/10" />
+        <div className="absolute bottom-6 left-6 h-12 w-12 border-b border-l border-white/10" />
       </div>
 
       <div 
-        className="pointer-events-none absolute inset-0 opacity-60" 
-        style={{ background: 'radial-gradient(circle, transparent 20%, #000 100%)' }}
+        className="pointer-events-none absolute inset-0 opacity-40" 
+        style={{ background: 'radial-gradient(circle, transparent 30%, #000 100%)' }}
       />
     </div>
   )
