@@ -5,24 +5,8 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 
-// --- Tactical Color Palette ---
-const COLOR_HAZARD = new THREE.Color(0xff3300)  // Emergency Red
-const COLOR_SCANNER = new THREE.Color(0x0066ff) // Deep Scan Blue
-const COLOR_IDLE_OBJ = new THREE.Color(0x333333) // Dim Grey
-
-type ObstacleEntry = {
-  mesh: THREE.Mesh
-  basePosition: THREE.Vector3
-  center: THREE.Vector3
-  influenceRadius: number
-  material: THREE.MeshBasicMaterial
-  detectionLevel: number
-  hazardType: string
-}
-
 export default function InteractiveRelight() {
   const mountRef = useRef<HTMLDivElement>(null)
-  const [scanStatus, setScanStatus] = useState('SYSTEM SCANNING')
   const [hazardCount, setHazardCount] = useState(0)
   const [activeHazard, setActiveHazard] = useState<string | null>(null)
 
@@ -31,11 +15,10 @@ export default function InteractiveRelight() {
     if (!el) return
 
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x050508)
-    scene.fog = new THREE.FogExp2(0x050508, 0.05)
+    scene.background = new THREE.Color(0x020205)
 
     const camera = new THREE.PerspectiveCamera(45, el.clientWidth / el.clientHeight, 0.1, 1000)
-    camera.position.set(0, 15, 20)
+    camera.position.set(0, 18, 25)
     camera.lookAt(0, 0, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
@@ -43,22 +26,21 @@ export default function InteractiveRelight() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     el.appendChild(renderer.domElement)
 
+    // Standard lighting to ensure we see the model
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
+    scene.add(ambientLight)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
+    directionalLight.position.set(5, 10, 5)
+    scene.add(directionalLight)
+
     const modelGroup = new THREE.Group()
     scene.add(modelGroup)
 
-    // Scanner Ring Visual
-    const ringGeo = new THREE.RingGeometry(1.9, 2.0, 64)
-    const ringMat = new THREE.MeshBasicMaterial({ 
-      color: COLOR_SCANNER, 
-      transparent: true, 
-      opacity: 0.4, 
-      side: THREE.DoubleSide 
-    })
-    const scannerRing = new THREE.Mesh(ringGeo, ringMat)
-    scannerRing.rotation.x = -Math.PI / 2
-    scene.add(scannerRing)
+    // Helpers to verify coordinate system
+    const grid = new THREE.GridHelper(30, 30, 0x444444, 0x222222)
+    scene.add(grid)
 
-    const obstacleEntries: ObstacleEntry[] = []
+    const obstacleEntries: any[] = []
     const dracoLoader = new DRACOLoader()
     dracoLoader.setDecoderPath('/draco/')
     const loader = new GLTFLoader()
@@ -74,57 +56,49 @@ export default function InteractiveRelight() {
       '/models/objects.glb',
       (gltf) => {
         const model = gltf.scene
-        
-        // Scale and center properly
+        console.log('Hazard model loaded successfully:', model)
+
         const box = new THREE.Box3().setFromObject(model)
         const size = box.getSize(new THREE.Vector3())
-        const scale = 22 / Math.max(size.x, size.z)
+        const scale = 20 / Math.max(size.x, size.z)
         model.scale.setScalar(scale)
         
-        // Center the model horizontally and ground it vertically
+        // Ground the model
         const centeredBox = new THREE.Box3().setFromObject(model)
-        const center = centeredBox.getCenter(new THREE.Vector3())
-        model.position.x -= center.x
-        model.position.z -= center.z
         model.position.y = -centeredBox.min.y
-        
         modelGroup.add(model)
 
-        const hazardLabels = ['DEBRIS BLOCKAGE', 'UNSTABLE STRUCTURE', 'VEHICLE ABANDONMENT', 'STREET DAMAGE']
+        const hazardLabels = ['BLOCKED PATH', 'DEBRIS HAZARD', 'UNSTABLE WALL', 'DAMAGED ROAD']
 
         model.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh
-            // Detect road/ground meshes
-            const isRoad = mesh.name.toLowerCase().includes('road') || 
-                           mesh.name.toLowerCase().includes('ground') || 
-                           mesh.name.toLowerCase().includes('plane')
-
-            const material = new THREE.MeshBasicMaterial({
-              color: isRoad ? 0x111111 : COLOR_IDLE_OBJ,
-              wireframe: !isRoad,
+            console.log('Found mesh:', mesh.name)
+            
+            // For now, give everything a visible wireframe material
+            const material = new THREE.MeshPhongMaterial({
+              color: 0x888888,
+              wireframe: true,
+              emissive: 0x222222,
               transparent: true,
-              opacity: isRoad ? 0.9 : 0.6,
+              opacity: 0.7
             })
             mesh.material = material
 
-            if (!isRoad) {
-              const b = new THREE.Box3().setFromObject(mesh)
-              obstacleEntries.push({
-                mesh,
-                basePosition: mesh.position.clone(),
-                center: b.getCenter(new THREE.Vector3()),
-                influenceRadius: 2.8,
-                material,
-                detectionLevel: 0,
-                hazardType: hazardLabels[Math.floor(Math.random() * hazardLabels.length)]
-              })
-            }
+            const b = new THREE.Box3().setFromObject(mesh)
+            obstacleEntries.push({
+              mesh,
+              basePosition: mesh.position.clone(),
+              center: b.getCenter(new THREE.Vector3()),
+              material,
+              detectionLevel: 0,
+              hazardType: hazardLabels[Math.floor(Math.random() * hazardLabels.length)]
+            })
           }
         })
       },
       undefined,
-      (err) => console.error('Error loading hazard model:', err)
+      (err) => console.error('GLB ERROR:', err)
     )
 
     const onPointerMove = (e: MouseEvent) => {
@@ -136,52 +110,39 @@ export default function InteractiveRelight() {
     el.addEventListener('mousemove', onPointerMove)
 
     const clock = new THREE.Clock()
-    let animationId: number
-
     const animate = () => {
-      animationId = requestAnimationFrame(animate)
+      requestAnimationFrame(animate)
       const t = clock.getElapsedTime()
       mouse.lerp(targetMouse, 0.1)
 
       raycaster.setFromCamera(mouse, camera)
-      if (raycaster.ray.intersectPlane(groundPlane, hoverPoint)) {
-        scannerRing.position.set(hoverPoint.x, 0.05, hoverPoint.z)
-        scannerRing.scale.setScalar(1 + Math.sin(t * 4) * 0.1)
-        scannerRing.material.opacity = 0.2 + Math.sin(t * 4) * 0.2
-      }
+      raycaster.ray.intersectPlane(groundPlane, hoverPoint)
 
-      let detectedCount = 0
-      let topHazard: string | null = null
+      let count = 0
+      let active: string | null = null
 
       obstacleEntries.forEach((obj) => {
         const dist = hoverPoint.distanceTo(obj.center)
-        const inRange = dist < obj.influenceRadius
+        const isNear = dist < 3.5
+        obj.detectionLevel += ((isNear ? 1 : 0) - obj.detectionLevel) * 0.1
 
-        // Smoothly transition detection state
-        obj.detectionLevel += ((inRange ? 1 : 0) - obj.detectionLevel) * 0.08
-        
-        if (obj.detectionLevel > 0.01) {
-          detectedCount++
-          // Interpolate between idle color and emergency red
-          obj.material.color.copy(COLOR_IDLE_OBJ).lerp(COLOR_HAZARD, obj.detectionLevel)
-          obj.material.opacity = 0.6 + obj.detectionLevel * 0.4
-          
-          // Subtle pulse and lift
-          obj.mesh.position.y = obj.basePosition.y + Math.sin(t * 10 + obj.detectionLevel) * 0.05 * obj.detectionLevel
-          
-          if (obj.detectionLevel > 0.75) topHazard = obj.hazardType
+        if (obj.detectionLevel > 0.05) {
+          count++
+          obj.material.emissive.setHex(0xff0000)
+          obj.material.emissiveIntensity = obj.detectionLevel * 2
+          obj.mesh.position.y = obj.basePosition.y + obj.detectionLevel * 0.2
+          if (obj.detectionLevel > 0.8) active = obj.hazardType
         } else {
-          obj.material.color.copy(COLOR_IDLE_OBJ)
-          obj.material.opacity = 0.6
+          obj.material.emissive.setHex(0x222222)
+          obj.material.emissiveIntensity = 1
           obj.mesh.position.y = obj.basePosition.y
         }
       })
 
-      setScanStatus(detectedCount > 0 ? 'WARNING: HAZARD DETECTED' : 'SYSTEM SCANNING')
-      setHazardCount(detectedCount)
-      setActiveHazard(topHazard)
+      setHazardCount(count)
+      setActiveHazard(active)
 
-      modelGroup.rotation.y = Math.sin(t * 0.1) * 0.05
+      modelGroup.rotation.y += 0.002
       renderer.render(scene, camera)
     }
 
@@ -195,53 +156,36 @@ export default function InteractiveRelight() {
     window.addEventListener('resize', onResize)
 
     return () => {
-      cancelAnimationFrame(animationId)
       el.removeEventListener('mousemove', onPointerMove)
       window.removeEventListener('resize', onResize)
       renderer.dispose()
-      dracoLoader.dispose()
     }
   }, [])
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#050508] font-mono">
+    <div className="relative h-full min-h-[500px] w-full bg-[#050508] font-mono">
       <div ref={mountRef} className="h-full w-full" />
       
-      {/* Tactical HUD Overlay */}
-      <div className="pointer-events-none absolute inset-0 border-[1px] border-white/5 p-6">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <div className={`h-2 w-2 rounded-full ${hazardCount > 0 ? 'animate-pulse bg-red-500' : 'bg-cyan-400 opacity-50'}`} />
-            <span className="text-[10px] tracking-[0.3em] text-white/70">{scanStatus}</span>
-          </div>
-          <div className="h-[1px] w-32 bg-white/10" />
-        </div>
-
-        <div className="absolute bottom-10 left-10">
-          <div className="text-[9px] leading-relaxed text-white/30 uppercase tracking-widest">
-            <div>Sector: Istanbul_Fatih_Z3</div>
-            <div>Detected_Objects: {hazardCount}</div>
-            <div>Risk_Factor: {hazardCount > 0 ? 'CRITICAL' : 'MINIMAL'}</div>
-          </div>
+      {/* HUD Overlay */}
+      <div className="pointer-events-none absolute inset-0 p-8">
+        <div className="flex flex-col gap-1 border-l-2 border-cyan-500 pl-4">
+          <div className="text-[10px] tracking-[0.4em] text-cyan-400 uppercase font-bold">Tactical Scanner v2.1</div>
+          <div className="text-[9px] text-white/50">SECTOR: IST_EVAC_01</div>
         </div>
 
         {activeHazard && (
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-            <div className="mb-2 text-[10px] tracking-[0.5em] text-red-500/60 font-bold">IDENTIFIED</div>
-            <div className="bg-red-500/20 px-4 py-1 text-[11px] tracking-widest text-red-500 backdrop-blur-md border border-red-500/30">
-              {activeHazard}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="bg-red-600/20 backdrop-blur-md border border-red-500 px-6 py-2 text-red-500 text-xs tracking-widest uppercase">
+              Caution: {activeHazard}
             </div>
           </div>
         )}
 
-        <div className="absolute right-6 top-6 h-12 w-12 border-r border-t border-white/10" />
-        <div className="absolute bottom-6 left-6 h-12 w-12 border-b border-l border-white/10" />
+        <div className="absolute bottom-10 left-10 text-[9px] text-white/40 leading-relaxed uppercase">
+          <div>Objects Scanned: {hazardCount}</div>
+          <div>Status: {hazardCount > 0 ? 'Hazard identified' : 'Scanning street...'}</div>
+        </div>
       </div>
-
-      <div 
-        className="pointer-events-none absolute inset-0 opacity-40" 
-        style={{ background: 'radial-gradient(circle, transparent 30%, #000 100%)' }}
-      />
     </div>
   )
 }
