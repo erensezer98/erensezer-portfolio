@@ -350,7 +350,7 @@ export default function InteractiveRelight() {
   }, [neighborhood, destination, showHeatmap, showBoxes, generateCity])
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-[#020205] font-sans">
+    <div className="relative h-full w-full overflow-hidden bg-[#020205] font-sans">
       <div ref={mountRef} className="h-full w-full" />
 
       {/* UI Panel */}

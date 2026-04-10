@@ -300,9 +300,13 @@ export default function ProjectDetailTemplate({
             </div>
           </div>
 
-          {/* ── Three.js scene (standalone, no detail sections) ── */}
-          {content.sceneComponent !== 'none' && !hasDetailSections && (
-            <div className={`mb-8 aspect-[16/7] w-full overflow-hidden border ${theme.surface} ${theme.border}`}>
+          {/* ── Three.js scene ── */}
+          {content.sceneComponent !== 'none' && (
+            <div className={`mb-12 overflow-hidden border ${theme.surface} ${theme.border} ${
+              isIstanbul 
+                ? 'w-full aspect-[16/7]' 
+                : 'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] aspect-[21/9] md:aspect-[24/9] !border-x-0'
+            }`}>
               <ProjectScene component={content.sceneComponent} />
             </div>
           )}
@@ -420,13 +424,19 @@ export default function ProjectDetailTemplate({
                       {/* Accordion content */}
                       {isOpen && (
                         <div className="pb-10">
-                          {/* Three.js scene – full content width */}
+                          {/* Three.js scene – full content width or screen width */}
                           {section.includeScene && content.sceneComponent !== 'none' && (
-                            <div className="mb-8">
-                              <div className={`w-full overflow-hidden border ${theme.surface} ${theme.border}`} style={{ aspectRatio: '16/7' }}>
+                            <div className="mb-12">
+                              <div className={`overflow-hidden border ${theme.surface} ${theme.border} ${
+                                isIstanbul 
+                                  ? 'w-full aspect-[16/7]' 
+                                  : 'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] aspect-[21/9] md:aspect-[24/9] !border-x-0'
+                              }`}>
                                 <ProjectScene component={content.sceneComponent} />
                               </div>
-                              <p className={`mt-2 text-[11px] leading-relaxed ${theme.muted}`}>Interactive three.js study</p>
+                              <p className={`mt-3 text-[11px] leading-relaxed uppercase tracking-widest ${theme.muted}`}>
+                                {isIstanbul ? 'Interactive Hazard Simulation' : '3D Study'}
+                              </p>
                             </div>
                           )}
 
