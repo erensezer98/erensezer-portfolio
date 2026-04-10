@@ -280,14 +280,10 @@ export default function InteractiveRelight() {
 
     currentScene.add(new THREE.AmbientLight(0x111122, 0.5))
     
-    const spotLight = new THREE.SpotLight(0xffffff, 2)
-    spotLight.angle = Math.PI / 8
-    spotLight.penumbra = 0.5
-    spotLight.decay = 1.5
-    spotLight.distance = 50
-    spotLight.castShadow = true
-    currentScene.add(spotLight)
-    currentScene.add(spotLight.target)
+    const cursorLight = new THREE.PointLight(0xffffff, 5, 60)
+    cursorLight.decay = 2
+    cursorLight.castShadow = true
+    currentScene.add(cursorLight)
 
     const groundGeo = new THREE.PlaneGeometry(200, 200)
     const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0f, roughness: 1 })
@@ -312,8 +308,7 @@ export default function InteractiveRelight() {
       
       if (intersects.length > 0) {
         const p = intersects[0].point
-        spotLight.position.set(p.x, 15, p.z + 5)
-        spotLight.target.position.copy(p)
+        cursorLight.position.set(p.x, 4, p.z)
       }
     }
     el.addEventListener('mousemove', onMouseMove)
