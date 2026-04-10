@@ -174,7 +174,7 @@ export default function InteractiveRelight() {
     
     const blockSize = isDolapdere ? 2 : 5
     const streetWidth = isDolapdere ? 1 : 3
-    const buildingMat = new THREE.MeshStandardMaterial({ color: 0x151b22, roughness: 0.8 })
+    const buildingMat = new THREE.MeshStandardMaterial({ color: 0x445566, roughness: 0.6, metalness: 0.1 })
 
     for (let x = 0; x < gridSize; x++) {
       for (let z = 0; z < gridSize; z++) {
@@ -275,10 +275,12 @@ export default function InteractiveRelight() {
 
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.target.set(15, 0, 15)
-    controls.maxPolarAngle = Math.PI / 2 - 0.1
     controls.update()
 
-    currentScene.add(new THREE.AmbientLight(0x111122, 0.5))
+    currentScene.add(new THREE.AmbientLight(0xffffff, 2.0))
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.5)
+    sunLight.position.set(50, 100, 50)
+    currentScene.add(sunLight)
     
     const cursorLight = new THREE.SpotLight(0xffffff, 15)
     cursorLight.angle = Math.PI / 6
@@ -290,7 +292,7 @@ export default function InteractiveRelight() {
     currentScene.add(cursorLight.target)
 
     const groundGeo = new THREE.PlaneGeometry(200, 200)
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0f, roughness: 1 })
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a1a25, roughness: 1 })
     const groundMesh = new THREE.Mesh(groundGeo, groundMat)
     groundMesh.rotation.x = -Math.PI / 2
     groundMesh.receiveShadow = true
