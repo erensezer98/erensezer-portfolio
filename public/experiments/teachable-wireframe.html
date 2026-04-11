@@ -235,8 +235,31 @@
             
             // Wait for image to be fully loaded into DOM before prediction
             previewImage.onload = async () => {
-                statusEl.innerText = "Extracting features...";
-                await predict(previewImage);
+                statusEl.innerText = "Cropping and extracting features...";
+                
+                // Construct a strict square crop to prevent TM from warping rectangular images
+                const offscreenCanvas = document.createElement('canvas');
+                offscreenCanvas.width = 224;
+                offscreenCanvas.height = 224;
+                const ctx = offscreenCanvas.getContext('2d');
+                
+                // Fill with solid white. This prevents transparent PNGs from automatically converting to black backgrounds!
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, 224, 224);
+                
+                // Calculate center crop mathematically
+                const size = Math.min(previewImage.naturalWidth, previewImage.naturalHeight);
+                const startX = (previewImage.naturalWidth - size) / 2;
+                const startY = (previewImage.naturalHeight - size) / 2;
+                
+                // Draw crop
+                ctx.drawImage(previewImage, startX, startY, size, size, 0, 0, 224, 224);
+                
+                // Override the displayed preview so the user sees exactly what the AI sees
+                previewImage.src = offscreenCanvas.toDataURL('image/jpeg', 0.9);
+
+                // Analyze the strictly formatted canvas instead of the stretchy raw image
+                await predict(offscreenCanvas);
             }
         };
         reader.readAsDataURL(file);
