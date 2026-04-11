@@ -102,7 +102,7 @@ export default async function RootLayout({
                 '@type': 'WebSite',
                 '@id': 'https://www.erensezer.com/#website',
                 url: 'https://www.erensezer.com',
-                name: 'Eren Sezer — Architect',
+                name: 'Eren Sezer',
                 image: portraitUrl,
                 publisher: {
                   '@id': 'https://www.erensezer.com/#person'
