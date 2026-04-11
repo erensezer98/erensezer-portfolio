@@ -53,10 +53,9 @@ export const EXPERIMENTS: Experiment[] = [
       'This experiment bridges AI-driven vision and generative geometry. By uploading images against a pre-trained Teachable Machine model, the resulting classification probabilities directly manipulate the form factor, noise distortion, color interpolation, and kinetic behavior of a high-density 3D wireframe mesh in real time.',
     embedPath: '/experiments/teachable-wireframe.html',
     notes: [
-      'You need a Teachable Machine Image project to use this.',
-      'Copy the hosted model URL from Teachable Machine (e.g., https://teachablemachine.withgoogle.com/models/YOUR_ID/).',
-      'Or, host the model locally in your `/public/my_model/` folder.',
-      'Connect the model and upload an image to see the geometry react to the AI predictions.',
+      'This study uses an onboard AI engine hosted directly within the portfolio.',
+      'Select any image to analyze it through the neural network.',
+      'The wireframe geometry reacts and shifts proportionally to the inference probabilities.',
     ],
   },
 ]

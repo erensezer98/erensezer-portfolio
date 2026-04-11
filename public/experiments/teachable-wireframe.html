@@ -14,11 +14,7 @@
     .upload-btn:hover { opacity: 0.8; }
     #image-upload { display: none; }
     
-    .model-url-group { display: flex; flex-direction: column; gap: 8px;}
-    .model-url-group input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; color: #fff; border-radius: 4px; font-size: 12px;}
-    .load-model-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 12px; transition: background 0.2s;}
-    .load-model-btn:hover { background: rgba(255,255,255,0.1); }
-    
+
     #preview-container { width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;}
     #preview-image { width: 100%; height: 100%; object-fit: cover; display: none; }
     
@@ -44,14 +40,7 @@
   <div id="ui-container">
     <h1>AI Form Factor</h1>
     
-    <div class="model-url-group">
-      <label style="font-size: 12px; color: #aaa;">Teachable Machine Model URL</label>
-      <!-- E.g., https://teachablemachine.withgoogle.com/models/YOUR_MODEL_ID/ or ./my_model/ -->
-      <input type="text" id="model-url" value="" placeholder="e.g. https://teachablemachine.withgoogle.com/models/...">
-      <button class="load-model-btn" onclick="loadModelFromUrl()">Connect Model</button>
-    </div>
-
-    <div id="status">Please provide a valid Teachable Machine model URL to begin.</div>
+    <div id="status">Connecting to onboard AI engine...</div>
 
     <div style="flex:1;"></div>
 
@@ -187,18 +176,9 @@
     const previewText = document.getElementById('preview-text');
     const labelContainer = document.getElementById("label-container");
 
-    async function loadModelFromUrl() {
-        let url = document.getElementById('model-url').value.trim();
-        if (!url) {
-            statusEl.innerText = "Please enter a valid URL.";
-            return;
-        }
-        if (!url.endsWith('/')) url += '/';
+    async function initModel() {
+        const url = "/ai/";
         
-        statusEl.innerText = "Connecting to model...";
-        uploadBtn.style.opacity = '0.3';
-        uploadBtn.style.pointerEvents = 'none';
-
         try {
             const modelURL = url + "model.json";
             const metadataURL = url + "metadata.json";
@@ -227,14 +207,17 @@
                 labelContainer.appendChild(wrapper);
             }
 
-            statusEl.innerText = "Model connected successfully. Read to analyze images.";
+            statusEl.innerText = "AI Engine ready. Select an image to begin.";
             uploadBtn.style.opacity = '1';
             uploadBtn.style.pointerEvents = 'auto';
         } catch (e) {
             console.error(e);
-            statusEl.innerText = "Error loading model. Make sure the URL is public and correct.";
+            statusEl.innerText = "Error loading onboard AI model. Make sure the /ai/ folder exists.";
         }
     }
+    
+    // Auto-initialize
+    initModel();
 
     // Handle Image Upload
     imageUpload.addEventListener('change', async (e) => {
