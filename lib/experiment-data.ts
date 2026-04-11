@@ -41,6 +41,24 @@ export const EXPERIMENTS: Experiment[] = [
       'Books, cups, bottles, laptops, and small tools will be translated into a live desk-city on the desktop.',
     ],
   },
+  {
+    slug: 'ai-form-factor',
+    title: 'AI Form Factor',
+    category: 'Machine Learning Study',
+    year: 2026,
+    location: 'Browser-based / Teachable Machine',
+    shortDescription:
+      'A Three.js wireframe sculpture that shapeshifts based on Teachable Machine image classifications.',
+    description:
+      'This experiment bridges AI-driven vision and generative geometry. By uploading images against a pre-trained Teachable Machine model, the resulting classification probabilities directly manipulate the form factor, noise distortion, color interpolation, and kinetic behavior of a high-density 3D wireframe mesh in real time.',
+    embedPath: '/experiments/teachable-wireframe.html',
+    notes: [
+      'You need a Teachable Machine Image project to use this.',
+      'Copy the hosted model URL from Teachable Machine (e.g., https://teachablemachine.withgoogle.com/models/YOUR_ID/).',
+      'Or, host the model locally in your `/public/my_model/` folder.',
+      'Connect the model and upload an image to see the geometry react to the AI predictions.',
+    ],
+  },
 ]
 
 export function getExperimentBySlug(slug: string) {
