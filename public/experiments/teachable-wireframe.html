@@ -177,7 +177,7 @@
     const labelContainer = document.getElementById("label-container");
 
     async function initModel() {
-        const url = "/ai/";
+        const url = window.location.origin + "/ai/";
         
         try {
             const modelURL = url + "model.json";
@@ -212,7 +212,7 @@
             uploadBtn.style.pointerEvents = 'auto';
         } catch (e) {
             console.error(e);
-            statusEl.innerText = "Error loading onboard AI model. Make sure the /ai/ folder exists.";
+            statusEl.innerText = "Error: " + (e.message || String(e));
         }
     }
     
