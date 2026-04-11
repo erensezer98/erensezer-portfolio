@@ -41,6 +41,13 @@ export async function generateMetadata(): Promise<Metadata> {
       creator: '@erensezer',
       images: portraitUrl ? [portraitUrl] : undefined,
     },
+    icons: {
+      icon: [
+        { url: '/icon', sizes: '192x192', type: 'image/png' },
+        { url: '/icon', sizes: '48x48', type: 'image/png' },
+      ],
+      apple: [{ url: '/apple-icon', sizes: '180x180', type: 'image/png' }],
+    },
     alternates: {
       canonical: '/',
     },
