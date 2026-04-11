@@ -365,8 +365,8 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
       2021,
       'Milan, Italy',
       'academic',
-      'Auditorium project exploring organic timber form in Milan.',
-      'The Log is an auditorium conceived as a single continuous timber form, a monolithic object carved from the landscape. Its sectional geometry is derived from acoustic performance requirements, while the exterior silhouette references the raw materiality of a fallen log partially reclaimed by the earth.',
+      'Auditorium born from a schoolyard ritual — students rolling logs into a circle to make their own little stage.',
+      'The Log began with a simple observation: students at the Alda Merini Secondary School in Milan dragging heavy timber logs across the garden, arranging them into a circle to create their own makeshift auditorium. That image became the project. The building keeps the log as its central idea — not as ornament, but as the architecture itself.',
       ['auditorium', 'timber', 'acoustics'],
       null,
       true,
@@ -375,11 +375,11 @@ export const STATIC_PROJECT_RECORDS: StaticProjectRecord[] = [
     page: createPageContent({
       sceneComponent: 'the-log-scene',
       introText:
-        'This project imagines an auditorium for the Alda Merini School in Milan, born from a simple scene: students gathering in a circle on logs. That image stayed with us. We wanted to keep something that already belonged to them and turn it into architecture, carrying the log from object to idea. The result is a bright, playful auditorium where the stage can expand by folding open the back wall, allowing the performance space to stretch outward and transform with use.',
+        'The Log was born from a scene in the schoolyard at Alda Merini Secondary School in Milan: students dragging heavy timber logs across the garden, arranging them into a circle for their little shows. That gesture stayed with us. We wanted to hold onto what already belonged to them — the ritual, the weight, the joy of it — and turn it into architecture. The result is a bright, open auditorium where the stage can expand by folding back the wall and spilling out into the garden.',
       processText:
-        'The Log is organized in two layers: the auditorium itself and the foyer. The foyer is conceived as an almost weightless space, light-filled and transparent beneath an ETFE roof. In contrast, the auditorium is grounded, solid, and heavy, holding the stillness and concentration of the performance room. That tension between lightness and mass came from the children themselves, from the effort of rolling heavy logs into place and turning them into a circle, then into a shared and joyful environment.',
+        'The design is built on a single contrast: the heavy log and the light shell. The auditorium is conceived as the log — grounded, solid, opaque, anchored to the earth. The foyer is its opposite: as light as it can be, transparent, semi-open, and semi-conditioned. That tension between mass and weightlessness came directly from the students themselves — from the effort of moving something heavy to create something joyful, from turning a pile of timber into a circle, and a circle into a shared place.',
       schematicText:
-        'Inside the auditorium, acoustic panels shape the atmosphere as much as the sound. The stage is paired with a bifold door that can open the back wall completely, turning the garden into a backdrop or, even better, into an extension of the stage itself. The foyer works as a semi-conditioned buffer, helping moderate the greenhouse effect created by the polycarbonate walls while preserving its luminous, in-between character.',
+        'We knew the students loved their garden, and we did not want to take it from them. A bifold door behind the stage means the garden remains part of the performance — a backdrop, an extension of the stage, or simply a place to breathe. For the foyer, we kept the roof open so hot air can rise and escape, preventing the space from becoming a greenhouse. An ETFE membrane seals it against rain while keeping the space luminous and alive, hovering somewhere between inside and out.',
       infoFields: [
         { label: 'Program', value: 'Cultural / Performance' },
         { label: 'Area', value: '8,500 m2' },
