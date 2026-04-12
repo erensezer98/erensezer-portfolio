@@ -12,13 +12,13 @@
 
     :root {
       --panel-w: 320px;
-      --bg: #060608;
-      --surface: rgba(8, 8, 12, 0.85);
-      --border: rgba(255,255,255,0.07);
-      --accent: #a0c4ff;
-      --text-primary: rgba(255,255,255,0.92);
-      --text-muted: rgba(255,255,255,0.4);
-      --text-dim: rgba(255,255,255,0.22);
+      --bg: #ffffff;
+      --surface: rgba(255, 255, 255, 0.94);
+      --border: rgba(0,0,0,0.08);
+      --accent: #0077ff;
+      --text-primary: #0a0a0a;
+      --text-muted: rgba(0,0,0,0.5);
+      --text-dim: rgba(0,0,0,0.2);
     }
 
     body {
@@ -351,8 +351,8 @@
 //  THREE.JS — Architectural Membrane + Particle Field
 // ═══════════════════════════════════════════════════════════════════════
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x060608);
-scene.fog = new THREE.FogExp2(0x060608, 0.018);
+scene.background = new THREE.Color(0xffffff);
+scene.fog = new THREE.FogExp2(0xffffff, 0.012);
 
 const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
 camera.position.set(0, 0, 32);
@@ -369,34 +369,44 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ── LIGHTING (Robust for all GPUs) ──────────────────────────────────
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+// ── LIGHTING (Optimized for White) ──────────────────────────────────
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambientLight);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
 dirLight.position.set(10, 20, 10);
 scene.add(dirLight);
 
-const blueLight = new THREE.PointLight(0x0088ff, 1.2);
-blueLight.position.set(-20, -10, 10);
-scene.add(blueLight);
+const accentLight = new THREE.PointLight(0x0077ff, 0.5);
+accentLight.position.set(-20, -10, 10);
+scene.add(accentLight);
 
 // ── FLUIDIC CORE (THE WATER DROP) ────────────────────────────────────
 const fluidGeo = new THREE.IcosahedronGeometry(6, 12);
 const fluidBasePos = new Float32Array(fluidGeo.attributes.position.array);
 
 const fluidMat = new THREE.MeshPhongMaterial({
-  color: 0x88ccff,
-  specular: 0x111111,
-  shininess: 100,
+  color: 0x222222,
+  specular: 0x444444,
+  shininess: 120,
   transparent: true,
-  opacity: 0.85,
+  opacity: 0.15,
   wireframe: true,        
-  flatShading: false,
 });
 
 const fluidMesh = new THREE.Mesh(fluidGeo, fluidMat);
 scene.add(fluidMesh);
+
+// ── INNER CORE (FOR VOLUME) ──────────────────────────────────────────
+const coreGeo = new THREE.IcosahedronGeometry(3, 8);
+const coreMat = new THREE.MeshPhongMaterial({ 
+  color: 0x0077ff, 
+  transparent: true, 
+  opacity: 0.05, 
+  wireframe: true 
+});
+const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+scene.add(coreMesh);
 
 // ── VORTEX TRAILS (REPRESENTING TRACES/CONTINUITY) ─────────────────────
 const RIBS_COUNT = 15;
@@ -458,16 +468,18 @@ const target = {
   fluidDistortion: 0.1,    
   fluidTurbulence: 0.05,   
   fluidFlow: 0.0,         
-  fluidDepth: 0.0,          // AI "Depth"
-  fluidCirculation: 0.0,    // AI "Circulation"
-  fluidLife: 0.0,           // AI "Life" / "Rhythm"
+  fluidDepth: 0.0,          
+  fluidCirculation: 0.0,    
+  fluidLife: 0.0,           
+  fluidIridescence: 0.0,    // NEW
+  coreScale: 0.5,           // NEW
   fluidWireframe: 1.0,     
   fluidTransmission: 0.5,  
   fluidScale: 1.0,         
   ribOpacity: 0.05,        
   ribSpeed: 0.4,
   particleSpread: 1.0,
-  colorR: 0.53, colorG: 0.8, colorB: 1.0,
+  colorR: 0.1, colorG: 0.1, colorB: 0.1,
   rotationY: 0.001,
   cameraZ: 28,
 };
@@ -491,8 +503,17 @@ function animate() {
   // Colors & Materials
   const col = new THREE.Color(current.colorR, current.colorG, current.colorB);
   fluidMat.color.copy(col);
-  fluidMat.opacity = 0.45 + current.fluidTransmission * 0.45;
-  particleMat.color.copy(col);
+  fluidMat.opacity = 0.15 + current.fluidTransmission * 0.1;
+  
+  // Iridescence (Light)
+  const spec = new THREE.Color(0x444444).lerp(new THREE.Color(0xffffff), current.fluidIridescence);
+  fluidMat.specular.copy(spec);
+
+  // Inner Core (Volume)
+  coreMesh.scale.setScalar(current.coreScale + lifePulse * 0.2);
+  coreMesh.material.opacity = 0.05 + current.fluidDepth * 0.15;
+
+  particleMat.color.set(0x000000); // Black particles for white bg
 
   // ── CHARACTER-DRIVEN MORPHING (DNA) ──
   const fPos = fluidGeo.attributes.position;
@@ -713,54 +734,51 @@ function updateWireframe(preds) {
   };
 
   // Group 1: FLUIDITY (Sleekness & Motion)
-  // Words: Flow, Continuity, Circulation, Movement, Route, Integration, Cycle, Regeneration, Life
   const fluidity = getProb(['Flow', 'Continuity', 'Circulation', 'Movement', 'Route', 'Integration', 'Cycle', 'Regeneration', 'Life']);
   
   // Group 2: LIGHT (Reflections & Clarity)
-  // Words: Transparency, Glass, Reflection, Cleansing, Rest, Balance, Ecology, Art
   const light = getProb(['Transparency', 'Glass', 'Reflection', 'Cleansing', 'Rest', 'Balance', 'Ecology', 'Art']);
 
-  // Group 3: DENSITY (Turbulence & Detail)
-  // Words: Trace, Pressure, Mechanism, Segmentation, Distribution, Repetition, Rythm
+  // Group 3: DENSITY (Turbulence & Detail) - Note: "Rythm" in labels
   const density = getProb(['Trace', 'Pressure', 'Mechanism', 'Segmentation', 'Distribution', 'Repetition', 'Rythm']);
 
   // Group 4: VOLUME (Depth & Mystery)
-  // Words: Depth, Mystery, Echoes, Memory, Heritage, Accessibility, Void, Cavity
   const volume = getProb(['Depth', 'Mystery', 'Echoes', 'Memory', 'Heritage', 'Accessibility']);
 
-  // ── Apply to Parameters ──────────────────────────────────────────
+  // ── Apply to Parameters (Galleristic White Mode) ──────────────────
   
-  // Color: From deep sea teal to clear sky blue
-  target.colorR = 0.1 + light * 0.4;
-  target.colorG = 0.5 + fluidity * 0.4 + light * 0.1;
-  target.colorB = 0.7 + volume * 0.3;
+  // Color: Sophisticated Dark Greys to Deep Blues
+  target.colorR = 0.05 + volume * 0.1;
+  target.colorG = 0.05 + fluidity * 0.2;
+  target.colorB = 0.05 + light * 0.4;
 
-  // Form: Distortion (Density) vs Calm (Light/Rest)
-  target.fluidDistortion = 0.02 + density * 0.15;
-  target.fluidTurbulence = 0.01 + density * 0.25;
+  // Form: Distortion
+  target.fluidDistortion = 0.01 + density * 0.12;
+  target.fluidTurbulence = 0.01 + density * 0.2;
   
   // Shape: Stretching (Fluidity)
-  target.fluidFlow = fluidity * 0.8; 
+  target.fluidFlow = fluidity * 0.7; 
   
   // Volume: Expansion (Volume group)
-  target.fluidDepth = volume * 0.5;
+  target.fluidDepth = volume * 0.4;
+  target.coreScale = 0.4 + volume * 0.8; // Inner core expansion
+
+  // Light: Iridescence
+  target.fluidIridescence = light * 1.0;
   
-  // Life: Heartbeat (Fluidity/Rythm/Repetition)
-  target.fluidLife = getProb(['Life', 'Rythm', 'Repetition']) * 0.6;
+  // Life: Heartbeat
+  target.fluidLife = getProb(['Life', 'Rythm', 'Repetition']) * 0.5;
 
-  // Material: Transmission (Light group)
-  target.fluidTransmission = 0.15 + light * 0.8;
+  // Trails: Ribbon visibility (Density)
+  target.ribOpacity = 0.02 + (density * 0.4);
+  target.ribSpeed = 0.2 + fluidity * 0.6;
 
-  // Trails: Ribbon visibility (Density/Trace)
-  target.ribOpacity = 0.05 + (density * 0.5);
-  target.ribSpeed = 0.3 + fluidity * 0.8;
-
-  // Camera & Global
+  // Global Scale & View
   const p1 = [...preds].sort((a,b)=>b.probability-a.probability)[0]?.probability || 0;
-  target.fluidScale = 0.8 + p1 * 0.15;
-  target.cameraZ = 38 - (p1 * 6);
-  target.rotationY = 0.0004 + (fluidity * 0.003);
-  target.fluidCirculation = fluidity * 1.0;
+  target.fluidScale = 0.75 + p1 * 0.15;
+  target.cameraZ = 36 - (p1 * 6);
+  target.rotationY = 0.0003 + (fluidity * 0.002);
+  target.fluidCirculation = fluidity * 0.8;
 }
 
 function showLLMSection() {
