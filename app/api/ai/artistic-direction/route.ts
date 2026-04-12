@@ -15,30 +15,50 @@ export async function POST(request: Request) {
 
     let imageDescription = "";
 
-    // STEP 1: Get an objective description of the image using a 
-    // highly-available natively hosted model (BLIP)
+    // STEP 1: Attempt image description with multiple fallbacks
     if (imageBase64) {
+      const base64Data = imageBase64.split(',')[1];
+      
+      // Attempt 1: PaliGemma (Modern, High Availability)
       try {
-        const blipResponse = await fetch(
-            'https://router.huggingface.co/models/Salesforce/blip-image-captioning-large',
+        const pgResponse = await fetch(
+            'https://router.huggingface.co/models/google/paligemma-3b-pt-224',
             {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ inputs: imageBase64.split(',')[1] })
+                body: JSON.stringify({ inputs: base64Data })
             }
         );
-        if (blipResponse.ok) {
-            const blipData = await blipResponse.json();
-            imageDescription = Array.isArray(blipData) ? blipData[0].generated_text : blipData.generated_text;
-            console.log('Image description generated:', imageDescription);
+        if (pgResponse.ok) {
+            const pgData = await pgResponse.json();
+            imageDescription = Array.isArray(pgData) ? (pgData[0].generated_text || pgData[0]) : pgData.generated_text;
         }
       } catch (e) {
-        console.warn('Image captioning failed, proceeding with scores only.');
+        console.warn('PaliGemma failed');
+      }
+
+      // Attempt 2: BLIP Fallback (Classic Stability)
+      if (!imageDescription) {
+        try {
+          const blipResponse = await fetch(
+              'https://router.huggingface.co/models/Salesforce/blip-image-captioning-large',
+              {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ inputs: base64Data })
+              }
+          );
+          if (blipResponse.ok) {
+              const blipData = await blipResponse.json();
+              imageDescription = Array.isArray(blipData) ? blipData[0].generated_text : blipData.generated_text;
+          }
+        } catch (e) {
+          console.warn('BLIP fallback failed');
+        }
       }
     }
 
-    // STEP 2: Use the high-availability Llama-3.3-70B text model to synthesize 
-    // the scores and the image description into artistic direction.
+    // STEP 2: Llama Synthesizer
     const response = await fetch(
       'https://router.huggingface.co/v1/chat/completions',
       {
@@ -52,18 +72,17 @@ export async function POST(request: Request) {
           messages: [
             {
               role: "system",
-              content: "You are a friendly architecture tutor giving literal, physical, non-abstract advice. Use very simple terms."
+              content: "You are a friendly architecture tutor. Use very simple, physical words. No jargon."
             },
             {
               role: "user",
               content: `Concept scores: ${classificationText}.
-              ${imageDescription ? `Image description: ${imageDescription}.` : ''}
+              ${imageDescription ? `Image shows: ${imageDescription}.` : 'Image not seen.'}
               
-              Give 3-5 simple sentences of advice. 
-              RULES:
-              1. Weight your advice exactly by the scores (e.g. if one is 80%, talk 80% about that).
-              2. For the highest score, tell the designer one LITERAL thing to do (e.g. 'add more glass', 'thicken the walls').
-              3. Only reference the image description if it's available.`
+              Task: Give 3-4 simple sentences of advice. 
+              1. Weight your advice exactly by the scores.
+              2. For the highest score, tell the designer one LITERAL physical change to make. 
+              3. Speak directly to the designer.`
             }
           ],
           max_tokens: 350
@@ -79,10 +98,7 @@ export async function POST(request: Request) {
     const data = await response.json();
     const resultText = data.choices?.[0]?.message?.content || 'No response generated.';
     
-    // Add a more subtle indicator if image analysis worked
-    const suffix = imageDescription ? "" : "\n\n(Note: Image analysis was limited, advice based on scores.)";
-
-    return NextResponse.json({ generated_text: resultText + suffix });
+    return NextResponse.json({ generated_text: resultText + (imageDescription ? "" : "\n\n(Note: Image analysis was limited, advice based on scores.)") });
 
   } catch (error: any) {
     console.error('AI Proxy Error:', error);
