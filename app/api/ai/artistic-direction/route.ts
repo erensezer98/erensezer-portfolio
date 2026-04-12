@@ -49,7 +49,7 @@ export async function POST(request: Request) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "meta-llama/Llama-3.2-11B-Vision-Instruct", // Powerful vision-capable model
+          model: "Qwen/Qwen2-VL-7B-Instruct",
           messages: messages,
           max_tokens: 400,
           temperature: 0.5, // Lower temperature for more consistent weighting
