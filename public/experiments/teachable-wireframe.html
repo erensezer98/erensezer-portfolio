@@ -827,13 +827,19 @@ async function generateArtisticFeedback() {
 }
 
 // ── DOWNLOAD SUBMISSION (Canvas Composition) ────────────────────────
-downloadBtn.addEventListener('click', () => {
+downloadBtn.addEventListener('click', async () => {
+  downloadBtn.textContent = 'Preparing Layout…';
+  downloadBtn.disabled = true;
+
+  // Wait a moment for last lerp to settle
+  await new Promise(r => setTimeout(r, 600));
+
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   
-  // Set A4-ish Vertical Layout (1200 x 1600)
-  canvas.width = 1200;
-  canvas.height = 1600;
+  // Set A4 (High Res: 2480 x 3508 for 300dpi, or use 1414x2000 for web)
+  canvas.width = 1414;
+  canvas.height = 2000;
   
   // 1. Background
   ctx.fillStyle = '#ffffff';
@@ -841,73 +847,88 @@ downloadBtn.addEventListener('click', () => {
   
   // 2. Header
   ctx.fillStyle = '#000000';
-  ctx.font = '500 48px Inter, sans-serif';
-  ctx.fillText('Form Factor — Workshop Submission', 60, 100);
-  ctx.font = '300 18px Inter, sans-serif';
-  ctx.fillStyle = '#666666';
-  ctx.fillText('AI-Driven Artistic Direction & Fluidic Simulation', 60, 140);
+  ctx.font = '500 52px Inter, sans-serif';
+  ctx.fillText('Form Factor — Workshop Submission', 80, 140);
+  ctx.font = '300 22px Inter, sans-serif';
+  ctx.fillStyle = '#888888';
+  ctx.fillText('AI-Driven Artistic Direction & Fluidic Geometry', 80, 185);
   
-  // 3. Images (Uploaded vs Wireframe)
-  // Draw Uploaded Image
+  // 3. Images (Uploaded vs 3D Core)
+  const imgSize = 580;
+  const imgY = 280;
+  
+  // ORIGINAL INPUT
   if (previewImage.src) {
-    ctx.strokeStyle = '#eeeeee';
+    ctx.drawImage(previewImage, 80, imgY, imgSize, imgSize);
+    ctx.strokeStyle = '#f0f0f0';
     ctx.lineWidth = 1;
-    ctx.strokeRect(60, 200, 520, 520);
-    ctx.drawImage(previewImage, 60, 200, 520, 520);
+    ctx.strokeRect(80, imgY, imgSize, imgSize);
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 12px Inter, sans-serif';
-    ctx.fillText('ORIGINAL INPUT', 60, 190);
+    ctx.font = 'bold 13px Inter, sans-serif';
+    ctx.fillText('INPUT IMAGE', 80, imgY - 20);
   }
   
-  // Draw Wireframe Screenshot
+  // GENERATED FLUIDIC CORE
+  // IMPORTANT: Force render to ensure preserveDrawingBuffer has current frame
+  renderer.render(scene, camera);
   const threeCanvas = renderer.domElement;
-  ctx.strokeRect(620, 200, 520, 520);
-  ctx.drawImage(threeCanvas, 620, 200, 520, 520);
-  ctx.fillText('GENERATED FLUIDIC CORE', 620, 190);
-
-  // 4. Classification Percentages
+  
+  // Capture a square from the center of the threeCanvas
+  const side = Math.min(threeCanvas.width, threeCanvas.height);
+  const sx = (threeCanvas.width - side) / 2;
+  const sy = (threeCanvas.height - side) / 2;
+  
+  ctx.drawImage(threeCanvas, sx, sy, side, side, 755, imgY, imgSize, imgSize);
+  ctx.strokeRect(755, imgY, imgSize, imgSize);
   ctx.fillStyle = '#000';
-  ctx.font = 'bold 14px Inter, sans-serif';
-  ctx.fillText('AI VISION CLASSIFICATION', 60, 780);
+  ctx.fillText('RESULTANT FLUIDIC CORE', 755, imgY - 20);
+
+  // 4. Classification
+  ctx.fillStyle = '#000';
+  ctx.font = 'bold 15px Inter, sans-serif';
+  ctx.fillText('VISION ANALYSIS (TOP 5)', 80, 960);
   
   const sorted = [...lastPrediction].sort((a, b) => b.probability - a.probability);
   sorted.slice(0, 5).forEach((p, i) => {
-    const y = 820 + i * 40;
-    const barWidth = 300;
-    ctx.fillStyle = '#f5f5f5';
-    ctx.fillRect(60, y, barWidth, 4);
+    const y = 1010 + i * 50;
+    const barMax = 400;
+    ctx.fillStyle = '#f9f9f9';
+    ctx.fillRect(80, y, barMax, 6);
     ctx.fillStyle = '#0081ff';
-    ctx.fillRect(60, y, barWidth * p.probability, 4);
+    ctx.fillRect(80, y, barMax * p.probability, 6);
     
     ctx.fillStyle = '#333';
-    ctx.font = '14px Inter, sans-serif';
-    ctx.fillText(`${p.className}`, 60 + barWidth + 20, y + 6);
-    ctx.fillStyle = '#999';
-    ctx.fillText(`${(p.probability * 100).toFixed(1)}%`, 60 + barWidth + 240, y + 6);
+    ctx.font = '16px Inter, sans-serif';
+    ctx.fillText(p.className, 80 + barMax + 30, y + 8);
+    ctx.fillStyle = '#aaa';
+    ctx.fillText(`${(p.probability * 100).toFixed(1)}%`, 1200, y + 8);
   });
 
-  // 5. Artistic Direction (LLM Feedback)
-  ctx.fillStyle = '#000';
-  ctx.font = 'bold 14px Inter, sans-serif';
-  ctx.fillText('ARTISTIC DIRECTION & FEEDBACK', 60, 1080);
+  // 5. Artistic Direction
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(80, 1320, 1254, 1);
+  ctx.font = 'bold 15px Inter, sans-serif';
+  ctx.fillText('ARTISTIC DIRECTION FEEDBACK', 80, 1370);
   
-  ctx.fillStyle = '#333';
-  ctx.font = '22px Inter, sans-serif';
+  ctx.fillStyle = '#333333';
+  ctx.font = '24px Inter, sans-serif';
   const text = llmFeedback.textContent;
-  wrapText(ctx, text, 60, 1140, 1080, 34);
+  wrapText(ctx, text, 80, 1430, 1200, 42);
 
   // 6. Footer
-  ctx.fillStyle = '#dddddd';
-  ctx.fillRect(60, 1540, 1080, 1);
   ctx.fillStyle = '#999';
-  ctx.font = '12px Inter, sans-serif';
-  ctx.fillText(`Generated on ${new Date().toLocaleString()}  |  Eren Sezer Portfolio Experiment`, 60, 1570);
+  ctx.font = '14px Inter, sans-serif';
+  ctx.fillText(`Timestamp: ${new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })}`, 80, 1920);
+  ctx.fillText('Google DeepMind Advanced Agentic Coding Workshop Prototype', 1000, 1920);
 
-  // Trigger Download
+  // 7. Download
   const link = document.createElement('a');
-  link.download = 'fluidic-submission.png';
-  link.href = canvas.toDataURL('image/png');
+  link.download = `formfactor_submission_${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png', 1.0);
   link.click();
+
+  downloadBtn.textContent = 'Download Submission';
+  downloadBtn.disabled = false;
 });
 
 // Canvas text wrapper helper
