@@ -13,35 +13,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'AI key not configured on server' }, { status: 500 });
     }
 
-    // Vision-capable model messages structure
-    const messages: any[] = [
-      {
-        role: "system",
-        content: "You are an artistic director. Your task is to provide clear, simple, and practical artistic direction to a designer. You must weight your advice exactly based on the percentage scores provided. Use simple terms and avoid complex jargon."
-      },
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: `I have analyzed an image and found these concept scores: ${classificationText}. \n\nPlease provide an artistic direction note (3-5 sentences). \n\nIMPORTANT RULES:\n1. Weight your advice strictly by these percentages. If a concept has 80%, 80% of your advice should be about it.\n2. Look at the attached image to give context to your advice.\n3. Use simple, clear language that is easy to understand.\n4. Speak directly to the designer.`
-          }
-        ]
-      }
-    ];
-
-    // Add image if provided (in OpenAI vision format supported by HF router)
-    if (imageBase64) {
-      messages[1].content.push({
-        type: "image_url",
-        image_url: {
-          url: imageBase64 // This is a data:image/... base64 string
-        }
-      });
-    }
-
+    // Using LLaVA 1.5 - A highly compatible vision model that usually works 
+    // on the standard Inference API without the 'Provider' restriction.
     const response = await fetch(
-      'https://router.huggingface.co/v1/chat/completions',
+      'https://api-inference.huggingface.co/models/llava-hf/llava-1.5-7b-hf',
       {
         method: 'POST',
         headers: {
@@ -49,10 +24,17 @@ export async function POST(request: Request) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "Qwen/Qwen2-VL-7B-Instruct",
-          messages: messages,
-          max_tokens: 400,
-          temperature: 0.5, // Lower temperature for more consistent weighting
+          inputs: `[INST] <image>\nYou are an artistic director. Provide clear, simple artistic direction (3-5 sentences) to a designer.
+          
+Strictly weight your advice based on these scores: ${classificationText}.
+
+The image above is the context. Use it to make your advice tangible. 
+Use simple terms and speak directly to the designer. Do not use bullet points. [/INST]`,
+          parameters: {
+            max_new_tokens: 300,
+          },
+          // Some HF models expect the image in a specific payload for legacy inference
+          image: imageBase64?.split(',')[1] // Just the base64 part
         })
       }
     );
@@ -63,9 +45,19 @@ export async function POST(request: Request) {
     }
 
     const data = await response.json();
-    const resultText = data.choices?.[0]?.message?.content || 'No response generated.';
     
-    return NextResponse.json({ generated_text: resultText });
+    // LLaVA typical response is an array with {generated_text: "..."}
+    let resultText = '';
+    if (Array.isArray(data) && data[0] && data[0].generated_text) {
+      resultText = data[0].generated_text;
+    } else if (data.generated_text) {
+      resultText = data.generated_text;
+    }
+
+    // Remove the prompt/instruction from the result if present
+    const cleanText = resultText.replace(/\[INST\].*?\[\/INST\]/gs, '').trim();
+
+    return NextResponse.json({ generated_text: cleanText || 'No response generated.' });
   } catch (error: any) {
     console.error('AI Proxy Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
