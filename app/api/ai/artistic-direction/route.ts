@@ -13,9 +13,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'AI key not configured on server' }, { status: 500 });
     }
 
-    // Modern Chat Completions format (OpenAI compatible) for maximum compatibility with HF Router
+    // Explicitly using the new router endpoint as required by the error message
+    // Format: https://router.huggingface.co/hf-inference/v1/chat/completions
     const response = await fetch(
-      'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions',
+      'https://router.huggingface.co/hf-inference/v1/chat/completions',
       {
         method: 'POST',
         headers: {
@@ -27,14 +28,14 @@ export async function POST(request: Request) {
           messages: [
             {
               role: "system",
-              content: "You are an artistic director working on an architectural installation. Give poetic but precise artistic direction to a designer based on spatial concept scores."
+              content: "You are an artistic director. Give poetic but precise artistic direction (3-5 sentences) based on spatial concept scores. Reference top concepts."
             },
             {
               role: "user",
-              content: `An AI vision model analysed an image and returned these spatial concept scores:\n\n${classificationText}\n\nBased on these findings, give a short (3–5 sentences) artistic direction note to the designer. Reference the top concepts by name, suggest how the installation should emphasise or balance them, and recommend one tangible design move (material, light, form, or programme). Speak directly to the designer. Do not use bullet points.`
+              content: `Spatial concepts detected: ${classificationText}. Provide artistic direction for an architectural installation.`
             }
           ],
-          max_tokens: 250,
+          max_tokens: 300,
           temperature: 0.7,
         })
       }
@@ -42,11 +43,7 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const errText = await response.text();
-      // If the specific model path fails, try the universal router
-      if (response.status === 404) {
-         return await tryUniversalRouter(classificationText, apiKey);
-      }
-      return NextResponse.json({ error: `HF API Error: ${errText}` }, { status: response.status });
+      return NextResponse.json({ error: `HF Router Error: ${errText}` }, { status: response.status });
     }
 
     const data = await response.json();
@@ -56,27 +53,4 @@ export async function POST(request: Request) {
     console.error('AI Proxy Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
-
-async function tryUniversalRouter(classificationText: string, apiKey: string) {
-    const response = await fetch(
-      'https://api-inference.huggingface.co/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: "mistralai/Mistral-7B-Instruct-v0.3",
-          messages: [
-            { role: "user", content: `Artistic direction for these concepts: ${classificationText}. Be poetic, 3 sentences.` }
-          ],
-          max_tokens: 150
-        })
-      }
-    );
-    const data = await response.json();
-    const resultText = data.choices?.[0]?.message?.content || 'No response generated.';
-    return NextResponse.json({ generated_text: resultText });
 }
