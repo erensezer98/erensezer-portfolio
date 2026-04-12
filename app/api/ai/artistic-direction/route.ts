@@ -96,5 +96,5 @@ async function textOnlyFallback(classificationText: string, apiKey: string) {
 
   const data = await response.json();
   const resultText = data.choices?.[0]?.message?.content || 'No response generated.';
-  return NextResponse.json({ generated_text: resultText });
+  return NextResponse.json({ generated_text: resultText + "\n\n(Note: Vision was unavailable, advice based on scores only.)" });
 }
