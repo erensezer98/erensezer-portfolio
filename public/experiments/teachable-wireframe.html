@@ -419,9 +419,9 @@ for (let i = 0; i < TRAIL_COUNT; i++) {
 // ── POST-PROCESSING (BLOOM) ──────────────────────────────────────────
 const renderScene = new THREE.RenderPass(scene, camera);
 const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-bloomPass.threshold = 0.2; 
-bloomPass.strength = 0.7; // Subtle for white bg
-bloomPass.radius = 0.4;
+bloomPass.threshold = 0.5; // Only bloom the brightest spots
+bloomPass.strength = 0.25; // Much subtler
+bloomPass.radius = 0.3;
 
 const composer = new THREE.EffectComposer(renderer);
 composer.addPass(renderScene);
