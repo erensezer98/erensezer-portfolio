@@ -456,11 +456,13 @@ scene.add(particles);
 
 // ── TARGET PARAMS (driven by AI) ─────────────────────────────────────
 const target = {
-  fluidDistortion: 0.1,    // AI "Flow" / "Regeneration"
-  fluidWireframe: 1.0,     // 1 = wireframe, 0 = solid 
-  fluidTransmission: 0.5,  // AI "Transparency" / "Reflection"
-  fluidScale: 1.0,         // AI "Intensity"
-  ribOpacity: 0.05,        // AI "Trace" / "Continuity"
+  fluidDistortion: 0.1,    
+  fluidTurbulence: 0.05,   // AI "Intensity"
+  fluidFlow: 0.0,         // AI "Continuity" / "Trace"
+  fluidWireframe: 1.0,     
+  fluidTransmission: 0.5,  
+  fluidScale: 1.0,         
+  ribOpacity: 0.05,        
   ribSpeed: 0.4,
   particleSpread: 1.0,
   colorR: 0.53, colorG: 0.8, colorB: 1.0,
@@ -491,24 +493,36 @@ function animate() {
   fluidMat.opacity = 0.4 + current.fluidTransmission * 0.6;
   particleMat.color.copy(col);
 
-  // Fluid Morphing
-  const fPos = fluidGeo.attributes.position;
-  for (let i = 0; i < fPos.count; i++) {
-    const bx = fluidBasePos[i * 3];
-    const by = fluidBasePos[i * 3 + 1];
-    const bz = fluidBasePos[i * 3 + 2];
+    // ── CHARACTER-DRIVEN MORPHING ──
+    const p = new THREE.Vector3(bx, by, bz).normalize();
     
-    // Simulating water ripples/noise
-    const noise = Math.sin(bx * 0.5 + t * 1.2) * Math.cos(by * 0.5 + t * 1.5) * Math.sin(bz * 0.5 + t * 0.8);
-    const dist = 1 + noise * current.fluidDistortion;
+    // 1. Turbulent Layer (Noise for Intensity/Regeneration)
+    const turbulence = Math.sin(bx * 0.8 + t * 1.5) * Math.cos(by * 0.8 + t * 1.2) * Math.sin(bz * 0.8 + t * 0.9);
     
-    fPos.array[i * 3] = bx * dist * current.fluidScale;
-    fPos.array[i * 3 + 1] = by * dist * current.fluidScale;
-    fPos.array[i * 3 + 2] = bz * dist * current.fluidScale;
+    // 2. Elongation Layer (Stretch for Continuity/Trace)
+    // We stretch along the current rotation axis
+    const stretch = 1 + Math.abs(bx + by) * current.fluidFlow * 0.15;
+    
+    // 3. Calm Layer (Smooth waves for Stability)
+    const calm = Math.sin(t * 0.4 + bz * 0.2) * 0.5;
+
+    // Combine layers: drop remains a core sphere but with unique protrusions
+    const totalDist = 1 + 
+      (turbulence * current.fluidTurbulence) + 
+      (calm * (1 - current.fluidTurbulence * 0.5)) +
+      (noiseLayers(bx, by, bz, t) * current.fluidDistortion);
+    
+    fPos.array[i * 3] = bx * totalDist * current.fluidScale * stretch;
+    fPos.array[i * 3 + 1] = by * totalDist * current.fluidScale * (1/stretch);
+    fPos.array[i * 3 + 2] = bz * totalDist * current.fluidScale;
   }
   fPos.needsUpdate = true;
   fluidMesh.rotation.y += current.rotationY;
-  fluidMesh.rotation.x += current.rotationY * 0.5;
+
+  // Helper for extra organic detail
+  function noiseLayers(x, y, z, time) {
+    return Math.sin(x * 0.3 - time) * 0.5 + Math.cos(y * 0.3 + time * 0.7) * 0.5;
+  }
 
   // Ribbons (Traces)
   ribs.forEach((r, i) => {
@@ -694,10 +708,13 @@ function updateWireframe(preds) {
   target.colorB = 0.8 + p3 * 0.2;
 
   // ── Fluid Shape: Distortion & Waves ─────────────────────────────
-  // High Intensity/Regeneration/Flow scores create bigger waves
-  const waveInfluence = preds.find(p => p.className === 'Intensity' || p.className === 'Regeneration')?.probability || 0;
-  target.fluidDistortion = 0.05 + waveInfluence * 0.45;
-  target.fluidScale = 0.9 + p1 * 0.4;
+  const intensityInfluence = preds.find(p => p.className === 'Intensity' || p.className === 'Regeneration')?.probability || 0;
+  const flowInfluence = preds.find(p => p.className === 'Flow' || p.className === 'Continuity' || p.className === 'Trace')?.probability || 0;
+  
+  target.fluidDistortion = 0.05 + intensityInfluence * 0.3;
+  target.fluidTurbulence = 0.02 + intensityInfluence * 0.45;
+  target.fluidFlow = flowInfluence * 1.5; // Stretches the drop
+  target.fluidScale = 0.9 + p1 * 0.3;
 
   // ── Ribbons: Trace & Continuity ─────────────────────────────────
   const traceInfluence = preds.find(p => p.className === 'Trace' || p.className === 'Continuity' || p.className === 'Loop')?.probability || 0;
