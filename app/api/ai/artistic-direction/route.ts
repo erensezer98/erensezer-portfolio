@@ -20,7 +20,7 @@ ${classificationText}
 Based on these findings, give a short (3–5 sentences) artistic direction note to the designer. Reference the top concepts by name, suggest how the installation should emphasise or balance them, and recommend one tangible design move (material, light, form, or programme). Be poetic but precise. Speak directly to the designer. Do not use bullet points. [/INST]`;
 
     const response = await fetch(
-      'https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.3',
+      'https://router.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3',
       {
         method: 'POST',
         headers: {
