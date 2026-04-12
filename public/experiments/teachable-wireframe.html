@@ -506,7 +506,8 @@ function animate() {
 
   // Material updates (Stay DARK on white)
   coreMaterial.color.setHSL(0.61, 0.9, 0.12 - (current.glass * 0.05)); 
-  coreMaterial.opacity = 0.95 - (current.glass * 0.2); 
+  // Map opacity from 1.0 (opaque) down to 0.4 (60% transparent) based on score
+  coreMaterial.opacity = 1.0 - (current.glass * 0.6); 
   
   const pulse = 1.0 + (Math.sin(time * 4) * current.rhythm * 0.12);
   innerMesh.scale.set(pulse, pulse, pulse);
