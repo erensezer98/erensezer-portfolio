@@ -290,8 +290,8 @@
     }
     .dim-chip.active { opacity: 1; color: rgba(255,255,255,0.6); }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.7.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.4/dist/teachablemachine-image.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -306,7 +306,7 @@
   <div id="panel-body">
 
     <!-- Image -->
-    <div id="drop-zone" onclick="document.getElementById('image-upload').click()">
+    <div id="drop-zone" onclick="document.getElementById('image-upload').click()" style="cursor:pointer">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1" stroke-linecap="round">
         <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
         <polyline points="21 15 16 10 5 21"/>
@@ -314,7 +314,7 @@
       <span id="drop-zone-label">Upload image<br>to begin</span>
       <img id="preview-image" crossorigin="anonymous" alt="Preview" />
     </div>
-    <input type="file" id="image-upload" accept="image/*">
+    <input type="file" id="image-upload" style="display:none" accept="image/*">
 
     <button id="analyse-btn" disabled>Analyse Image</button>
 
@@ -369,35 +369,29 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ── LIGHTING (Required for Physical Materials) ───────────────────────
+// ── LIGHTING (Robust for all GPUs) ──────────────────────────────────
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
 scene.add(ambientLight);
 
-const pointLight = new THREE.PointLight(0xffffff, 1.2);
-pointLight.position.set(20, 20, 20);
-scene.add(pointLight);
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+dirLight.position.set(10, 20, 10);
+scene.add(dirLight);
 
-const blueLight = new THREE.PointLight(0x0088ff, 0.8);
+const blueLight = new THREE.PointLight(0x0088ff, 1.2);
 blueLight.position.set(-20, -10, 10);
 scene.add(blueLight);
 
 // ── FLUIDIC CORE (THE WATER DROP) ────────────────────────────────────
-// A high-resolution sphere that morphs based on AI scores
 const fluidGeo = new THREE.IcosahedronGeometry(7, 32);
 const fluidBasePos = new Float32Array(fluidGeo.attributes.position.array);
 
-const fluidMat = new THREE.MeshPhysicalMaterial({
+const fluidMat = new THREE.MeshPhongMaterial({
   color: 0x88ccff,
-  metalness: 0.1,
-  roughness: 0.2,
+  specular: 0x111111,
+  shininess: 100,
   transparent: true,
-  opacity: 0.8,
-  transmission: 0.5,     // Water transparency
-  thickness: 2.5,        // Refraction depth
-  ior: 1.33,             // Water Index of Refraction
-  clearcoat: 1.0,
-  clearcoatRoughness: 0.1,
-  wireframe: true,        // Artistic wireframe style
+  opacity: 0.85,
+  wireframe: true,        
   flatShading: false,
 });
 
@@ -492,8 +486,7 @@ function animate() {
   // Colors & Materials
   const col = new THREE.Color(current.colorR, current.colorG, current.colorB);
   fluidMat.color.copy(col);
-  fluidMat.transmission = current.fluidTransmission;
-  fluidMat.opacity = 0.4 + current.fluidTransmission * 0.6;
+  fluidMat.opacity = 0.45 + current.fluidTransmission * 0.45;
   particleMat.color.copy(col);
 
   // ── CHARACTER-DRIVEN MORPHING (DNA) ──
