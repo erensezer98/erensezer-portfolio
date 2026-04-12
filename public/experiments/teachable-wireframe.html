@@ -369,6 +369,18 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+// ── LIGHTING (Required for Physical Materials) ───────────────────────
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(0xffffff, 1.2);
+pointLight.position.set(20, 20, 20);
+scene.add(pointLight);
+
+const blueLight = new THREE.PointLight(0x0088ff, 0.8);
+blueLight.position.set(-20, -10, 10);
+scene.add(blueLight);
+
 // ── FLUIDIC CORE (THE WATER DROP) ────────────────────────────────────
 // A high-resolution sphere that morphs based on AI scores
 const fluidGeo = new THREE.IcosahedronGeometry(7, 32);
@@ -702,8 +714,6 @@ function updateWireframe(preds) {
   // ── Camera: Overall dominance pulls us in ───────────────────────
   target.cameraZ = 30 + (1 - p1) * 12;
   target.rotationY = 0.0005 + p3 * 0.002;
-}
-  target.rotationY = 0.0001 + p1 * 0.0012;
 }
 
 function showLLMSection() {
