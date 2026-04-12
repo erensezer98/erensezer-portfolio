@@ -72,17 +72,17 @@ export async function POST(request: Request) {
           messages: [
             {
               role: "system",
-              content: "You are a friendly architecture tutor. Use very simple, physical words. No jargon."
+              content: `You are a professional architectural tutor in a generative design workshop. 
+              You MUST explicitly reference the top-scoring concepts from the classification and their specific percentages in your response (e.g., "At 85% Flow, your form suggests...").
+              Translate these abstract scores into ONE specific physical or structural piece of advice.
+              Keep the response to 3-4 concise, inspiring sentences.`
             },
             {
               role: "user",
-              content: `Concept scores: ${classificationText}.
-              ${imageDescription ? `Image shows: ${imageDescription}.` : 'Image not seen.'}
+              content: `The spatial analysis scores are: ${classificationText}.
+              ${imageDescription ? `The visual content shows: ${imageDescription}.` : 'Visual analysis is pending.'}
               
-              Task: Give 3-4 simple sentences of advice. 
-              1. Weight your advice exactly by the scores.
-              2. For the highest score, tell the designer one LITERAL physical change to make. 
-              3. Speak directly to the designer.`
+              Task: Provide artistic direction. Speak directly to the designer. Ensure you use the exact names of the high-scoring concepts.`
             }
           ],
           max_tokens: 350
