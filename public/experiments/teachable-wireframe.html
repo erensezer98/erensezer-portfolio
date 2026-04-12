@@ -774,7 +774,10 @@ async function generateArtisticFeedback() {
     const response = await fetch('/api/ai/artistic-direction', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ classificationText })
+      body: JSON.stringify({ 
+        classificationText,
+        imageBase64: lastImageDataURL 
+      })
     });
 
     if (!response.ok) {
