@@ -382,7 +382,7 @@ blueLight.position.set(-20, -10, 10);
 scene.add(blueLight);
 
 // ── FLUIDIC CORE (THE WATER DROP) ────────────────────────────────────
-const fluidGeo = new THREE.IcosahedronGeometry(7, 12);
+const fluidGeo = new THREE.IcosahedronGeometry(6, 12);
 const fluidBasePos = new Float32Array(fluidGeo.attributes.position.array);
 
 const fluidMat = new THREE.MeshPhongMaterial({
@@ -736,31 +736,31 @@ function updateWireframe(preds) {
   target.colorB = 0.7 + volume * 0.3;
 
   // Form: Distortion (Density) vs Calm (Light/Rest)
-  target.fluidDistortion = 0.05 + density * 0.4;
-  target.fluidTurbulence = 0.01 + density * 0.6;
+  target.fluidDistortion = 0.02 + density * 0.15;
+  target.fluidTurbulence = 0.01 + density * 0.25;
   
   // Shape: Stretching (Fluidity)
-  target.fluidFlow = fluidity * 1.8; 
+  target.fluidFlow = fluidity * 0.8; 
   
   // Volume: Expansion (Volume group)
-  target.fluidDepth = volume * 1.5;
+  target.fluidDepth = volume * 0.5;
   
   // Life: Heartbeat (Fluidity/Rythm/Repetition)
-  target.fluidLife = getProb(['Life', 'Rythm', 'Repetition']) * 1.1;
+  target.fluidLife = getProb(['Life', 'Rythm', 'Repetition']) * 0.6;
 
   // Material: Transmission (Light group)
   target.fluidTransmission = 0.15 + light * 0.8;
 
   // Trails: Ribbon visibility (Density/Trace)
   target.ribOpacity = 0.05 + (density * 0.5);
-  target.ribSpeed = 0.3 + fluidity * 1.2;
+  target.ribSpeed = 0.3 + fluidity * 0.8;
 
   // Camera & Global
   const p1 = [...preds].sort((a,b)=>b.probability-a.probability)[0]?.probability || 0;
-  target.fluidScale = 0.9 + p1 * 0.35;
-  target.cameraZ = 32 - (p1 * 8);
-  target.rotationY = 0.0005 + (fluidity * 0.004);
-  target.fluidCirculation = fluidity * 1.5;
+  target.fluidScale = 0.8 + p1 * 0.15;
+  target.cameraZ = 38 - (p1 * 6);
+  target.rotationY = 0.0004 + (fluidity * 0.003);
+  target.fluidCirculation = fluidity * 1.0;
 }
 
 function showLLMSection() {
