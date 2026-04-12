@@ -493,14 +493,17 @@ function animate() {
   fluidMat.opacity = 0.4 + current.fluidTransmission * 0.6;
   particleMat.color.copy(col);
 
-    // ── CHARACTER-DRIVEN MORPHING ──
-    const p = new THREE.Vector3(bx, by, bz).normalize();
+  // Fluid Morphing
+  const fPos = fluidGeo.attributes.position;
+  for (let i = 0; i < fPos.count; i++) {
+    const bx = fluidBasePos[i * 3];
+    const by = fluidBasePos[i * 3 + 1];
+    const bz = fluidBasePos[i * 3 + 2];
     
     // 1. Turbulent Layer (Noise for Intensity/Regeneration)
     const turbulence = Math.sin(bx * 0.8 + t * 1.5) * Math.cos(by * 0.8 + t * 1.2) * Math.sin(bz * 0.8 + t * 0.9);
     
     // 2. Elongation Layer (Stretch for Continuity/Trace)
-    // We stretch along the current rotation axis
     const stretch = 1 + Math.abs(bx + by) * current.fluidFlow * 0.15;
     
     // 3. Calm Layer (Smooth waves for Stability)
