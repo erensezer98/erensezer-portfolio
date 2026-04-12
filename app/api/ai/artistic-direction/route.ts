@@ -13,8 +13,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'AI key not configured on server' }, { status: 500 });
     }
 
-    // Attempting a Vision request via the Router
-    // This uses the confirmed stable router URL
     const response = await fetch(
       'https://router.huggingface.co/v1/chat/completions',
       {
@@ -24,14 +22,18 @@ export async function POST(request: Request) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+          model: "HuggingFaceM4/idefics2-8b",
           messages: [
+            {
+              role: "system",
+              content: "You are a friendly architecture tutor giving literal, non-abstract advice to a student. Avoid poetic jargon. Use simple words like 'join', 'smooth', 'brighten', 'open up'."
+            },
             {
               role: "user",
               content: [
                 {
                   type: "text",
-                  text: `Artistic director role. Scores: ${classificationText}. Weight advice by these %. Image attached. Simple terms, 3-5 sentences.`
+                  text: `Concepts: ${classificationText}. Weight your advice by these %. Give 3-5 simple sentences. For the top concept, tell the designer one literal physical change to make. Look at the image context.`
                 },
                 {
                   type: "image_url",
@@ -45,10 +47,7 @@ export async function POST(request: Request) {
       }
     );
 
-    // If Vision fails due to provider issues, fallback to a robust TEXT-ONLY model
-    // This ensures the students ALWAYS get a response, even if vision is offline.
     if (!response.ok) {
-      console.warn('Vision failed, falling back to text-only artistic direction');
       return await textOnlyFallback(classificationText, apiKey);
     }
 
@@ -72,13 +71,17 @@ async function textOnlyFallback(classificationText: string, apiKey: string) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "meta-llama/Llama-3.3-70B-Instruct", // Highly available text model
+        model: "meta-llama/Llama-3.3-70B-Instruct",
         messages: [
           {
+            role: "system",
+            content: "You are a friendly architecture tutor giving literal, non-abstract advice to a student. Use basic English. No jargon like 'cohesion' or 'narrative'."
+          },
+          {
             role: "user",
-            content: `You are an artistic director. A designer has a work with these scores: ${classificationText}. 
+            content: `Scores: ${classificationText}. 
             
-            Give 3-5 clear, simple sentences of direction. Weight your advice strictly by the percentages (e.g. if one is 80%, talk mostly about that). Use simple terms. Speak directly to the designer.`
+            Based strictly on these weights, give 3-4 simple sentences of advice. For the highest score, tell the designer one LITERAL thing to do (e.g. 'add more windows', 'make the walls thicker', 'join the two boxes').`
           }
         ],
         max_tokens: 250
@@ -93,5 +96,5 @@ async function textOnlyFallback(classificationText: string, apiKey: string) {
 
   const data = await response.json();
   const resultText = data.choices?.[0]?.message?.content || 'No response generated.';
-  return NextResponse.json({ generated_text: resultText + " (Note: Vision was unavailable, using scores only.)" });
+  return NextResponse.json({ generated_text: resultText });
 }
