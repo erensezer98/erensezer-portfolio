@@ -379,10 +379,10 @@ scene.add(coreMesh);
 const RIBS_COUNT = 15;
 const ribs = [];
 const ribMat = new THREE.LineBasicMaterial({ 
-  color: 0x88ccff, 
+  color: 0x333333, 
   transparent: true, 
   opacity: 0, 
-  blending: THREE.AdditiveBlending 
+  blending: THREE.NormalBlending 
 });
 
 for (let i = 0; i < RIBS_COUNT; i++) {
@@ -420,11 +420,11 @@ for (let i = 0; i < PARTICLE_COUNT; i++) {
 }
 particleGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
 const particleMat = new THREE.PointsMaterial({
-  color: 0x88ccff,
+  color: 0x000000,
   size: 0.08,
   transparent: true,
-  opacity: 0.3,
-  blending: THREE.AdditiveBlending,
+  opacity: 0.1,
+  blending: THREE.NormalBlending,
   depthWrite: false,
 });
 const particles = new THREE.Points(particleGeo, particleMat);
@@ -464,6 +464,9 @@ function animate() {
     current[k] = lerp(current[k], target[k], lp);
   }
 
+  // Heartbeat (DNA) - Define before use
+  const lifePulse = current.fluidLife > 0.5 ? Math.pow(Math.sin(t * 4), 10) * current.fluidLife * 0.15 : 0;
+
   // Camera
   camera.position.z = lerp(camera.position.z, current.cameraZ, 0.01);
 
@@ -482,9 +485,8 @@ function animate() {
 
   particleMat.color.set(0x000000); // Black particles for white bg
 
-  // ── CHARACTER-DRIVEN MORPHING (DNA) ──
+  // ── CHARACTER-DRIVEN MORPHING ──
   const fPos = fluidGeo.attributes.position;
-  const lifePulse = current.fluidLife > 0.5 ? Math.pow(Math.sin(t * 4), 10) * current.fluidLife * 0.15 : 0;
   
   for (let i = 0; i < fPos.count; i++) {
     const bx = fluidBasePos[i * 3];
