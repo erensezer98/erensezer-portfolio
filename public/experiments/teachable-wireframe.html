@@ -366,9 +366,9 @@ for (let i = 0; i < positionAttribute.count; i++) {
 
 const coreMaterial = new THREE.MeshPhysicalMaterial({
   color: 0x003366,
-  metalness: 0.1,
-  roughness: 0.4,
-  transmission: 0.0, 
+  metalness: 0.15,
+  roughness: 0.2,
+  transmission: 0.5, 
   ior: 1.5,
   thickness: 2.0,
   transparent: true,
@@ -377,17 +377,29 @@ const coreMaterial = new THREE.MeshPhysicalMaterial({
 const innerMesh = new THREE.Mesh(baseGeometry, coreMaterial);
 scene.add(innerMesh);
 
-const wireMaterial = new THREE.MeshBasicMaterial({
-  color: 0x00aaff,
-  wireframe: true,
-  transparent: true,
-  opacity: 0.3,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false
+// ── VORTEX TRAILS (REPLACING THE OUTER BLOB) ────────────────────────
+const TRAIL_COUNT = 12;
+const trails = [];
+const trailMat = new THREE.LineBasicMaterial({ 
+  color: 0x00aaff, 
+  transparent: true, 
+  opacity: 0.4,
+  blending: THREE.AdditiveBlending 
 });
-const outerMesh = new THREE.Mesh(baseGeometry, wireMaterial);
-outerMesh.scale.set(1.02, 1.02, 1.02);
-scene.add(outerMesh);
+
+for (let i = 0; i < TRAIL_COUNT; i++) {
+  const points = [];
+  for (let j = 0; j < 50; j++) points.push(new THREE.Vector3());
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const line = new THREE.Line(geometry, trailMat.clone());
+  scene.add(line);
+  trails.push({ 
+    line, 
+    pts: points, 
+    offset: Math.random() * 100, 
+    speed: 0.2 + Math.random() * 0.4 
+  });
+}
 
 // ── POST-PROCESSING (BLOOM) ──────────────────────────────────────────
 const renderScene = new THREE.RenderPass(scene, camera);
@@ -466,12 +478,27 @@ function animate() {
   
   const pulse = 1.0 + (Math.sin(time * 4) * current.rhythm * 0.12);
   innerMesh.scale.set(pulse, pulse, pulse);
-  outerMesh.scale.set(pulse * 1.02, pulse * 1.02, pulse * 1.02);
+
+  // Animate Vortex Trails
+  trails.forEach((t, idx) => {
+    const positions = t.line.geometry.attributes.position;
+    for (let i = 0; i < t.pts.length; i++) {
+      const pIdx = i / t.pts.length;
+      const angle = pIdx * Math.PI * 2 + time * t.speed + t.offset;
+      const r = (3 + current.flow * 2) + Math.sin(time + idx) * 0.5;
+      
+      const tx = Math.cos(angle) * r;
+      const ty = (pIdx - 0.5) * 10 + Math.sin(time * 0.5 + t.offset) * 2;
+      const tz = Math.sin(angle) * r;
+      
+      positions.setXYZ(i, tx, ty, tz);
+    }
+    positions.needsUpdate = true;
+    t.line.material.opacity = (0.1 + current.flow * 0.4) * (1.0 - current.rest * 0.5);
+  });
 
   scene.fog.density = 0.015 + (current.depth * 0.04);
-  
   innerMesh.rotation.y = time * 0.15;
-  outerMesh.rotation.y = time * 0.18;
   
   controls.update();
   composer.render(); 
