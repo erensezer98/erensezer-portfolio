@@ -290,8 +290,8 @@
     }
     .dim-chip.active { opacity: 1; color: rgba(255,255,255,0.6); }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.7.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.4/dist/teachablemachine-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -382,7 +382,7 @@ blueLight.position.set(-20, -10, 10);
 scene.add(blueLight);
 
 // ── FLUIDIC CORE (THE WATER DROP) ────────────────────────────────────
-const fluidGeo = new THREE.IcosahedronGeometry(7, 32);
+const fluidGeo = new THREE.IcosahedronGeometry(7, 12);
 const fluidBasePos = new Float32Array(fluidGeo.attributes.position.array);
 
 const fluidMat = new THREE.MeshPhongMaterial({
@@ -420,6 +420,11 @@ for (let i = 0; i < RIBS_COUNT; i++) {
   const line = new THREE.Line(geometry, ribMat.clone());
   scene.add(line);
   ribs.push({ line, phase: Math.random() * Math.PI * 2, speed: 0.3 + Math.random() * 0.4 });
+}
+
+// ── NOISE HELPER ─────────────────────────────────────────────────────
+function noiseLayers(x, y, z, time) {
+  return Math.sin(x * 0.3 - time) * 0.5 + Math.cos(y * 0.3 + time * 0.7) * 0.5;
 }
 
 // ── ATMOSPHERIC MIST (PARTICLES) ─────────────────────────────────────
@@ -575,8 +580,16 @@ function setStatus(msg, type = '') {
 }
 
 async function initModel() {
+  setStatus('Loading AI vision model…');
   try {
-    model = await tmImage.load('/ai/model.json', '/ai/metadata.json');
+    const loc = window.location.pathname;
+    const base = loc.substring(0, loc.lastIndexOf('/'));
+    const url = base + '/../ai/model.json';
+    const meta = base + '/../ai/metadata.json';
+    
+    console.log("Loading TM model from:", url);
+    model = await tmImage.load(url, meta);
+    console.log("Model loaded successfully.");
     maxPredictions = model.getTotalClasses();
 
     // Build classification bars
@@ -595,11 +608,11 @@ async function initModel() {
       classifications.appendChild(row);
     }
 
-    setStatus('AI engine ready. Upload an image.', 'active');
+    setStatus('Vision engine ready. Upload image.', 'active');
     analyseBtn.disabled = false;
   } catch (e) {
-    console.error(e);
-    setStatus('Error loading model: ' + (e.message || e), 'error');
+    console.error("Model load error:", e);
+    setStatus('Connection Error: Check AI model path.', 'error');
   }
 }
 initModel();
@@ -688,8 +701,10 @@ function displayResults(preds) {
 
   // Update corner chips
   sorted.slice(0, 3).forEach((p, i) => {
-    chips[i].textContent = `${p.className}  ${(p.probability * 100).toFixed(0)}%`;
-    chips[i].classList.add('active');
+    if (chips[i]) {
+      chips[i].textContent = `${p.className}  ${(p.probability * 100).toFixed(0)}%`;
+      chips[i].classList.add('active');
+    }
   });
 }
 
