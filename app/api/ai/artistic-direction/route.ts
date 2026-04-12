@@ -22,7 +22,7 @@ export async function POST(request: Request) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "HuggingFaceM4/idefics2-8b",
+          model: "microsoft/Phi-3-vision-128k-instruct",
           messages: [
             {
               role: "system",
