@@ -475,14 +475,6 @@ function animate() {
   baseGeometry.attributes.position.needsUpdate = true;
   baseGeometry.computeVertexNormals();
 
-  // Material updates
-  // Stay consistently DARK on white background
-  coreMaterial.color.setHSL(0.61, 0.9, 0.15 - (current.glass * 0.05)); 
-  coreMaterial.opacity = 0.95 - (current.glass * 0.2); 
-  
-  const pulse = 1.0 + (Math.sin(time * 4) * current.rhythm * 0.12);
-  innerMesh.scale.set(pulse, pulse, pulse);
-
   // Animate Vortex Trails
   trails.forEach((t, idx) => {
     const positions = t.line.geometry.attributes.position;
