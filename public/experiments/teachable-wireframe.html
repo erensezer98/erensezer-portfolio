@@ -2,346 +2,827 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Teachable Wireframe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Factor — AI Artistic Direction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    /* Premium dark mode UI */
-    body { margin: 0; background-color: #050505; color: #fff; font-family: 'Inter', system-ui, sans-serif; overflow: hidden; display: flex;}
-    #ui-container { position: absolute; top: 0; left: 0; width: 340px; height: 100%; padding: 24px; box-sizing: border-box; background: rgba(10, 10, 10, 0.7); backdrop-filter: blur(10px); border-right: 1px solid rgba(255,255,255,0.1); z-index: 10; display: flex; flex-direction: column; gap: 16px; overflow-y: auto;}
-    canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;}
-    h1 { font-size: 14px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 16px 0; color: #aaa; }
-    
-    .upload-btn { background: #fff; color: #000; border: none; padding: 12px 16px; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 4px; transition: opacity 0.2s; text-align: center;}
-    .upload-btn:hover { opacity: 0.8; }
-    #image-upload { display: none; }
-    
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    #preview-container { width: 100%; aspect-ratio: 1; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;}
-    #preview-image { width: 100%; height: 100%; object-fit: cover; display: none; }
-    
-    .label-row { display: flex; justify-content: space-between; font-size: 12px; padding: 8px 0 4px 0;}
-    .progress-bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-bottom: 8px; overflow: hidden;}
-    .progress-bar-fill { height: 100%; background: #fff; width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
-    
-    #status { font-size: 12px; color: #888; margin-top: 8px; line-height: 1.5; }
-    
-    /* Scrollbar styling for a premium feel */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+    :root {
+      --panel-w: 320px;
+      --bg: #060608;
+      --surface: rgba(8, 8, 12, 0.85);
+      --border: rgba(255,255,255,0.07);
+      --accent: #a0c4ff;
+      --text-primary: rgba(255,255,255,0.92);
+      --text-muted: rgba(255,255,255,0.4);
+      --text-dim: rgba(255,255,255,0.22);
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow: hidden;
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* ─── Canvas ─────────────────────────────────────────────── */
+    #three-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* ─── Left Panel ─────────────────────────────────────────── */
+    #panel {
+      position: relative;
+      z-index: 10;
+      width: var(--panel-w);
+      min-width: var(--panel-w);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      backdrop-filter: blur(24px) saturate(120%);
+      border-right: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    /* Panel Header */
+    #panel-header {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #panel-header .eyebrow {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+    #panel-header h1 {
+      font-size: 16px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--text-primary);
+    }
+
+    /* Scrollable body of panel */
+    #panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ─── Image Upload ─────────────────────────────────────────*/
+    #drop-zone {
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    #drop-zone:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.02); }
+    #drop-zone.has-image { border-color: rgba(255,255,255,0.15); }
+    #drop-zone-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      pointer-events: none;
+      text-align: center;
+      line-height: 1.6;
+    }
+    #drop-zone svg { opacity: 0.25; pointer-events: none; }
+    #preview-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    #image-upload { display: none; }
+
+    /* Analyse button */
+    #analyse-btn {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    #analyse-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.22); }
+    #analyse-btn:disabled { opacity: 0.35; cursor: default; }
+
+    /* ─── Status line ─────────────────────────────────────────*/
+    #status {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      min-height: 32px;
+      flex-shrink: 0;
+    }
+    #status.active { color: var(--text-muted); }
+    #status.error { color: #ff6b6b; }
+
+    /* ─── Classification bars ─────────────────────────────────*/
+    #classifications {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .cls-row { display: flex; flex-direction: column; gap: 4px; }
+    .cls-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .cls-name { font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
+    .cls-pct { font-size: 10px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+    .cls-track {
+      width: 100%;
+      height: 2px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .cls-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 1px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.6s;
+      background: rgba(255,255,255,0.3);
+    }
+    .cls-fill.dominant { background: var(--accent); }
+
+    /* ─── Divider ─────────────────────────────────────────────*/
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    /* ─── LLM Feedback ────────────────────────────────────────*/
+    #llm-section { flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+
+    #llm-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #llm-title {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* HF API key input */
+    #hf-key-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    #hf-key-input {
+      flex: 1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 11px;
+      padding: 8px 10px;
+      border-radius: 4px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #hf-key-input:focus { border-color: rgba(255,255,255,0.2); }
+    #hf-key-input::placeholder { color: var(--text-dim); }
+
+    #llm-btn {
+      padding: 8px 12px;
+      background: rgba(160,196,255,0.08);
+      border: 1px solid rgba(160,196,255,0.2);
+      color: var(--accent);
+      font-family: inherit;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    #llm-btn:hover:not(:disabled) { background: rgba(160,196,255,0.14); }
+    #llm-btn:disabled { opacity: 0.3; cursor: default; }
+
+    /* Feedback box */
+    #llm-feedback {
+      font-size: 12px;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.7);
+      min-height: 48px;
+      border-left: 2px solid rgba(160,196,255,0.25);
+      padding-left: 14px;
+    }
+    #llm-feedback.thinking { color: var(--text-dim); font-style: italic; }
+    #llm-feedback.error-msg { color: #ff8080; border-left-color: rgba(255,100,100,0.3); }
+
+    /* HF note */
+    #hf-note {
+      font-size: 10px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    #hf-note a { color: rgba(160,196,255,0.6); text-decoration: none; }
+    #hf-note a:hover { color: var(--accent); }
+
+    /* ─── Scrollbar ───────────────────────────────────────────*/
+    #panel-body::-webkit-scrollbar { width: 4px; }
+    #panel-body::-webkit-scrollbar-track { background: transparent; }
+    #panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+    /* ─── Wireframe active dims indicator (top-right) ─────────*/
+    #live-dims {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+    .dim-chip {
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+      opacity: 0;
+      transition: opacity 0.4s, color 0.4s;
+    }
+    .dim-chip.active { opacity: 1; color: rgba(255,255,255,0.6); }
   </style>
-  <!-- Load TensorFlow.js and Teachable Machine Image -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-  <!-- Load Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-  <div id="ui-container">
-    <h1>AI Form Factor</h1>
-    
-    <div id="status">Connecting to onboard AI engine...</div>
 
-    <div style="flex:1;"></div>
-
-    <div id="preview-container">
-      <span id="preview-text" style="font-size: 12px; color: #666;">No image selected</span>
-      <img id="preview-image" crossorigin="anonymous" />
-    </div>
-
-    <label for="image-upload" class="upload-btn" id="upload-label" style="opacity: 0.3; pointer-events: none;">Select Image</label>
-    <input type="file" id="image-upload" accept="image/*">
-
-    <div id="label-container" style="display: flex; flex-direction: column; margin-top: 8px;"></div>
+<!-- ── Left Panel ──────────────────────────────────────────────────── -->
+<div id="panel">
+  <div id="panel-header">
+    <div class="eyebrow">Experiment · AI Form Factor</div>
+    <h1>Artistic Direction Engine</h1>
   </div>
 
-  <script>
-    // ----------------------------------------------------
-    // THREE.JS SETUP
-    // ----------------------------------------------------
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050505, 0.03);
+  <div id="panel-body">
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 18;
+    <!-- Image -->
+    <div id="drop-zone" onclick="document.getElementById('image-upload').click()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1" stroke-linecap="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+      <span id="drop-zone-label">Upload image<br>to begin</span>
+      <img id="preview-image" crossorigin="anonymous" alt="Preview" />
+    </div>
+    <input type="file" id="image-upload" accept="image/*">
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio for performance
-    document.body.appendChild(renderer.domElement);
+    <button id="analyse-btn" disabled>Analyse Image</button>
 
-    // Create complex wireframe geometry
-    const geometry = new THREE.IcosahedronGeometry(6, 12); // High density for beautiful distortion
-    
-    // Store original vertices for morphing via noise
-    const positionAttribute = geometry.attributes.position;
-    const basePositions = new Float32Array(positionAttribute.count * 3);
-    for (let i = 0; i < positionAttribute.count * 3; i++) {
-        basePositions[i] = positionAttribute.array[i];
+    <!-- Status -->
+    <div id="status">Connecting to AI engine…</div>
+
+    <!-- Classifications -->
+    <div id="classifications"></div>
+
+    <div class="divider" id="llm-divider" style="display:none"></div>
+
+    <!-- LLM Artistic Direction -->
+    <div id="llm-section" style="display:none">
+      <div id="llm-header">
+        <span id="llm-title">Artistic Direction · LLM</span>
+      </div>
+
+      <div id="hf-key-row">
+        <input
+          type="password"
+          id="hf-key-input"
+          placeholder="hf_… (free API key)"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="llm-btn" disabled>Generate</button>
+      </div>
+
+      <div id="llm-feedback">Analysis results will appear here after classification.</div>
+
+      <div id="hf-note">
+        Free key at <a href="https://huggingface.co/settings/tokens" target="_blank">huggingface.co</a>.
+        No billing required. Uses Mistral-7B-Instruct.
+      </div>
+    </div>
+
+  </div><!-- /panel-body -->
+</div><!-- /panel -->
+
+<!-- ── Live Dimension Chips ────────────────────────────────────────── -->
+<div id="live-dims">
+  <div class="dim-chip" id="chip-0">—</div>
+  <div class="dim-chip" id="chip-1">—</div>
+  <div class="dim-chip" id="chip-2">—</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+//  THREE.JS — Architectural Membrane + Particle Field
+// ═══════════════════════════════════════════════════════════════════════
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x060608);
+scene.fog = new THREE.FogExp2(0x060608, 0.018);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
+camera.position.set(0, 0, 32);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.domElement.id = 'three-canvas';
+document.body.appendChild(renderer.domElement);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ── GEOMETRY 1: Parametric Grid Membrane ──────────────────────────────
+// A recursive plane subdivided into a tension-structure-like surface
+const GRID_W = 80, GRID_H = 80;
+const planeGeo = new THREE.PlaneGeometry(28, 28, GRID_W, GRID_H);
+const planeMat = new THREE.MeshBasicMaterial({
+  color: 0xffffff,
+  wireframe: true,
+  transparent: true,
+  opacity: 0.12,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+});
+const planeBase = new Float32Array(planeGeo.attributes.position.array);
+const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+scene.add(planeMesh);
+
+// ── GEOMETRY 2: Floating Rod System (structural sticks) ──────────────
+// Vertical/horizontal sticks that slowly drift = "installation rods"
+const ROD_COUNT = 40;
+const rodGroup = new THREE.Group();
+scene.add(rodGroup);
+
+const rodMat = new THREE.LineBasicMaterial({
+  color: 0xffffff,
+  transparent: true,
+  opacity: 0.18,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+});
+
+const rods = [];
+for (let i = 0; i < ROD_COUNT; i++) {
+  const len = 1.5 + Math.random() * 8;
+  const angle = Math.random() * Math.PI;
+  const dir = new THREE.Vector3(Math.sin(angle), Math.cos(angle), (Math.random() - 0.5) * 0.5).normalize();
+  const start = new THREE.Vector3(
+    (Math.random() - 0.5) * 26,
+    (Math.random() - 0.5) * 26,
+    (Math.random() - 0.5) * 14,
+  );
+  const end = start.clone().addScaledVector(dir, len);
+
+  const geo = new THREE.BufferGeometry().setFromPoints([start, end]);
+  const line = new THREE.Line(geo, rodMat.clone());
+  rodGroup.add(line);
+  rods.push({ line, start: start.clone(), angle, len, phase: Math.random() * Math.PI * 2, speed: 0.2 + Math.random() * 0.5 });
+}
+
+// ── GEOMETRY 3: Suspended Particle Field ─────────────────────────────
+const PARTICLE_COUNT = 800;
+const particleGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(PARTICLE_COUNT * 3);
+const pBase = new Float32Array(PARTICLE_COUNT * 3);
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  const x = (Math.random() - 0.5) * 40;
+  const y = (Math.random() - 0.5) * 40;
+  const z = (Math.random() - 0.5) * 20;
+  pPos[i * 3] = pBase[i * 3] = x;
+  pPos[i * 3 + 1] = pBase[i * 3 + 1] = y;
+  pPos[i * 3 + 2] = pBase[i * 3 + 2] = z;
+}
+particleGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+const particleMat = new THREE.PointsMaterial({
+  color: 0xffffff,
+  size: 0.06,
+  transparent: true,
+  opacity: 0.5,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+});
+const particles = new THREE.Points(particleGeo, particleMat);
+scene.add(particles);
+
+// ── GEOMETRY 4: Silhouette Ring Stack ────────────────────────────────
+// Horizontal rings at different heights — evoke "installation levels"
+const RING_COUNT = 5;
+const rings = [];
+for (let r = 0; r < RING_COUNT; r++) {
+  const radius = 6 + r * 2.5;
+  const rGeo = new THREE.RingGeometry(radius - 0.01, radius + 0.01, 120);
+  const rMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.04 + r * 0.006,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const ring = new THREE.Mesh(rGeo, rMat);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = -8 + r * 4;
+  scene.add(ring);
+  rings.push({ mesh: ring, phase: r * 0.8, baseY: -8 + r * 4 });
+}
+
+// ── TARGET PARAMS (driven by AI) ─────────────────────────────────────
+const target = {
+  membraneAmplitude: 0.0,
+  membraneFrequency: 0.4,
+  membraneSpeed: 0.5,
+  membraneOpacity: 0.12,
+  particleSpread: 1.0,
+  particleOpacity: 0.5,
+  particleSize: 0.06,
+  rodOpacity: 0.18,
+  rodSpeed: 0.4,
+  ringOpacity: 0.04,
+  ringTilt: 0,        // tilt in radians
+  colorR: 1, colorG: 1, colorB: 1,
+  rotationY: 0.0003,
+  cameraZ: 32,
+};
+const current = { ...target };
+
+const lp = 0.025; // lerp factor per frame
+
+// ── ANIMATION LOOP ────────────────────────────────────────────────────
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = Date.now() * 0.001;
+
+  // Lerp all params
+  for (const k of Object.keys(target)) {
+    current[k] = lerp(current[k], target[k], lp);
+  }
+
+  // Camera
+  camera.position.z = lerp(camera.position.z, current.cameraZ, 0.01);
+
+  // Color
+  const col = new THREE.Color(current.colorR, current.colorG, current.colorB);
+  planeMat.color.copy(col);
+  rodMat.color.copy(col);
+  particleMat.color.copy(col);
+
+  // Membrane
+  planeMat.opacity = current.membraneOpacity;
+  const pos = planeGeo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const bx = planeBase[i * 3];
+    const by = planeBase[i * 3 + 1];
+    const bz = planeBase[i * 3 + 2];
+    const wave =
+      Math.sin(bx * current.membraneFrequency + t * current.membraneSpeed) *
+      Math.cos(by * current.membraneFrequency * 0.7 + t * current.membraneSpeed * 0.8);
+    pos.array[i * 3 + 2] = bz + wave * current.membraneAmplitude;
+  }
+  pos.needsUpdate = true;
+
+  planeMesh.rotation.z += current.rotationY;
+
+  // Particles
+  particleMat.opacity = current.particleOpacity;
+  particleMat.size = current.particleSize;
+  const pp = particleGeo.attributes.position;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const ox = pBase[i * 3];
+    const oy = pBase[i * 3 + 1];
+    const oz = pBase[i * 3 + 2];
+    const drift = Math.sin(t * 0.3 + i * 0.7) * 0.3;
+    pp.array[i * 3] = ox * current.particleSpread + drift;
+    pp.array[i * 3 + 1] = oy * current.particleSpread + Math.cos(t * 0.2 + i * 0.5) * 0.25;
+    pp.array[i * 3 + 2] = oz;
+  }
+  pp.needsUpdate = true;
+
+  // Rods
+  for (const rod of rods) {
+    const m = rod.line.material;
+    m.color.copy(col);
+    m.opacity = current.rodOpacity;
+    const drift = Math.sin(t * current.rodSpeed * rod.speed + rod.phase) * 0.6;
+    rod.line.position.x = drift;
+    rod.line.position.y = Math.cos(t * current.rodSpeed * rod.speed * 0.6 + rod.phase) * 0.4;
+    rod.line.rotation.z = Math.sin(t * 0.1 + rod.phase) * 0.08;
+  }
+
+  // Rings
+  rings.forEach((r, i) => {
+    r.mesh.material.opacity = current.ringOpacity * (1 + i * 0.15);
+    r.mesh.material.color.copy(col);
+    r.mesh.rotation.x = Math.PI / 2 + Math.sin(t * 0.2 + r.phase) * current.ringTilt;
+    r.mesh.position.y = r.baseY + Math.sin(t * 0.15 + r.phase) * 0.5;
+  });
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// ═══════════════════════════════════════════════════════════════════════
+//  TEACHABLE MACHINE
+// ═══════════════════════════════════════════════════════════════════════
+let model, maxPredictions;
+let lastPrediction = null;
+let lastImageDataURL = null;
+
+const statusEl = document.getElementById('status');
+const analyseBtn = document.getElementById('analyse-btn');
+const imageUpload = document.getElementById('image-upload');
+const previewImage = document.getElementById('preview-image');
+const dropZone = document.getElementById('drop-zone');
+const dropLabel = document.getElementById('drop-zone-label');
+const classifications = document.getElementById('classifications');
+const chips = [0, 1, 2].map(i => document.getElementById(`chip-${i}`));
+const llmSection = document.getElementById('llm-section');
+const llmDivider = document.getElementById('llm-divider');
+const llmBtn = document.getElementById('llm-btn');
+const hfKeyInput = document.getElementById('hf-key-input');
+const llmFeedback = document.getElementById('llm-feedback');
+
+function setStatus(msg, type = '') {
+  statusEl.textContent = msg;
+  statusEl.className = type;
+}
+
+async function initModel() {
+  try {
+    model = await tmImage.load('/ai/model.json', '/ai/metadata.json');
+    maxPredictions = model.getTotalClasses();
+
+    // Build classification bars
+    classifications.innerHTML = '';
+    for (let i = 0; i < maxPredictions; i++) {
+      const row = document.createElement('div');
+      row.className = 'cls-row';
+      row.id = `cls-row-${i}`;
+      row.innerHTML = `
+        <div class="cls-top">
+          <span class="cls-name" id="cls-name-${i}">—</span>
+          <span class="cls-pct" id="cls-pct-${i}">—</span>
+        </div>
+        <div class="cls-track"><div class="cls-fill" id="cls-fill-${i}"></div></div>
+      `;
+      classifications.appendChild(row);
     }
 
-    const material = new THREE.MeshBasicMaterial({ 
-      color: 0xffffff, 
-      wireframe: true, 
-      transparent: true, 
-      opacity: 0.4,
-      blending: THREE.AdditiveBlending // Glow effect
+    setStatus('AI engine ready. Upload an image.', 'active');
+    analyseBtn.disabled = false;
+  } catch (e) {
+    console.error(e);
+    setStatus('Error loading model: ' + (e.message || e), 'error');
+  }
+}
+initModel();
+
+// Image selection
+imageUpload.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+  const reader = new FileReader();
+  reader.onload = ev => {
+    lastImageDataURL = ev.target.result;
+    previewImage.src = lastImageDataURL;
+    previewImage.style.display = 'block';
+    dropLabel.style.display = 'none';
+    dropLabel.previousElementSibling.style.display = 'none'; // hide svg
+    dropZone.classList.add('has-image');
+    setStatus('Image loaded. Press Analyse to run.', 'active');
+    analyseBtn.disabled = !model;
+  };
+  reader.readAsDataURL(file);
+});
+
+analyseBtn.addEventListener('click', async () => {
+  if (!model || !previewImage.src) return;
+  analyseBtn.disabled = true;
+  setStatus('Preprocessing…');
+
+  await new Promise(resolve => {
+    if (previewImage.complete) { resolve(); return; }
+    previewImage.onload = resolve;
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 224; canvas.height = 224;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, 224, 224);
+  const size = Math.min(previewImage.naturalWidth, previewImage.naturalHeight);
+  const sx = (previewImage.naturalWidth - size) / 2;
+  const sy = (previewImage.naturalHeight - size) / 2;
+  ctx.drawImage(previewImage, sx, sy, size, size, 0, 0, 224, 224);
+
+  try {
+    setStatus('Running classification…');
+    const preds = await model.predict(canvas);
+    lastPrediction = preds;
+    displayResults(preds);
+    updateWireframe(preds);
+    showLLMSection();
+    setStatus('Classification complete.', 'active');
+  } catch (e) {
+    console.error(e);
+    setStatus('Error: ' + e.message, 'error');
+  }
+  analyseBtn.disabled = false;
+});
+
+function displayResults(preds) {
+  const sorted = [...preds].sort((a, b) => b.probability - a.probability);
+
+  preds.forEach((p, i) => {
+    const nameEl = document.getElementById(`cls-name-${i}`);
+    const pctEl = document.getElementById(`cls-pct-${i}`);
+    const fillEl = document.getElementById(`cls-fill-${i}`);
+    if (!nameEl) return;
+    nameEl.textContent = p.className;
+    const pct = (p.probability * 100).toFixed(1);
+    pctEl.textContent = pct + '%';
+    fillEl.style.width = pct + '%';
+    fillEl.className = 'cls-fill' + (p === sorted[0] || p === sorted[1] ? ' dominant' : '');
+  });
+
+  // Update corner chips
+  sorted.slice(0, 3).forEach((p, i) => {
+    chips[i].textContent = `${p.className}  ${(p.probability * 100).toFixed(0)}%`;
+    chips[i].classList.add('active');
+  });
+}
+
+// ── WIREFRAME PARAMETER MAPPING ────────────────────────────────────────
+function updateWireframe(preds) {
+  const sorted = [...preds].sort((a, b) => b.probability - a.probability);
+  const p1 = sorted[0]?.probability || 0;
+  const p2 = sorted[1]?.probability || 0;
+  const p3 = sorted[2]?.probability || 0;
+  const c1 = sorted[0]?.className || '';
+  const c2 = sorted[1]?.className || '';
+
+  // ── Colour: top 3 → RGB channels, then normalize ──────────────────
+  let r = sorted[0]?.probability || 0;
+  let g = sorted[1]?.probability || 0;
+  let b = sorted[2]?.probability || 0;
+  const maxC = Math.max(r, g, b, 0.001);
+  target.colorR = r / maxC;
+  target.colorG = g / maxC;
+  target.colorB = b / maxC;
+
+  // ── Membrane: dominant class drives wave amplitude ─────────────────
+  target.membraneAmplitude = p1 * 3.2;           // 0 → 3.2 units
+  target.membraneFrequency = 0.15 + p2 * 0.65;  // higher 2nd → finer wrinkles
+  target.membraneSpeed     = 0.3 + p3 * 1.8;    // 3rd class → agitation speed
+  target.membraneOpacity   = 0.06 + p1 * 0.22;  // more dominant = more visible
+
+  // ── Particles: 2nd class drives expansion / chaos ─────────────────
+  target.particleSpread  = 0.7 + p2 * 0.7;
+  target.particleOpacity = 0.3 + p1 * 0.55;
+  target.particleSize    = 0.04 + p2 * 0.12;
+
+  // ── Rods: 3rd class = how much they drift ─────────────────────────
+  target.rodOpacity = 0.08 + p3 * 0.28;
+  target.rodSpeed   = 0.2 + p3 * 1.2;
+
+  // ── Rings: transparency or glass concept → strong ring tilt ───────
+  const transparencyPred = preds.find(p => p.className === 'Transparency');
+  const glassPred        = preds.find(p => p.className === 'Glass');
+  const ringInfluence    = ((transparencyPred?.probability || 0) + (glassPred?.probability || 0)) * 0.5;
+  target.ringOpacity = 0.02 + ringInfluence * 0.15;
+  target.ringTilt    = ringInfluence * 0.6;
+
+  // ── Camera Pull: overall dominance → slight zoom ──────────────────
+  target.cameraZ = 26 + (1 - p1) * 10;
+
+  // ── Rotation speed ─────────────────────────────────────────────────
+  target.rotationY = 0.0001 + p1 * 0.0012;
+}
+
+function showLLMSection() {
+  llmDivider.style.display = '';
+  llmSection.style.display = '';
+  llmBtn.disabled = false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  LLM — Hugging Face Inference API (free)
+// ═══════════════════════════════════════════════════════════════════════
+// Model: mistralai/Mistral-7B-Instruct-v0.3 (free, no billing required)
+// User must paste a read-only Inference token from huggingface.co/settings/tokens
+
+llmBtn.addEventListener('click', generateArtisticFeedback);
+
+async function generateArtisticFeedback() {
+  if (!lastPrediction) {
+    llmFeedback.textContent = 'Run classification first.';
+    llmFeedback.className = 'error-msg';
+    return;
+  }
+
+  llmBtn.disabled = true;
+  llmFeedback.textContent = 'Generating artistic direction…';
+  llmFeedback.className = 'thinking';
+
+  // Build a concise text summary of the top classifications
+  const sorted = [...lastPrediction].sort((a, b) => b.probability - a.probability);
+  const top8 = sorted.slice(0, 8).map(p => `${p.className} (${(p.probability * 100).toFixed(1)}%)`);
+  const classificationText = top8.join(', ');
+
+  // Use local proxy to avoid exposing secret and satisfy GitHub scanning
+  setStatus('Connecting to local AI proxy…');
+  try {
+    const response = await fetch('/api/ai/artistic-direction', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ classificationText })
     });
-    
-    const mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
 
-    // Group for base rotation
-    const group = new THREE.Group();
-    group.add(mesh);
-    // Center the group slightly to the right to account for the UI sidebar
-    group.position.x = 2;
-    scene.add(group);
-
-    // Handle Resize
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    // Wireframe Animation States
-    let targetParams = {
-        noiseAmplitude: 0,
-        noiseFrequency: 0.3,
-        rotationSpeedX: 0.001,
-        rotationSpeedY: 0.002,
-        scale: 1,
-        colorR: 1,
-        colorG: 1,
-        colorB: 1
-    };
-    let currentParams = { ...targetParams };
-
-    function animate() {
-      requestAnimationFrame(animate);
-
-      // Smoothly interpolate parameters (lerp)
-      const lerpFactor = 0.03;
-      currentParams.noiseAmplitude += (targetParams.noiseAmplitude - currentParams.noiseAmplitude) * lerpFactor;
-      currentParams.noiseFrequency += (targetParams.noiseFrequency - currentParams.noiseFrequency) * lerpFactor;
-      currentParams.rotationSpeedX += (targetParams.rotationSpeedX - currentParams.rotationSpeedX) * lerpFactor;
-      currentParams.rotationSpeedY += (targetParams.rotationSpeedY - currentParams.rotationSpeedY) * lerpFactor;
-      currentParams.scale += (targetParams.scale - currentParams.scale) * lerpFactor;
-      
-      currentParams.colorR += (targetParams.colorR - currentParams.colorR) * lerpFactor;
-      currentParams.colorG += (targetParams.colorG - currentParams.colorG) * lerpFactor;
-      currentParams.colorB += (targetParams.colorB - currentParams.colorB) * lerpFactor;
-
-      material.color.setRGB(currentParams.colorR, currentParams.colorG, currentParams.colorB);
-
-      group.rotation.x += currentParams.rotationSpeedX;
-      group.rotation.y += currentParams.rotationSpeedY;
-      group.scale.setScalar(currentParams.scale);
-
-      // Apply procedural noise distortion to vertices
-      const time = Date.now() * 0.0005;
-      const positions = mesh.geometry.attributes.position;
-      
-      for(let i = 0; i < positions.count; i++) {
-          const vx = basePositions[i*3];
-          const vy = basePositions[i*3+1];
-          const vz = basePositions[i*3+2];
-
-          // Subdued sine wave noise based on frequency
-          const distortion = Math.sin(vx * currentParams.noiseFrequency + time) * 
-                             Math.cos(vy * currentParams.noiseFrequency + time * 0.8) * 
-                             Math.sin(vz * currentParams.noiseFrequency + time * 1.2);
-
-          const factor = 1 + distortion * currentParams.noiseAmplitude;
-
-          positions.array[i*3] = vx * factor;
-          positions.array[i*3+1] = vy * factor;
-          positions.array[i*3+2] = vz * factor;
-      }
-      positions.needsUpdate = true;
-
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    // ----------------------------------------------------
-    // TEACHABLE MACHINE LOGIC
-    // ----------------------------------------------------
-    let model, maxPredictions;
-    const statusEl = document.getElementById('status');
-    const uploadBtn = document.getElementById('upload-label');
-    const imageUpload = document.getElementById('image-upload');
-    const previewImage = document.getElementById('preview-image');
-    const previewText = document.getElementById('preview-text');
-    const labelContainer = document.getElementById("label-container");
-
-    async function initModel() {
-        const url = window.location.origin + "/ai/";
-        
-        try {
-            const modelURL = url + "model.json";
-            const metadataURL = url + "metadata.json";
-            
-            model = await tmImage.load(modelURL, metadataURL);
-            maxPredictions = model.getTotalClasses();
-            
-            // Rebuild label container UI based on number of classes
-            labelContainer.innerHTML = '';
-            for (let i = 0; i < maxPredictions; i++) {
-                // Class name might not be loaded initially, wait for predict or use placeholder
-                const row = document.createElement("div");
-                row.className = "label-row";
-                row.innerHTML = `<span class="label-name">Class ${i+1}</span><span class="label-val">0%</span>`;
-                
-                const progressBg = document.createElement('div');
-                progressBg.className = 'progress-bar-bg';
-                const progressFill = document.createElement('div');
-                progressFill.className = 'progress-bar-fill';
-                progressBg.appendChild(progressFill);
-                
-                const wrapper = document.createElement('div');
-                wrapper.appendChild(row);
-                wrapper.appendChild(progressBg);
-                
-                labelContainer.appendChild(wrapper);
-            }
-
-            statusEl.innerText = "AI Engine ready. Select an image to begin.";
-            uploadBtn.style.opacity = '1';
-            uploadBtn.style.pointerEvents = 'auto';
-        } catch (e) {
-            console.error(e);
-            statusEl.innerText = "Error: " + (e.message || String(e));
-        }
-    }
-    
-    // Auto-initialize
-    initModel();
-
-    // Handle Image Upload
-    imageUpload.addEventListener('change', async (e) => {
-        if (!model) return;
-        const file = e.target.files[0];
-        if (!file) return;
-
-        statusEl.innerText = "Parsing image...";
-        
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-            // Bind onload BEFORE setting src to prevent race conditions with Data URLs
-            previewImage.onload = async () => {
-                statusEl.innerText = "Cropping and extracting features...";
-                
-                // Construct a strict square crop to prevent TM from warping rectangular images
-                const offscreenCanvas = document.createElement('canvas');
-                offscreenCanvas.width = 224;
-                offscreenCanvas.height = 224;
-                const ctx = offscreenCanvas.getContext('2d');
-                
-                // Fill with solid white. This prevents transparent PNGs from automatically converting to black backgrounds!
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, 224, 224);
-                
-                // Calculate center crop mathematically
-                const size = Math.min(previewImage.naturalWidth, previewImage.naturalHeight);
-                const startX = (previewImage.naturalWidth - size) / 2;
-                const startY = (previewImage.naturalHeight - size) / 2;
-                
-                // Draw crop
-                ctx.drawImage(previewImage, startX, startY, size, size, 0, 0, 224, 224);
-                
-                // Analyze the strictly formatted canvas instead of the stretchy raw image
-                try {
-                    await predict(offscreenCanvas);
-                } catch (err) {
-                    console.error("Prediction error:", err);
-                    statusEl.innerText = "Error analyzing image data: " + (err.message || String(err));
-                }
-            };
-
-            previewImage.src = event.target.result;
-            previewImage.style.display = 'block';
-            previewText.style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    });
-
-    async function predict(imageElement) {
-        if(!model) return;
-        
-        try {
-            // predict can take in an image, video or canvas html element
-            const prediction = await model.predict(imageElement);
-            
-            for (let i = 0; i < maxPredictions; i++) {
-                const prob = prediction[i].probability;
-                const className = prediction[i].className;
-                
-                const wrapper = labelContainer.childNodes[i];
-                wrapper.querySelector('.label-name').innerText = className;
-                wrapper.querySelector('.label-val').innerText = (prob * 100).toFixed(0) + '%';
-                wrapper.querySelector('.progress-bar-fill').style.width = (prob * 100) + '%';
-            }
-            
-            statusEl.innerText = "Analysis complete. Form factor updated.";
-            
-            // Transform wireframe based on findings
-            updateWireframeParameters(prediction);
-        } catch (err) {
-            console.error("Prediction error:", err);
-            statusEl.innerText = "Error analyzing image data.";
-        }
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.error || `Server error: ${response.status}`);
     }
 
-    // Map AI predictions back to 3D geometry properties
-    function updateWireframeParameters(prediction) {
-        // Sort predictions by highest probability
-        const sorted = [...prediction].sort((a,b) => b.probability - a.probability);
-        
-        // Extract top probabilities to drive different geometric aspects safely
-        const p1 = sorted[0]?.probability || 0;
-        const p2 = sorted[1]?.probability || 0;
-        const p3 = sorted[2]?.probability || 0;
-
-        // --- Aesthetic Mapping Rules ---
-
-        // 1. Color Interpolation based on array indices mod 3 for deterministic but distinct colors
-        targetParams.colorR = 0.1;
-        targetParams.colorG = 0.1;
-        targetParams.colorB = 0.1;
-
-        prediction.forEach((p, index) => {
-            if (index % 3 === 0) targetParams.colorR += p.probability;
-            if (index % 3 === 1) targetParams.colorG += p.probability;
-            if (index % 3 === 2) targetParams.colorB += p.probability;
-        });
-        
-        // Normalize colors
-        const maxC = Math.max(targetParams.colorR, targetParams.colorG, targetParams.colorB, 1.0);
-        targetParams.colorR /= maxC;
-        targetParams.colorG /= maxC;
-        targetParams.colorB /= maxC;
-
-        // Boost brightness slightly
-        targetParams.colorR = Math.min(1, targetParams.colorR + 0.2);
-        targetParams.colorG = Math.min(1, targetParams.colorG + 0.2);
-        targetParams.colorB = Math.min(1, targetParams.colorB + 0.2);
-
-        // 2. Structural Distortion
-        // The most dominant class dictates the intensity of the shape breaking apart
-        targetParams.noiseAmplitude = p1 * 1.5; // Up to 1.5 multiplier on vertices
-        
-        // The second class dictates internal frequency / detail of distortion
-        // Maps 0->0.1 (smooth) upward to 0.8 (highly detailed peaks)
-        targetParams.noiseFrequency = 0.1 + (p2 * 0.7);
-
-        // 3. Movement & Presence
-        // The third main class scales it and spins it faster
-        targetParams.scale = 1.0 + (p3 * 0.4); 
-        targetParams.rotationSpeedX = 0.001 + (p3 * 0.02);
-        targetParams.rotationSpeedY = 0.002 + (p1 * 0.03); // Top class also adds wild y-spin
+    const data = await response.json();
+    let text = data.text || '';
+    if (Array.isArray(data) && data[0]?.generated_text) {
+      text = data[0].generated_text.trim();
+    } else if (data?.generated_text) {
+      text = data.generated_text.trim();
+    } else if (data?.error) {
+      throw new Error(data.error);
+    } else {
+      text = JSON.stringify(data);
     }
-  </script>
+
+    // Strip any leftover instruction tags
+    text = text.replace(/\[INST\].*?\[\/INST\]/gs, '').trim();
+
+    llmFeedback.textContent = text || 'No response generated.';
+    llmFeedback.className = '';
+  } catch (e) {
+    console.error(e);
+    llmFeedback.textContent = 'Error: ' + (e.message || e);
+    llmFeedback.className = 'error-msg';
+  }
+
+  llmBtn.disabled = false;
+}
+</script>
 </body>
 </html>
