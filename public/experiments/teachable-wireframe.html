@@ -477,59 +477,6 @@ function animate() {
   composer.render(); 
 }
 animate();
-    const by = fluidBasePos[i * 3 + 1];
-    const bz = fluidBasePos[i * 3 + 2];
-    
-    // 1. Turbulence (Intensity / Rhythm)
-    const turbulence = Math.sin(bx * 0.8 + t * 1.5) * Math.cos(by * 0.8 + t * 1.2) * Math.sin(bz * 0.8 + t * 0.9);
-    
-    // 2. Elongation (Flow / Circulation)
-    const stretch = 1 + Math.abs(bx + by) * current.fluidFlow * 0.18;
-    
-    // 3. Calm (Stability)
-    const calm = Math.sin(t * 0.4 + bz * 0.2) * 0.5;
-
-    // 4. Depth (Interior volume expansion)
-    const depthExp = 1 + (Math.sin(t * 0.2 + bx * 0.1) * current.fluidDepth * 0.3);
-
-    const totalDist = (1 + lifePulse) * (1 + 
-      (turbulence * current.fluidTurbulence) + 
-      (calm * (1 - current.fluidTurbulence * 0.5)) +
-      (Math.sin(bx * 0.3 - t) * 0.5 * current.fluidDistortion)) * depthExp;
-    
-    fPos.array[i * 3] = bx * totalDist * current.fluidScale * stretch;
-    fPos.array[i * 3 + 1] = by * totalDist * current.fluidScale * (1/stretch);
-    fPos.array[i * 3 + 2] = bz * totalDist * current.fluidScale;
-  }
-  fPos.needsUpdate = true;
-  fluidMesh.rotation.y += current.rotationY;
-  fluidMesh.rotation.z += current.fluidCirculation * 0.02;
-
-  // Ribbons (Traces)
-  ribs.forEach((r, i) => {
-    r.line.material.color.copy(col);
-    r.line.material.opacity = current.ribOpacity * (0.1 + i * 0.1);
-    r.line.rotation.y = t * current.ribSpeed + r.phase;
-    r.line.rotation.z = Math.sin(t * 0.2 + r.phase) * 0.5;
-    const scale = 1 + Math.sin(t * 0.5 + r.phase) * 0.2;
-    r.line.scale.set(scale, scale, scale);
-  });
-
-  // Mist
-  particleMat.opacity = 0.15 + current.ribOpacity * 0.4;
-  const pp = particleGeo.attributes.position;
-  for (let i = 0; i < PARTICLE_COUNT; i++) {
-    const ox = pBase[i * 3];
-    const oy = pBase[i * 3 + 1];
-    const oz = pBase[i * 3 + 2];
-    pp.array[i * 3] = ox * current.particleSpread + Math.sin(t * 0.2 + i) * 1.5;
-    pp.array[i * 3 + 1] = oy * current.particleSpread + Math.cos(t * 0.15 + i) * 1.5;
-  }
-  pp.needsUpdate = true;
-
-  renderer.render(scene, camera);
-}
-animate();
 
 // ═══════════════════════════════════════════════════════════════════════
 //  TEACHABLE MACHINE
