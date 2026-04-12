@@ -13,10 +13,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'AI key not configured on server' }, { status: 500 });
     }
 
-    // Explicitly using the new router endpoint as required by the error message
-    // Format: https://router.huggingface.co/hf-inference/v1/chat/completions
+    // According to official HF docs, the correct router endpoint for chat completions is:
+    // https://router.huggingface.co/v1/chat/completions
     const response = await fetch(
-      'https://router.huggingface.co/hf-inference/v1/chat/completions',
+      'https://router.huggingface.co/v1/chat/completions',
       {
         method: 'POST',
         headers: {
