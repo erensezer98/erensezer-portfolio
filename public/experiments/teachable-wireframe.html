@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Form Factor — Water Installation Engine</title>
+  <title>Form Factor — AI Artistic Direction</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -12,13 +12,13 @@
 
     :root {
       --panel-w: 320px;
-      --bg: #04080c;
-      --surface: rgba(4, 12, 20, 0.85);
-      --border: rgba(100, 200, 255, 0.1);
-      --accent: #70d6ff;
-      --text-primary: rgba(220, 240, 255, 0.95);
-      --text-muted: rgba(220, 240, 255, 0.45);
-      --text-dim: rgba(220, 240, 255, 0.25);
+      --bg: #060608;
+      --surface: rgba(8, 8, 12, 0.85);
+      --border: rgba(255,255,255,0.07);
+      --accent: #a0c4ff;
+      --text-primary: rgba(255,255,255,0.92);
+      --text-muted: rgba(255,255,255,0.4);
+      --text-dim: rgba(255,255,255,0.22);
     }
 
     body {
@@ -51,64 +51,69 @@
       display: flex;
       flex-direction: column;
       background: var(--surface);
-      backdrop-filter: blur(32px) saturate(140%);
+      backdrop-filter: blur(24px) saturate(120%);
       border-right: 1px solid var(--border);
       overflow: hidden;
     }
 
+    /* Panel Header */
     #panel-header {
-      padding: 32px 24px 24px;
+      padding: 28px 24px 20px;
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
     #panel-header .eyebrow {
-      font-size: 10px;
-      letter-spacing: 0.25em;
+      font-size: 9px;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: var(--accent);
-      opacity: 0.7;
-      margin-bottom: 8px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
     }
     #panel-header h1 {
-      font-size: 18px;
-      font-weight: 300;
-      letter-spacing: 0.02em;
+      font-size: 16px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
       color: var(--text-primary);
     }
 
+    /* Scrollable body of panel */
     #panel-body {
       flex: 1;
       overflow-y: auto;
-      padding: 24px;
+      padding: 20px 24px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 20px;
     }
 
+    /* ─── Image Upload ─────────────────────────────────────────*/
     #drop-zone {
-      border: 1px solid var(--border);
-      background: rgba(100, 200, 255, 0.03);
-      border-radius: 12px;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
       aspect-ratio: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transition: border-color 0.2s, background 0.2s;
       position: relative;
       overflow: hidden;
+      flex-shrink: 0;
     }
-    #drop-zone:hover { border-color: var(--accent); background: rgba(100, 200, 255, 0.08); transform: translateY(-2px); }
+    #drop-zone:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.02); }
+    #drop-zone.has-image { border-color: rgba(255,255,255,0.15); }
     #drop-zone-label {
       font-size: 11px;
-      color: var(--text-muted);
-      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
       text-transform: uppercase;
+      pointer-events: none;
       text-align: center;
       line-height: 1.6;
     }
+    #drop-zone svg { opacity: 0.25; pointer-events: none; }
     #preview-image {
       position: absolute;
       inset: 0;
@@ -117,83 +122,173 @@
       object-fit: cover;
       display: none;
     }
+    #image-upload { display: none; }
 
+    /* Analyse button */
     #analyse-btn {
       width: 100%;
-      padding: 14px;
-      background: rgba(112, 214, 255, 0.1);
-      border: 1px solid rgba(112, 214, 255, 0.2);
-      color: var(--accent);
+      padding: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-primary);
       font-family: inherit;
       font-size: 12px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-    }
-    #analyse-btn:hover:not(:disabled) { background: rgba(112, 214, 255, 0.2); border-color: var(--accent); box-shadow: 0 0 20px rgba(112, 214, 255, 0.15); }
-    #analyse-btn:disabled { opacity: 0.2; cursor: default; filter: grayscale(1); }
-
-    #status { font-size: 11px; color: var(--text-dim); min-height: 32px; }
-    #status.active { color: var(--accent); }
-
-    #classifications { display: flex; flex-direction: column; gap: 14px; }
-    .cls-row { display: flex; flex-direction: column; gap: 6px; }
-    .cls-top { display: flex; justify-content: space-between; align-items: baseline; }
-    .cls-name { font-size: 12px; color: var(--text-muted); font-weight: 300; }
-    .cls-pct { font-size: 11px; color: var(--text-dim); }
-    .cls-track { height: 1px; background: rgba(255,255,255,0.05); }
-    .cls-fill { height: 100%; width: 0%; transition: width 1s ease; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-
-    #llm-section { display: flex; flex-direction: column; gap: 16px; padding-top: 8px; }
-    #llm-title { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
-    #llm-feedback {
-      font-size: 13px;
-      line-height: 1.8;
-      color: var(--text-primary);
-      border-left: 1px solid var(--accent);
-      padding-left: 20px;
-      opacity: 0.85;
-    }
-    #llm-btn {
-      padding: 12px;
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 11px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       cursor: pointer;
-      border-radius: 6px;
-      transition: all 0.3s;
+      border-radius: 4px;
+      transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
     }
-    #llm-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    #analyse-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.22); }
+    #analyse-btn:disabled { opacity: 0.35; cursor: default; }
 
-    #live-dims {
-      position: fixed;
-      top: 32px;
-      right: 32px;
-      z-index: 20;
+    /* ─── Status line ─────────────────────────────────────────*/
+    #status {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      min-height: 32px;
+      flex-shrink: 0;
+    }
+    #status.active { color: var(--text-muted); }
+    #status.error { color: #ff6b6b; }
+
+    /* ─── Classification bars ─────────────────────────────────*/
+    #classifications {
       display: flex;
       flex-direction: column;
       gap: 10px;
+      flex-shrink: 0;
+    }
+    .cls-row { display: flex; flex-direction: column; gap: 4px; }
+    .cls-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .cls-name { font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
+    .cls-pct { font-size: 10px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+    .cls-track {
+      width: 100%;
+      height: 2px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .cls-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 1px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.6s;
+      background: rgba(255,255,255,0.3);
+    }
+    .cls-fill.dominant { background: var(--accent); }
+
+    /* ─── Divider ─────────────────────────────────────────────*/
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    /* ─── LLM Feedback ────────────────────────────────────────*/
+    #llm-section { flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+
+    #llm-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #llm-title {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* HF API key input */
+    #hf-key-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    #hf-key-input {
+      flex: 1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 11px;
+      padding: 8px 10px;
+      border-radius: 4px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #hf-key-input:focus { border-color: rgba(255,255,255,0.2); }
+    #hf-key-input::placeholder { color: var(--text-dim); }
+
+    #llm-btn {
+      padding: 8px 12px;
+      background: rgba(160,196,255,0.08);
+      border: 1px solid rgba(160,196,255,0.2);
+      color: var(--accent);
+      font-family: inherit;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    #llm-btn:hover:not(:disabled) { background: rgba(160,196,255,0.14); }
+    #llm-btn:disabled { opacity: 0.3; cursor: default; }
+
+    /* Feedback box */
+    #llm-feedback {
+      font-size: 12px;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.7);
+      min-height: 48px;
+      border-left: 2px solid rgba(160,196,255,0.25);
+      padding-left: 14px;
+    }
+    #llm-feedback.thinking { color: var(--text-dim); font-style: italic; }
+    #llm-feedback.error-msg { color: #ff8080; border-left-color: rgba(255,100,100,0.3); }
+
+    /* HF note */
+    #hf-note {
+      font-size: 10px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    #hf-note a { color: rgba(160,196,255,0.6); text-decoration: none; }
+    #hf-note a:hover { color: var(--accent); }
+
+    /* ─── Scrollbar ───────────────────────────────────────────*/
+    #panel-body::-webkit-scrollbar { width: 4px; }
+    #panel-body::-webkit-scrollbar-track { background: transparent; }
+    #panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+    /* ─── Wireframe active dims indicator (top-right) ─────────*/
+    #live-dims {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
       align-items: flex-end;
+      pointer-events: none;
     }
     .dim-chip {
-      font-size: 10px;
-      letter-spacing: 0.15em;
+      font-size: 9px;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--accent);
+      color: rgba(255,255,255,0.2);
       opacity: 0;
-      background: rgba(4, 12, 20, 0.4);
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      backdrop-filter: blur(4px);
-      transition: all 0.5s;
+      transition: opacity 0.4s, color 0.4s;
     }
-    .dim-chip.active { opacity: 0.8; }
+    .dim-chip.active { opacity: 1; color: rgba(255,255,255,0.6); }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
@@ -201,32 +296,50 @@
 </head>
 <body>
 
+<!-- ── Left Panel ──────────────────────────────────────────────────── -->
 <div id="panel">
   <div id="panel-header">
-    <div class="eyebrow">Water Workshop · 2026</div>
-    <h1>Liquid Installations</h1>
+    <div class="eyebrow">Experiment · AI Form Factor</div>
+    <h1>Artistic Direction Engine</h1>
   </div>
 
   <div id="panel-body">
+
+    <!-- Image -->
     <div id="drop-zone" onclick="document.getElementById('image-upload').click()">
-      <span id="drop-zone-label">Drop captured space<br>to analyze water flow</span>
-      <img id="preview-image" crossorigin="anonymous" />
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1" stroke-linecap="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+      <span id="drop-zone-label">Upload image<br>to begin</span>
+      <img id="preview-image" crossorigin="anonymous" alt="Preview" />
     </div>
-    <input type="file" id="image-upload" accept="image/*" style="display:none">
+    <input type="file" id="image-upload" accept="image/*">
 
-    <button id="analyse-btn" disabled>Calculate Fluid Dynamics</button>
-    <div id="status">Awakening AI sensor...</div>
+    <button id="analyse-btn" disabled>Analyse Image</button>
 
+    <!-- Status -->
+    <div id="status">Connecting to AI engine…</div>
+
+    <!-- Classifications -->
     <div id="classifications"></div>
 
-    <div id="llm-section" style="display:none">
-      <div id="llm-title">Artistic Direction</div>
-      <div id="llm-feedback">Waiting for dynamic results...</div>
-      <button id="llm-btn" disabled>Request Direction</button>
-    </div>
-  </div>
-</div>
+    <div class="divider" id="llm-divider" style="display:none"></div>
 
+    <!-- LLM Artistic Direction -->
+    <div id="llm-section" style="display:none">
+      <div id="llm-header">
+        <span id="llm-title">Artistic Direction · LLM</span>
+      </div>
+
+      <div id="llm-feedback">Analysis results will appear here after classification.</div>
+      <button id="llm-btn" disabled>Generate Artistic Direction</button>
+    </div>
+
+  </div><!-- /panel-body -->
+</div><!-- /panel -->
+
+<!-- ── Live Dimension Chips ────────────────────────────────────────── -->
 <div id="live-dims">
   <div class="dim-chip" id="chip-0">—</div>
   <div class="dim-chip" id="chip-1">—</div>
@@ -234,255 +347,437 @@
 </div>
 
 <script>
-// ─── THREE.JS — WATER THEME ───────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+//  THREE.JS — Architectural Membrane + Particle Field
+// ═══════════════════════════════════════════════════════════════════════
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x04080c);
-scene.fog = new THREE.FogExp2(0x04080c, 0.015);
+scene.background = new THREE.Color(0x060608);
+scene.fog = new THREE.FogExp2(0x060608, 0.018);
 
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
-camera.position.set(0, 5, 40);
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
+camera.position.set(0, 0, 32);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.domElement.id = 'three-canvas';
 document.body.appendChild(renderer.domElement);
 
-// 1. Core "Water Drop" Geometry
-const coreGeo = new THREE.IcosahedronGeometry(12, 12);
-const coreMat = new THREE.MeshBasicMaterial({
-  color: 0x70d6ff,
-  wireframe: true,
-  transparent: true,
-  opacity: 0.15,
-  blending: THREE.AdditiveBlending
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
-const coreMesh = new THREE.Mesh(coreGeo, coreMat);
-scene.add(coreMesh);
-const coreBase = new Float32Array(coreGeo.attributes.position.array);
 
-// 2. Sea Surface
-const seaGeo = new THREE.PlaneGeometry(100, 100, 60, 60);
-seaGeo.rotateX(-Math.PI / 2);
-const seaMat = new THREE.MeshBasicMaterial({
-  color: 0x004488,
-  wireframe: true,
+// ── FLUIDIC CORE (THE WATER DROP) ────────────────────────────────────
+// A high-resolution sphere that morphs based on AI scores
+const fluidGeo = new THREE.IcosahedronGeometry(7, 32);
+const fluidBasePos = new Float32Array(fluidGeo.attributes.position.array);
+
+const fluidMat = new THREE.MeshPhysicalMaterial({
+  color: 0x88ccff,
+  metalness: 0.1,
+  roughness: 0.2,
   transparent: true,
-  opacity: 0.1,
-  blending: THREE.AdditiveBlending
+  opacity: 0.8,
+  transmission: 0.5,     // Water transparency
+  thickness: 2.5,        // Refraction depth
+  ior: 1.33,             // Water Index of Refraction
+  clearcoat: 1.0,
+  clearcoatRoughness: 0.1,
+  wireframe: true,        // Artistic wireframe style
+  flatShading: false,
 });
-const seaMesh = new THREE.Mesh(seaGeo, seaMat);
-seaMesh.position.y = -15;
-scene.add(seaMesh);
-const seaBase = new Float32Array(seaGeo.attributes.position.array);
 
-// 3. Orbital Traces
-const TRAIL_COUNT = 80;
-const trails = [];
-for(let i=0; i<TRAIL_COUNT; i++) {
-  const points = [];
-  for(let j=0; j<30; j++) points.push(new THREE.Vector3());
-  const geo = new THREE.BufferGeometry().setFromPoints(points);
-  const mat = new THREE.LineBasicMaterial({
-    color: 0x70d6ff,
-    transparent: true,
-    opacity: 0.1,
-    blending: THREE.AdditiveBlending
-  });
-  const line = new THREE.Line(geo, mat);
+const fluidMesh = new THREE.Mesh(fluidGeo, fluidMat);
+scene.add(fluidMesh);
+
+// ── VORTEX TRAILS (REPRESENTING TRACES/CONTINUITY) ─────────────────────
+const RIBS_COUNT = 15;
+const ribs = [];
+const ribMat = new THREE.LineBasicMaterial({ 
+  color: 0x88ccff, 
+  transparent: true, 
+  opacity: 0, 
+  blending: THREE.AdditiveBlending 
+});
+
+for (let i = 0; i < RIBS_COUNT; i++) {
+  const curve = new THREE.CubicBezierCurve3(
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3((Math.random() - 0.5) * 15, 5, (Math.random() - 0.5) * 5),
+    new THREE.Vector3(5, 10, 5),
+    new THREE.Vector3(10, 10, 10)
+  );
+  const points = curve.getPoints(50);
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const line = new THREE.Line(geometry, ribMat.clone());
   scene.add(line);
-  trails.push({ 
-    line, points, 
-    radius: 14 + Math.random() * 10, 
-    speed: 0.2 + Math.random() * 0.8,
-    angle: Math.random() * Math.PI * 2,
-    yOff: (Math.random() - 0.5) * 30
-  });
+  ribs.push({ line, phase: Math.random() * Math.PI * 2, speed: 0.3 + Math.random() * 0.4 });
 }
 
-// Target States
+// ── ATMOSPHERIC MIST (PARTICLES) ─────────────────────────────────────
+const PARTICLE_COUNT = 600;
+const particleGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(PARTICLE_COUNT * 3);
+const pBase = new Float32Array(PARTICLE_COUNT * 3);
+
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  pBase[i * 3] = (Math.random() - 0.5) * 45;
+  pBase[i * 3 + 1] = (Math.random() - 0.5) * 45;
+  pBase[i * 3 + 2] = (Math.random() - 0.5) * 30;
+  pPos[i * 3] = pBase[i * 3];
+  pPos[i * 3 + 1] = pBase[i * 3 + 1];
+  pPos[i * 3 + 2] = pBase[i * 3 + 2];
+}
+particleGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+const particleMat = new THREE.PointsMaterial({
+  color: 0x88ccff,
+  size: 0.08,
+  transparent: true,
+  opacity: 0.3,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+});
+const particles = new THREE.Points(particleGeo, particleMat);
+scene.add(particles);
+
+// ── TARGET PARAMS (driven by AI) ─────────────────────────────────────
 const target = {
-  turb: 0.1,
-  waveAmp: 1.0,
-  opacity: 0.15,
-  color: new THREE.Color(0xbde0fe),
-  camZ: 40,
-  rotSpeed: 0.001
+  fluidDistortion: 0.1,    // AI "Flow" / "Regeneration"
+  fluidWireframe: 1.0,     // 1 = wireframe, 0 = solid 
+  fluidTransmission: 0.5,  // AI "Transparency" / "Reflection"
+  fluidScale: 1.0,         // AI "Intensity"
+  ribOpacity: 0.05,        // AI "Trace" / "Continuity"
+  ribSpeed: 0.4,
+  particleSpread: 1.0,
+  colorR: 0.53, colorG: 0.8, colorB: 1.0,
+  rotationY: 0.001,
+  cameraZ: 28,
 };
-const cur = { ...target, color: target.color.clone() };
+const current = { ...target };
+const lp = 0.04; // lerp factor
+
+// ── ANIMATION LOOP ────────────────────────────────────────────────────
+function lerp(a, b, t) { return a + (b - a) * t; }
 
 function animate() {
   requestAnimationFrame(animate);
   const t = Date.now() * 0.001;
 
-  // Smoothing
-  cur.turb = THREE.MathUtils.lerp(cur.turb, target.turb, 0.05);
-  cur.waveAmp = THREE.MathUtils.lerp(cur.waveAmp, target.waveAmp, 0.05);
-  cur.opacity = THREE.MathUtils.lerp(cur.opacity, target.opacity, 0.05);
-  cur.camZ = THREE.MathUtils.lerp(cur.camZ, target.camZ, 0.02);
-  cur.rotSpeed = THREE.MathUtils.lerp(cur.rotSpeed, target.rotSpeed, 0.05);
-  cur.color.lerp(target.color, 0.05);
-
-  camera.position.z = cur.camZ;
-  coreMesh.rotation.y += cur.rotSpeed;
-
-  // Core Morph
-  const pos = coreGeo.attributes.position;
-  for(let i=0; i<pos.count; i++) {
-    const x = coreBase[i*3], y = coreBase[i*3+1], z = coreBase[i*3+2];
-    const noise = Math.sin(x*0.2 + t) * Math.cos(y*0.2 + t*1.1) * cur.turb;
-    pos.array[i*3] = x * (1 + noise);
-    pos.array[i*3+1] = y * (1 + noise);
-    pos.array[i*3+2] = z * (1 + noise);
+  for (const k of Object.keys(target)) {
+    current[k] = lerp(current[k], target[k], lp);
   }
-  pos.needsUpdate = true;
-  coreMat.opacity = cur.opacity;
-  coreMat.color.copy(cur.color);
 
-  // Sea Wave
-  const sPos = seaGeo.attributes.position;
-  for(let i=0; i<sPos.count; i++) {
-    const bx = seaBase[i*3], bz = seaBase[i*3+2];
-    const d = Math.sqrt(bx*bx + bz*bz);
-    sPos.array[i*3+1] = Math.sin(d*0.1 - t*1.5) * cur.waveAmp;
-  }
-  sPos.needsUpdate = true;
-  seaMat.color.copy(cur.color).multiplyScalar(0.5);
+  // Camera
+  camera.position.z = lerp(camera.position.z, current.cameraZ, 0.01);
 
-  // Orbital Traces
-  trails.forEach(tr => {
-    tr.angle += tr.speed * cur.rotSpeed * 10;
-    const x = Math.cos(tr.angle) * tr.radius;
-    const z = Math.sin(tr.angle) * tr.radius;
-    const y = tr.yOff + Math.sin(t + tr.angle) * 5;
+  // Colors & Materials
+  const col = new THREE.Color(current.colorR, current.colorG, current.colorB);
+  fluidMat.color.copy(col);
+  fluidMat.transmission = current.fluidTransmission;
+  fluidMat.opacity = 0.4 + current.fluidTransmission * 0.6;
+  particleMat.color.copy(col);
+
+  // Fluid Morphing
+  const fPos = fluidGeo.attributes.position;
+  for (let i = 0; i < fPos.count; i++) {
+    const bx = fluidBasePos[i * 3];
+    const by = fluidBasePos[i * 3 + 1];
+    const bz = fluidBasePos[i * 3 + 2];
     
-    tr.points.push(new THREE.Vector3(x, y, z));
-    if(tr.points.length > 30) tr.points.shift();
-    tr.line.geometry.setFromPoints(tr.points);
-    tr.line.material.color.copy(cur.color);
-    tr.line.material.opacity = cur.opacity * 0.8;
+    // Simulating water ripples/noise
+    const noise = Math.sin(bx * 0.5 + t * 1.2) * Math.cos(by * 0.5 + t * 1.5) * Math.sin(bz * 0.5 + t * 0.8);
+    const dist = 1 + noise * current.fluidDistortion;
+    
+    fPos.array[i * 3] = bx * dist * current.fluidScale;
+    fPos.array[i * 3 + 1] = by * dist * current.fluidScale;
+    fPos.array[i * 3 + 2] = bz * dist * current.fluidScale;
+  }
+  fPos.needsUpdate = true;
+  fluidMesh.rotation.y += current.rotationY;
+  fluidMesh.rotation.x += current.rotationY * 0.5;
+
+  // Ribbons (Traces)
+  ribs.forEach((r, i) => {
+    r.line.material.color.copy(col);
+    r.line.material.opacity = current.ribOpacity * (0.1 + i * 0.1);
+    r.line.rotation.y = t * current.ribSpeed + r.phase;
+    r.line.rotation.z = Math.sin(t * 0.2 + r.phase) * 0.5;
+    const scale = 1 + Math.sin(t * 0.5 + r.phase) * 0.2;
+    r.line.scale.set(scale, scale, scale);
   });
+
+  // Mist
+  particleMat.opacity = 0.15 + current.ribOpacity * 0.4;
+  const pp = particleGeo.attributes.position;
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const ox = pBase[i * 3];
+    const oy = pBase[i * 3 + 1];
+    const oz = pBase[i * 3 + 2];
+    pp.array[i * 3] = ox * current.particleSpread + Math.sin(t * 0.2 + i) * 1.5;
+    pp.array[i * 3 + 1] = oy * current.particleSpread + Math.cos(t * 0.15 + i) * 1.5;
+  }
+  pp.needsUpdate = true;
 
   renderer.render(scene, camera);
 }
 animate();
 
-// ─── TEACHABLE MACHINE & UI ──────────────────────────────────────────
-let tmModel, lastPred, imageBase;
-const chips = [0,1,2].map(i => document.getElementById(`chip-${i}`));
+// ═══════════════════════════════════════════════════════════════════════
+//  TEACHABLE MACHINE
+// ═══════════════════════════════════════════════════════════════════════
+let model, maxPredictions;
+let lastPrediction = null;
+let lastImageDataURL = null;
 
-async function init() {
-  try {
-    tmModel = await tmImage.load('/ai/model.json', '/ai/metadata.json');
-    document.getElementById('status').textContent = 'Sensors Active. Waiting for flow...';
-    document.getElementById('status').classList.add('active');
-    document.getElementById('analyse-btn').disabled = false;
-    
-    // Build containers
-    const container = document.getElementById('classifications');
-    for(let i=0; i<tmModel.getTotalClasses(); i++) {
-      container.innerHTML += `<div class="cls-row" id="row-${i}">
-        <div class="cls-top"><span class="cls-name"></span><span class="cls-pct"></span></div>
-        <div class="cls-track"><div class="cls-fill"></div></div>
-      </div>`;
-    }
-  } catch(e) { document.getElementById('status').textContent = 'Sensor Error.'; }
+const statusEl = document.getElementById('status');
+const analyseBtn = document.getElementById('analyse-btn');
+const imageUpload = document.getElementById('image-upload');
+const previewImage = document.getElementById('preview-image');
+const dropZone = document.getElementById('drop-zone');
+const dropLabel = document.getElementById('drop-zone-label');
+const classifications = document.getElementById('classifications');
+const chips = [0, 1, 2].map(i => document.getElementById(`chip-${i}`));
+const llmSection = document.getElementById('llm-section');
+const llmDivider = document.getElementById('llm-divider');
+const llmBtn = document.getElementById('llm-btn');
+const llmFeedback = document.getElementById('llm-feedback');
+
+function setStatus(msg, type = '') {
+  statusEl.textContent = msg;
+  statusEl.className = type;
 }
-init();
 
-document.getElementById('image-upload').onchange = (e) => {
-  const f = e.target.files[0];
-  const r = new FileReader();
-  r.onload = ev => {
+async function initModel() {
+  try {
+    model = await tmImage.load('/ai/model.json', '/ai/metadata.json');
+    maxPredictions = model.getTotalClasses();
+
+    // Build classification bars
+    classifications.innerHTML = '';
+    for (let i = 0; i < maxPredictions; i++) {
+      const row = document.createElement('div');
+      row.className = 'cls-row';
+      row.id = `cls-row-${i}`;
+      row.innerHTML = `
+        <div class="cls-top">
+          <span class="cls-name" id="cls-name-${i}">—</span>
+          <span class="cls-pct" id="cls-pct-${i}">—</span>
+        </div>
+        <div class="cls-track"><div class="cls-fill" id="cls-fill-${i}"></div></div>
+      `;
+      classifications.appendChild(row);
+    }
+
+    setStatus('AI engine ready. Upload an image.', 'active');
+    analyseBtn.disabled = false;
+  } catch (e) {
+    console.error(e);
+    setStatus('Error loading model: ' + (e.message || e), 'error');
+  }
+}
+initModel();
+
+// Image selection
+imageUpload.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+  const reader = new FileReader();
+  reader.onload = ev => {
     const img = new Image();
     img.onload = () => {
-      const cv = document.createElement('canvas');
-      const max = 512;
+      // Downscale to max 512px for API stability
+      const canvas = document.createElement('canvas');
+      const maxDim = 512;
       let w = img.width, h = img.height;
-      if(w > h && w > max) { h *= max/w; w = max; } else if(h > max) { w *= max/h; h = max; }
-      cv.width = w; cv.height = h;
-      cv.getContext('2d').drawImage(img, 0, 0, w, h);
-      imageBase = cv.toDataURL('image/jpeg', 0.85);
-      document.getElementById('preview-image').src = imageBase;
-      document.getElementById('preview-image').style.display = 'block';
+      if (w > h && w > maxDim) { h *= maxDim / w; w = maxDim; }
+      else if (h > maxDim) { w *= maxDim / h; h = maxDim; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      lastImageDataURL = canvas.toDataURL('image/jpeg', 0.85);
+      
+      previewImage.src = lastImageDataURL;
+      previewImage.style.display = 'block';
+      dropLabel.style.display = 'none';
+      dropLabel.previousElementSibling.style.display = 'none'; // hide svg
+      dropZone.classList.add('has-image');
+      setStatus('Image loaded. Press Analyse to run.', 'active');
+      analyseBtn.disabled = !model;
     };
     img.src = ev.target.result;
-  }
-  r.readAsDataURL(f);
-};
+  };
+  reader.readAsDataURL(file);
+});
 
-document.getElementById('analyse-btn').onclick = async () => {
-  const img = document.getElementById('preview-image');
-  if(!tmModel || !img.src) return;
-  
-  const preds = await tmModel.predict(img);
-  lastPred = preds;
-  const sorted = [...preds].sort((a,b) => b.probability - a.probability);
-  
-  preds.forEach((p, i) => {
-    const row = document.getElementById(`row-${i}`);
-    row.querySelector('.cls-name').textContent = p.className;
-    row.querySelector('.cls-pct').textContent = (p.probability*100).toFixed(0)+'%';
-    row.querySelector('.cls-fill').style.width = (p.probability*100)+'%';
+analyseBtn.addEventListener('click', async () => {
+  if (!model || !previewImage.src) return;
+  analyseBtn.disabled = true;
+  setStatus('Preprocessing…');
+
+  await new Promise(resolve => {
+    if (previewImage.complete) { resolve(); return; }
+    previewImage.onload = resolve;
   });
 
-  sorted.slice(0,3).forEach((p, i) => {
-    chips[i].textContent = `${p.className} ${ (p.probability*100).toFixed(0) }%`;
-    chips[i].classList.add('active');
-  });
-
-  updateVis(preds);
-  document.getElementById('llm-section').style.display = 'flex';
-  document.getElementById('llm-btn').disabled = false;
-};
-
-function updateVis(preds) {
-  const s = [...preds].sort((a,b) => b.probability - a.probability);
-  const p1 = s[0].probability, p2 = s[1].probability, p3 = s[2].probability;
-  
-  // Mapping
-  target.turb = p1 * 8.0;
-  target.waveAmp = 1.0 + p2 * 5.0;
-  target.rotSpeed = 0.001 + p3 * 0.01;
-  target.opacity = 0.1 + p1 * 0.4;
-  target.camZ = 50 - p1 * 20;
-
-  // Colors based on concepts
-  if(s[0].className === 'Transparency' || s[0].className === 'Glass') {
-    target.color = new THREE.Color(0xd0f4f7);
-  } else if(s[0].className === 'Trace' || s[0].className === 'Movement') {
-    target.color = new THREE.Color(0x70d6ff);
-  } else {
-    target.color = new THREE.Color(0x0077b6);
-  }
-}
-
-document.getElementById('llm-btn').onclick = async () => {
-  const btn = document.getElementById('llm-btn');
-  const box = document.getElementById('llm-feedback');
-  btn.disabled = true;
-  box.textContent = 'Consulting the director...';
-  
-  const sorted = [...lastPred].sort((a,b) => b.probability - a.probability);
-  const text = sorted.slice(0,8).map(p => `${p.className} (${(p.probability*100).toFixed(1)}%)`).join(', ');
+  const canvas = document.createElement('canvas');
+  canvas.width = 224; canvas.height = 224;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, 224, 224);
+  const size = Math.min(previewImage.naturalWidth, previewImage.naturalHeight);
+  const sx = (previewImage.naturalWidth - size) / 2;
+  const sy = (previewImage.naturalHeight - size) / 2;
+  ctx.drawImage(previewImage, sx, sy, size, size, 0, 0, 224, 224);
 
   try {
-    const res = await fetch('/api/ai/artistic-direction', {
+    setStatus('Running classification…');
+    const preds = await model.predict(canvas);
+    lastPrediction = preds;
+    displayResults(preds);
+    updateWireframe(preds);
+    showLLMSection();
+    setStatus('Classification complete.', 'active');
+  } catch (e) {
+    console.error(e);
+    setStatus('Error: ' + e.message, 'error');
+  }
+  analyseBtn.disabled = false;
+});
+
+function displayResults(preds) {
+  const sorted = [...preds].sort((a, b) => b.probability - a.probability);
+
+  preds.forEach((p, i) => {
+    const nameEl = document.getElementById(`cls-name-${i}`);
+    const pctEl = document.getElementById(`cls-pct-${i}`);
+    const fillEl = document.getElementById(`cls-fill-${i}`);
+    if (!nameEl) return;
+    nameEl.textContent = p.className;
+    const pct = (p.probability * 100).toFixed(1);
+    pctEl.textContent = pct + '%';
+    fillEl.style.width = pct + '%';
+    fillEl.className = 'cls-fill' + (p === sorted[0] || p === sorted[1] ? ' dominant' : '');
+  });
+
+  // Update corner chips
+  sorted.slice(0, 3).forEach((p, i) => {
+    chips[i].textContent = `${p.className}  ${(p.probability * 100).toFixed(0)}%`;
+    chips[i].classList.add('active');
+  });
+}
+
+// ── FLUID PARAMETER MAPPING ──────────────────────────────────────────
+function updateWireframe(preds) {
+  const sorted = [...preds].sort((a, b) => b.probability - a.probability);
+  const p1 = sorted[0]?.probability || 0;
+  const p2 = sorted[1]?.probability || 0;
+  const p3 = sorted[2]?.probability || 0;
+
+  // ── Color: Water Palette (Blues/Cyans) ──────────────────────────
+  // We use the probabilities to tint the blue base
+  target.colorR = 0.2 + p2 * 0.4;
+  target.colorG = 0.6 + p1 * 0.4;
+  target.colorB = 0.8 + p3 * 0.2;
+
+  // ── Fluid Shape: Distortion & Waves ─────────────────────────────
+  // High Intensity/Regeneration/Flow scores create bigger waves
+  const waveInfluence = preds.find(p => p.className === 'Intensity' || p.className === 'Regeneration')?.probability || 0;
+  target.fluidDistortion = 0.05 + waveInfluence * 0.45;
+  target.fluidScale = 0.9 + p1 * 0.4;
+
+  // ── Ribbons: Trace & Continuity ─────────────────────────────────
+  const traceInfluence = preds.find(p => p.className === 'Trace' || p.className === 'Continuity' || p.className === 'Loop')?.probability || 0;
+  target.ribOpacity = 0.05 + traceInfluence * 0.4;
+  target.ribSpeed = 0.2 + traceInfluence * 0.8;
+
+  // ── Transmission: Transparency & Glass ──────────────────────────
+  const transInfluence = preds.find(p => p.className === 'Transparency' || p.className === 'Glass' || p.className === 'Reflection')?.probability || 0;
+  target.fluidTransmission = 0.2 + transInfluence * 0.75;
+
+  // ── Particle Field: Dust/Mist ──────────────────────────────────
+  target.particleSpread = 0.8 + p2 * 0.6;
+
+  // ── Camera: Overall dominance pulls us in ───────────────────────
+  target.cameraZ = 30 + (1 - p1) * 12;
+  target.rotationY = 0.0005 + p3 * 0.002;
+}
+  target.rotationY = 0.0001 + p1 * 0.0012;
+}
+
+function showLLMSection() {
+  llmDivider.style.display = '';
+  llmSection.style.display = '';
+  llmBtn.disabled = false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  LLM — Hugging Face Inference API (free)
+// ═══════════════════════════════════════════════════════════════════════
+// Model: mistralai/Mistral-7B-Instruct-v0.3 (free, no billing required)
+// User must paste a read-only Inference token from huggingface.co/settings/tokens
+
+llmBtn.addEventListener('click', generateArtisticFeedback);
+
+async function generateArtisticFeedback() {
+  if (!lastPrediction) {
+    llmFeedback.textContent = 'Run classification first.';
+    llmFeedback.className = 'error-msg';
+    return;
+  }
+
+  llmBtn.disabled = true;
+  llmFeedback.textContent = 'Generating artistic direction…';
+  llmFeedback.className = 'thinking';
+
+  // Build a concise text summary of the top classifications
+  const sorted = [...lastPrediction].sort((a, b) => b.probability - a.probability);
+  const top8 = sorted.slice(0, 8).map(p => `${p.className} (${(p.probability * 100).toFixed(1)}%)`);
+  const classificationText = top8.join(', ');
+
+  // Use local proxy to avoid exposing secret and satisfy GitHub scanning
+  setStatus('Connecting to local AI proxy…');
+  try {
+    const response = await fetch('/api/ai/artistic-direction', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ classificationText: text, imageBase64: imageBase })
+      body: JSON.stringify({ 
+        classificationText,
+        imageBase64: lastImageDataURL 
+      })
     });
-    const d = await res.json();
-    box.textContent = d.generated_text || 'Silence in the studio.';
-  } catch(e) { box.textContent = 'Connection lost.'; }
-  btn.disabled = false;
-};
 
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth/window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.error || `Server error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    let text = data.text || '';
+    if (Array.isArray(data) && data[0]?.generated_text) {
+      text = data[0].generated_text.trim();
+    } else if (data?.generated_text) {
+      text = data.generated_text.trim();
+    } else if (data?.error) {
+      throw new Error(data.error);
+    } else {
+      text = JSON.stringify(data);
+    }
+
+    // Strip any leftover instruction tags
+    text = text.replace(/\[INST\].*?\[\/INST\]/gs, '').trim();
+
+    llmFeedback.textContent = text || 'No response generated.';
+    llmFeedback.className = '';
+  } catch (e) {
+    console.error(e);
+    llmFeedback.textContent = 'Error: ' + (e.message || e);
+    llmFeedback.className = 'error-msg';
+  }
+
+  llmBtn.disabled = false;
+}
 </script>
 </body>
 </html>
