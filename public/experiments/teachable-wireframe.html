@@ -622,14 +622,27 @@ imageUpload.addEventListener('change', e => {
   e.target.value = '';
   const reader = new FileReader();
   reader.onload = ev => {
-    lastImageDataURL = ev.target.result;
-    previewImage.src = lastImageDataURL;
-    previewImage.style.display = 'block';
-    dropLabel.style.display = 'none';
-    dropLabel.previousElementSibling.style.display = 'none'; // hide svg
-    dropZone.classList.add('has-image');
-    setStatus('Image loaded. Press Analyse to run.', 'active');
-    analyseBtn.disabled = !model;
+    const img = new Image();
+    img.onload = () => {
+      // Downscale to max 512px for API stability
+      const canvas = document.createElement('canvas');
+      const maxDim = 512;
+      let w = img.width, h = img.height;
+      if (w > h && w > maxDim) { h *= maxDim / w; w = maxDim; }
+      else if (h > maxDim) { w *= maxDim / h; h = maxDim; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      lastImageDataURL = canvas.toDataURL('image/jpeg', 0.85);
+      
+      previewImage.src = lastImageDataURL;
+      previewImage.style.display = 'block';
+      dropLabel.style.display = 'none';
+      dropLabel.previousElementSibling.style.display = 'none'; // hide svg
+      dropZone.classList.add('has-image');
+      setStatus('Image loaded. Press Analyse to run.', 'active');
+      analyseBtn.disabled = !model;
+    };
+    img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
 });
