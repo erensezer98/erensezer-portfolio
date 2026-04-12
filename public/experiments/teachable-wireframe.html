@@ -301,6 +301,7 @@
 
       <div id="llm-feedback">Analysis results will appear here after classification.</div>
       <button id="llm-btn" disabled>Generate Artistic Direction</button>
+      <button id="download-btn" style="display: none; width: 100%; padding: 12px; background: #0081ff; color: #fff; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; border-radius: 4px; margin-top: 12px;">Download Submission</button>
     </div>
 
   </div><!-- /panel-body -->
@@ -324,7 +325,7 @@ scene.fog = new THREE.FogExp2(0xffffff, 0.012);
 const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
 camera.position.set(0, 0, 32);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.domElement.id = 'three-canvas';
@@ -563,6 +564,7 @@ const llmSection = document.getElementById('llm-section');
 const llmDivider = document.getElementById('llm-divider');
 const llmBtn = document.getElementById('llm-btn');
 const llmFeedback = document.getElementById('llm-feedback');
+const downloadBtn = document.getElementById('download-btn');
 
 function setStatus(msg, type = '') {
   statusEl.textContent = msg;
@@ -814,6 +816,7 @@ async function generateArtisticFeedback() {
 
     llmFeedback.textContent = text || 'No response generated.';
     llmFeedback.className = '';
+    downloadBtn.style.display = 'block'; // Show download button
   } catch (e) {
     console.error(e);
     llmFeedback.textContent = 'Error: ' + (e.message || e);
@@ -821,6 +824,109 @@ async function generateArtisticFeedback() {
   }
 
   llmBtn.disabled = false;
+}
+
+// ── DOWNLOAD SUBMISSION (Canvas Composition) ────────────────────────
+downloadBtn.addEventListener('click', () => {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Set A4-ish Vertical Layout (1200 x 1600)
+  canvas.width = 1200;
+  canvas.height = 1600;
+  
+  // 1. Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // 2. Header
+  ctx.fillStyle = '#000000';
+  ctx.font = '500 48px Inter, sans-serif';
+  ctx.fillText('Form Factor — Workshop Submission', 60, 100);
+  ctx.font = '300 18px Inter, sans-serif';
+  ctx.fillStyle = '#666666';
+  ctx.fillText('AI-Driven Artistic Direction & Fluidic Simulation', 60, 140);
+  
+  // 3. Images (Uploaded vs Wireframe)
+  // Draw Uploaded Image
+  if (previewImage.src) {
+    ctx.strokeStyle = '#eeeeee';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(60, 200, 520, 520);
+    ctx.drawImage(previewImage, 60, 200, 520, 520);
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 12px Inter, sans-serif';
+    ctx.fillText('ORIGINAL INPUT', 60, 190);
+  }
+  
+  // Draw Wireframe Screenshot
+  const threeCanvas = renderer.domElement;
+  ctx.strokeRect(620, 200, 520, 520);
+  ctx.drawImage(threeCanvas, 620, 200, 520, 520);
+  ctx.fillText('GENERATED FLUIDIC CORE', 620, 190);
+
+  // 4. Classification Percentages
+  ctx.fillStyle = '#000';
+  ctx.font = 'bold 14px Inter, sans-serif';
+  ctx.fillText('AI VISION CLASSIFICATION', 60, 780);
+  
+  const sorted = [...lastPrediction].sort((a, b) => b.probability - a.probability);
+  sorted.slice(0, 5).forEach((p, i) => {
+    const y = 820 + i * 40;
+    const barWidth = 300;
+    ctx.fillStyle = '#f5f5f5';
+    ctx.fillRect(60, y, barWidth, 4);
+    ctx.fillStyle = '#0081ff';
+    ctx.fillRect(60, y, barWidth * p.probability, 4);
+    
+    ctx.fillStyle = '#333';
+    ctx.font = '14px Inter, sans-serif';
+    ctx.fillText(`${p.className}`, 60 + barWidth + 20, y + 6);
+    ctx.fillStyle = '#999';
+    ctx.fillText(`${(p.probability * 100).toFixed(1)}%`, 60 + barWidth + 240, y + 6);
+  });
+
+  // 5. Artistic Direction (LLM Feedback)
+  ctx.fillStyle = '#000';
+  ctx.font = 'bold 14px Inter, sans-serif';
+  ctx.fillText('ARTISTIC DIRECTION & FEEDBACK', 60, 1080);
+  
+  ctx.fillStyle = '#333';
+  ctx.font = '22px Inter, sans-serif';
+  const text = llmFeedback.textContent;
+  wrapText(ctx, text, 60, 1140, 1080, 34);
+
+  // 6. Footer
+  ctx.fillStyle = '#dddddd';
+  ctx.fillRect(60, 1540, 1080, 1);
+  ctx.fillStyle = '#999';
+  ctx.font = '12px Inter, sans-serif';
+  ctx.fillText(`Generated on ${new Date().toLocaleString()}  |  Eren Sezer Portfolio Experiment`, 60, 1570);
+
+  // Trigger Download
+  const link = document.createElement('a');
+  link.download = 'fluidic-submission.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+// Canvas text wrapper helper
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = ctx.measureText(testLine);
+    const testWidth = metrics.width;
+    if (testWidth > maxWidth && n > 0) {
+      ctx.fillText(line, x, y);
+      line = words[n] + ' ';
+      y += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, x, y);
 }
 </script>
 </body>
