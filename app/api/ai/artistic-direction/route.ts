@@ -13,8 +13,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'AI key not configured on server' }, { status: 500 });
     }
 
-    // According to official HF docs, the correct router endpoint for chat completions is:
-    // https://router.huggingface.co/v1/chat/completions
     const response = await fetch(
       'https://router.huggingface.co/v1/chat/completions',
       {
@@ -24,7 +22,7 @@ export async function POST(request: Request) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "deepseek-ai/DeepSeek-R1:fastest",
+          model: "meta-llama/Llama-3.3-70B-Instruct", // Top tier model, widely supported on router
           messages: [
             {
               role: "system",
@@ -35,8 +33,7 @@ export async function POST(request: Request) {
               content: `Spatial concepts detected: ${classificationText}. Provide artistic direction for an architectural installation.`
             }
           ],
-          max_tokens: 300,
-          temperature: 0.7,
+          max_tokens: 350,
         })
       }
     );
@@ -47,8 +44,18 @@ export async function POST(request: Request) {
     }
 
     const data = await response.json();
-    const resultText = data.choices?.[0]?.message?.content || 'No response generated.';
-    return NextResponse.json({ generated_text: resultText });
+    
+    // Robust extraction: Check OpenAI format first, then fallback to HF array format
+    let resultText = '';
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      resultText = data.choices[0].message.content;
+    } else if (Array.isArray(data) && data[0] && data[0].generated_text) {
+      resultText = data[0].generated_text;
+    } else if (data.generated_text) {
+      resultText = data.generated_text;
+    }
+
+    return NextResponse.json({ generated_text: resultText || 'No response generated from the model.' });
   } catch (error: any) {
     console.error('AI Proxy Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
