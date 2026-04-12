@@ -582,10 +582,8 @@ function setStatus(msg, type = '') {
 async function initModel() {
   setStatus('Loading AI vision model…');
   try {
-    const loc = window.location.pathname;
-    const base = loc.substring(0, loc.lastIndexOf('/'));
-    const url = base + '/../ai/model.json';
-    const meta = base + '/../ai/metadata.json';
+    const url = '/ai/model.json';
+    const meta = '/ai/metadata.json';
     
     console.log("Loading TM model from:", url);
     model = await tmImage.load(url, meta);
@@ -707,19 +705,6 @@ function displayResults(preds) {
     }
   });
 }
-
-// ── FLUID PARAMETER MAPPING ──────────────────────────────────────────
-function updateWireframe(preds) {
-  const sorted = [...preds].sort((a, b) => b.probability - a.probability);
-  const p1 = sorted[0]?.probability || 0;
-  const p2 = sorted[1]?.probability || 0;
-  const p3 = sorted[2]?.probability || 0;
-
-  // ── Color: Water Palette (Blues/Cyans) ──────────────────────────
-  // We use the probabilities to tint the blue base
-  target.colorR = 0.2 + p2 * 0.4;
-  target.colorG = 0.6 + p1 * 0.4;
-  target.colorB = 0.8 + p3 * 0.2;
 
 // ── COMPREHENSIVE FLUID DNA MAPPING (30 WORDS) ────────────────────────
 function updateWireframe(preds) {
