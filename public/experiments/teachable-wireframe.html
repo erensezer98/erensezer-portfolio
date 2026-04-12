@@ -12,13 +12,13 @@
 
     :root {
       --panel-w: 320px;
-      --bg: #ffffff;
-      --surface: rgba(255, 255, 255, 0.94);
-      --border: rgba(0,0,0,0.08);
+      --bg: #02050a;
+      --surface: rgba(10, 15, 25, 0.94);
+      --border: rgba(255,255,255,0.08);
       --accent: #0077ff;
-      --text-primary: #0a0a0a;
-      --text-muted: rgba(0,0,0,0.5);
-      --text-dim: rgba(0,0,0,0.2);
+      --text-primary: #ffffff;
+      --text-muted: rgba(255,255,255,0.5);
+      --text-dim: rgba(255,255,255,0.2);
     }
 
     body {
@@ -326,8 +326,8 @@
 //  THREE.JS — SPATIAL FINGERPRINT (GENERATIVE CORE)
 // ═══════════════════════════════════════════════════════════════════════
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xffffff);
-scene.fog = new THREE.FogExp2(0xffffff, 0.015);
+scene.background = new THREE.Color(0x02050a);
+scene.fog = new THREE.FogExp2(0x02050a, 0.03);
 
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 2, 12);
@@ -352,7 +352,7 @@ window.addEventListener('resize', () => {
 
 // ── LIGHTING ────────────────────────────────────────────────────────
 scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-const pointLight = new THREE.PointLight(0x0044ff, 1.5, 50);
+const pointLight = new THREE.PointLight(0x0088ff, 1.8, 50);
 pointLight.position.set(5, 5, 5);
 scene.add(pointLight);
 
@@ -365,24 +365,24 @@ for (let i = 0; i < positionAttribute.count; i++) {
 }
 
 const coreMaterial = new THREE.MeshPhysicalMaterial({
-  color: 0x001133, // Navy
-  metalness: 0.2,
-  roughness: 0.3,
+  color: 0x003366,
+  metalness: 0.1,
+  roughness: 0.4,
   transmission: 0.0, 
   ior: 1.5,
   thickness: 2.0,
   transparent: true,
-  opacity: 0.9
+  opacity: 0.8
 });
 const innerMesh = new THREE.Mesh(baseGeometry, coreMaterial);
 scene.add(innerMesh);
 
 const wireMaterial = new THREE.MeshBasicMaterial({
-  color: 0x0044cc, // Royal Blue
+  color: 0x00aaff,
   wireframe: true,
   transparent: true,
-  opacity: 0.25,
-  blending: THREE.NormalBlending,
+  opacity: 0.3,
+  blending: THREE.AdditiveBlending,
   depthWrite: false
 });
 const outerMesh = new THREE.Mesh(baseGeometry, wireMaterial);
@@ -393,8 +393,8 @@ scene.add(outerMesh);
 const renderScene = new THREE.RenderPass(scene, camera);
 const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
 bloomPass.threshold = 0.2; 
-bloomPass.strength = 0.8; // Subtler for white bg
-bloomPass.radius = 0.4;
+bloomPass.strength = 1.2; 
+bloomPass.radius = 0.5;
 
 const composer = new THREE.EffectComposer(renderer);
 composer.addPass(renderScene);
@@ -461,8 +461,8 @@ function animate() {
 
   // Material updates
   coreMaterial.transmission = current.glass;
-  // Deep Blue range (not cyan)
-  coreMaterial.color.setHSL(0.61, 0.9, 0.12 + (current.glass * 0.3)); 
+  // Shift from deep water to clear ice (Cyan-Blue)
+  coreMaterial.color.setHSL(0.58, 0.8, 0.15 + (current.glass * 0.35)); 
   
   const pulse = 1.0 + (Math.sin(time * 4) * current.rhythm * 0.12);
   innerMesh.scale.set(pulse, pulse, pulse);
