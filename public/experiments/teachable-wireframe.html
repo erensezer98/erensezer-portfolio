@@ -54,25 +54,26 @@
       backdrop-filter: blur(24px) saturate(120%);
       border-right: 1px solid var(--border);
       overflow: hidden;
+      box-shadow: 10px 0 30px rgba(0,0,0,0.02);
     }
 
     /* Panel Header */
     #panel-header {
-      padding: 28px 24px 20px;
+      padding: 32px 24px 20px;
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
     #panel-header .eyebrow {
       font-size: 9px;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 6px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
     }
     #panel-header h1 {
-      font-size: 16px;
-      font-weight: 400;
-      letter-spacing: 0.04em;
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
       color: var(--text-primary);
     }
 
@@ -80,40 +81,40 @@
     #panel-body {
       flex: 1;
       overflow-y: auto;
-      padding: 20px 24px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
     /* ─── Image Upload ─────────────────────────────────────────*/
     #drop-zone {
       border: 1px dashed var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
       aspect-ratio: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 12px;
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s;
       position: relative;
       overflow: hidden;
       flex-shrink: 0;
     }
-    #drop-zone:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.02); }
-    #drop-zone.has-image { border-color: rgba(255,255,255,0.15); }
+    #drop-zone:hover { border-color: var(--accent); background: rgba(0,0,0,0.02); }
+    #drop-zone.has-image { border-color: var(--border); }
     #drop-zone-label {
       font-size: 11px;
-      color: var(--text-dim);
+      color: var(--text-muted);
       letter-spacing: 0.06em;
       text-transform: uppercase;
       pointer-events: none;
       text-align: center;
       line-height: 1.6;
     }
-    #drop-zone svg { opacity: 0.25; pointer-events: none; }
+    #drop-zone svg { opacity: 0.4; pointer-events: none; stroke: #000; }
     #preview-image {
       position: absolute;
       inset: 0;
@@ -128,47 +129,46 @@
     #analyse-btn {
       width: 100%;
       padding: 12px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: var(--text-primary);
+      background: #000;
+      border: none;
+      color: #fff;
       font-family: inherit;
-      font-size: 12px;
-      letter-spacing: 0.1em;
+      font-size: 11px;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
       border-radius: 4px;
-      transition: background 0.2s, border-color 0.2s;
-      flex-shrink: 0;
+      transition: opacity 0.2s;
     }
-    #analyse-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.22); }
-    #analyse-btn:disabled { opacity: 0.35; cursor: default; }
+    #analyse-btn:hover:not(:disabled) { opacity: 0.8; }
+    #analyse-btn:disabled { opacity: 0.15; cursor: not-allowed; }
 
     /* ─── Status line ─────────────────────────────────────────*/
     #status {
       font-size: 11px;
-      color: var(--text-dim);
+      color: var(--text-muted);
       line-height: 1.6;
       min-height: 32px;
       flex-shrink: 0;
     }
-    #status.active { color: var(--text-muted); }
-    #status.error { color: #ff6b6b; }
+    #status.active { color: var(--text-primary); }
+    #status.error { color: #ff4444; }
 
     /* ─── Classification bars ─────────────────────────────────*/
     #classifications {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       flex-shrink: 0;
     }
-    .cls-row { display: flex; flex-direction: column; gap: 4px; }
+    .cls-row { display: flex; flex-direction: column; gap: 6px; }
     .cls-top { display: flex; justify-content: space-between; align-items: baseline; }
-    .cls-name { font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
-    .cls-pct { font-size: 10px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+    .cls-name { font-size: 11px; color: var(--text-primary); letter-spacing: 0.05e; text-transform: uppercase; }
+    .cls-pct { font-size: 10px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
     .cls-track {
       width: 100%;
       height: 2px;
-      background: rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.05);
       border-radius: 1px;
       overflow: hidden;
     }
@@ -176,10 +176,10 @@
       height: 100%;
       width: 0%;
       border-radius: 1px;
-      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.6s;
-      background: rgba(255,255,255,0.3);
+      transition: width 0.6s cubic-bezier(0.2, 1, 0.3, 1), background 0.6s;
+      background: #ddd;
     }
-    .cls-fill.dominant { background: var(--accent); }
+    .cls-fill.dominant { background: #000; }
 
     /* ─── Divider ─────────────────────────────────────────────*/
     .divider {
@@ -190,7 +190,7 @@
     }
 
     /* ─── LLM Feedback ────────────────────────────────────────*/
-    #llm-section { flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+    #llm-section { flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; }
 
     #llm-header {
       display: flex;
@@ -198,75 +198,42 @@
       align-items: center;
     }
     #llm-title {
-      font-size: 9px;
-      letter-spacing: 0.2em;
+      font-size: 10px;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--text-dim);
+      color: var(--text-muted);
+      font-weight: 600;
     }
-
-    /* HF API key input */
-    #hf-key-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    #hf-key-input {
-      flex: 1;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 11px;
-      padding: 8px 10px;
-      border-radius: 4px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    #hf-key-input:focus { border-color: rgba(255,255,255,0.2); }
-    #hf-key-input::placeholder { color: var(--text-dim); }
 
     #llm-btn {
-      padding: 8px 12px;
-      background: rgba(160,196,255,0.08);
-      border: 1px solid rgba(160,196,255,0.2);
-      color: var(--accent);
-      font-family: inherit;
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid #000;
+      color: #000;
       font-size: 10px;
-      letter-spacing: 0.1em;
       text-transform: uppercase;
+      letter-spacing: 0.12em;
       cursor: pointer;
       border-radius: 4px;
-      transition: background 0.2s;
-      white-space: nowrap;
     }
-    #llm-btn:hover:not(:disabled) { background: rgba(160,196,255,0.14); }
-    #llm-btn:disabled { opacity: 0.3; cursor: default; }
+    #llm-btn:hover:not(:disabled) { background: #000; color: #fff; }
+    #llm-btn:disabled { opacity: 0.15; }
 
     /* Feedback box */
     #llm-feedback {
-      font-size: 12px;
-      line-height: 1.75;
-      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      line-height: 1.65;
+      color: #222;
       min-height: 48px;
-      border-left: 2px solid rgba(160,196,255,0.25);
+      border-left: 2px solid #000;
       padding-left: 14px;
     }
-    #llm-feedback.thinking { color: var(--text-dim); font-style: italic; }
-    #llm-feedback.error-msg { color: #ff8080; border-left-color: rgba(255,100,100,0.3); }
-
-    /* HF note */
-    #hf-note {
-      font-size: 10px;
-      color: var(--text-dim);
-      line-height: 1.6;
-    }
-    #hf-note a { color: rgba(160,196,255,0.6); text-decoration: none; }
-    #hf-note a:hover { color: var(--accent); }
 
     /* ─── Scrollbar ───────────────────────────────────────────*/
     #panel-body::-webkit-scrollbar { width: 4px; }
     #panel-body::-webkit-scrollbar-track { background: transparent; }
-    #panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    #panel-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
 
     /* ─── Wireframe active dims indicator (top-right) ─────────*/
     #live-dims {
@@ -284,11 +251,11 @@
       font-size: 9px;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.2);
+      color: var(--text-muted);
       opacity: 0;
       transition: opacity 0.4s, color 0.4s;
     }
-    .dim-chip.active { opacity: 1; color: rgba(255,255,255,0.6); }
+    .dim-chip.active { opacity: 1; color: #000; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
