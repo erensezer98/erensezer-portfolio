@@ -713,38 +713,61 @@ function updateWireframe(preds) {
   target.colorG = 0.6 + p1 * 0.4;
   target.colorB = 0.8 + p3 * 0.2;
 
-  // ── Fluid Shape: Distortion & Waves ─────────────────────────────
-  const intensityInfluence = preds.find(p => p.className === 'Intensity' || p.className === 'Regeneration')?.probability || 0;
-  const flowInfluence = preds.find(p => p.className === 'Flow' || p.className === 'Continuity' || p.className === 'Trace' || p.className === 'Loop')?.probability || 0;
-  const depthInfluence = preds.find(p => p.className === 'Depth' || p.className === 'Cavity' || p.className === 'Void')?.probability || 0;
-  const lifeInfluence = preds.find(p => p.className === 'Life' || p.className === 'Rhythm' || p.className === 'Biology')?.probability || 0;
-  const circInfluence = preds.find(p => p.className === 'Circulation' || p.className === 'Connection' || p.className === 'Path')?.probability || 0;
+// ── COMPREHENSIVE FLUID DNA MAPPING (30 WORDS) ────────────────────────
+function updateWireframe(preds) {
+  const getProb = (names) => {
+    return names.reduce((sum, name) => sum + (preds.find(p => p.className === name)?.probability || 0), 0);
+  };
 
-  target.fluidDistortion = 0.05 + intensityInfluence * 0.3;
-  target.fluidTurbulence = 0.02 + intensityInfluence * 0.45;
-  target.fluidFlow = flowInfluence * 1.5; 
-  target.fluidDepth = depthInfluence * 1.2;
-  target.fluidLife = lifeInfluence * 0.8;
-  target.fluidCirculation = circInfluence * 2.0;
+  // Group 1: FLUIDITY (Sleekness & Motion)
+  // Words: Flow, Continuity, Circulation, Movement, Route, Integration, Cycle, Regeneration, Life
+  const fluidity = getProb(['Flow', 'Continuity', 'Circulation', 'Movement', 'Route', 'Integration', 'Cycle', 'Regeneration', 'Life']);
   
-  target.fluidScale = 0.9 + p1 * 0.3;
-  target.rotationY = 0.0005 + p3 * 0.002 + (circInfluence * 0.005);
+  // Group 2: LIGHT (Reflections & Clarity)
+  // Words: Transparency, Glass, Reflection, Cleansing, Rest, Balance, Ecology, Art
+  const light = getProb(['Transparency', 'Glass', 'Reflection', 'Cleansing', 'Rest', 'Balance', 'Ecology', 'Art']);
 
-  // ── Ribbons: Trace & Continuity ─────────────────────────────────
-  const traceInfluence = preds.find(p => p.className === 'Trace' || p.className === 'Continuity' || p.className === 'Loop')?.probability || 0;
-  target.ribOpacity = 0.05 + traceInfluence * 0.4;
-  target.ribSpeed = 0.2 + traceInfluence * 0.8;
+  // Group 3: DENSITY (Turbulence & Detail)
+  // Words: Trace, Pressure, Mechanism, Segmentation, Distribution, Repetition, Rythm
+  const density = getProb(['Trace', 'Pressure', 'Mechanism', 'Segmentation', 'Distribution', 'Repetition', 'Rythm']);
 
-  // ── Transmission: Transparency & Glass ──────────────────────────
-  const transInfluence = preds.find(p => p.className === 'Transparency' || p.className === 'Glass' || p.className === 'Reflection')?.probability || 0;
-  target.fluidTransmission = 0.2 + transInfluence * 0.75;
+  // Group 4: VOLUME (Depth & Mystery)
+  // Words: Depth, Mystery, Echoes, Memory, Heritage, Accessibility, Void, Cavity
+  const volume = getProb(['Depth', 'Mystery', 'Echoes', 'Memory', 'Heritage', 'Accessibility']);
 
-  // ── Particle Field: Dust/Mist ──────────────────────────────────
-  target.particleSpread = 0.8 + p2 * 0.6;
+  // ── Apply to Parameters ──────────────────────────────────────────
+  
+  // Color: From deep sea teal to clear sky blue
+  target.colorR = 0.1 + light * 0.4;
+  target.colorG = 0.5 + fluidity * 0.4 + light * 0.1;
+  target.colorB = 0.7 + volume * 0.3;
 
-  // ── Camera: Overall dominance pulls us in ───────────────────────
-  target.cameraZ = 30 + (1 - p1) * 12;
-  target.rotationY = 0.0005 + p3 * 0.002;
+  // Form: Distortion (Density) vs Calm (Light/Rest)
+  target.fluidDistortion = 0.05 + density * 0.4;
+  target.fluidTurbulence = 0.01 + density * 0.6;
+  
+  // Shape: Stretching (Fluidity)
+  target.fluidFlow = fluidity * 1.8; 
+  
+  // Volume: Expansion (Volume group)
+  target.fluidDepth = volume * 1.5;
+  
+  // Life: Heartbeat (Fluidity/Rythm/Repetition)
+  target.fluidLife = getProb(['Life', 'Rythm', 'Repetition']) * 1.1;
+
+  // Material: Transmission (Light group)
+  target.fluidTransmission = 0.15 + light * 0.8;
+
+  // Trails: Ribbon visibility (Density/Trace)
+  target.ribOpacity = 0.05 + (density * 0.5);
+  target.ribSpeed = 0.3 + fluidity * 1.2;
+
+  // Camera & Global
+  const p1 = [...preds].sort((a,b)=>b.probability-a.probability)[0]?.probability || 0;
+  target.fluidScale = 0.9 + p1 * 0.35;
+  target.cameraZ = 32 - (p1 * 8);
+  target.rotationY = 0.0005 + (fluidity * 0.004);
+  target.fluidCirculation = fluidity * 1.5;
 }
 
 function showLLMSection() {
