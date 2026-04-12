@@ -24,7 +24,7 @@ export async function POST(request: Request) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "Qwen/Qwen2.5-1.5B-Instruct",
+          model: "deepseek-ai/DeepSeek-R1:fastest",
           messages: [
             {
               role: "system",
