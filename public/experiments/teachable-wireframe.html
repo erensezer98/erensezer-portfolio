@@ -332,23 +332,8 @@
         <span id="llm-title">Artistic Direction · LLM</span>
       </div>
 
-      <div id="hf-key-row">
-        <input
-          type="password"
-          id="hf-key-input"
-          placeholder="hf_… (free API key)"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <button id="llm-btn" disabled>Generate</button>
-      </div>
-
       <div id="llm-feedback">Analysis results will appear here after classification.</div>
-
-      <div id="hf-note">
-        Free key at <a href="https://huggingface.co/settings/tokens" target="_blank">huggingface.co</a>.
-        No billing required. Uses Mistral-7B-Instruct.
-      </div>
+      <button id="llm-btn" disabled>Generate Artistic Direction</button>
     </div>
 
   </div><!-- /panel-body -->
@@ -593,7 +578,6 @@ const chips = [0, 1, 2].map(i => document.getElementById(`chip-${i}`));
 const llmSection = document.getElementById('llm-section');
 const llmDivider = document.getElementById('llm-divider');
 const llmBtn = document.getElementById('llm-btn');
-const hfKeyInput = document.getElementById('hf-key-input');
 const llmFeedback = document.getElementById('llm-feedback');
 
 function setStatus(msg, type = '') {
