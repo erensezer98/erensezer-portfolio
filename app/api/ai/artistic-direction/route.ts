@@ -32,9 +32,9 @@ export async function POST(request: Request) {
       });
     }
 
-    // Call Gemini 1.5 Flash API via REST
+    // Call Gemini 1.5 Flash API via REST (using stable v1 and latest alias)
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
