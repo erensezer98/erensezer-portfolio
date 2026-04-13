@@ -1,68 +1,116 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { google } from 'googleapis';
+import { JWT } from 'google-auth-library';
+import { Readable } from 'stream';
 
-// On Vercel (and other serverless), process.cwd() is read-only (/var/task).
-// Only /tmp is writable. Locally we write into public/submissions so files
-// are served as static assets. On Vercel we write to /tmp/submissions and
-// serve them through the /api/submissions/file route.
-const isVercel = !!process.env.VERCEL;
-const submissionsBase = isVercel
-  ? '/tmp/submissions'
-  : path.join(process.cwd(), 'public', 'submissions');
+// ── Google Drive auth (service account) ─────────────────────────────────
+// Set these in Vercel env vars / .env.local:
+//   GOOGLE_SERVICE_ACCOUNT_EMAIL   e.g. workshop@my-project.iam.gserviceaccount.com
+//   GOOGLE_PRIVATE_KEY             the private key from the JSON (with \n for newlines)
+//   GOOGLE_DRIVE_FOLDER_ID         the ID of the shared Drive folder
 
-function saveBase64File(dataUrl: string, filePath: string) {
-  const comma = dataUrl.indexOf(',');
-  const base64 = comma !== -1 ? dataUrl.slice(comma + 1) : dataUrl;
-  fs.writeFileSync(filePath, Buffer.from(base64, 'base64'));
+function getDriveClient() {
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const key   = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+  if (!email || !key) throw new Error('Google credentials not configured');
+
+  const auth = new JWT({
+    email,
+    key,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
+  });
+  return google.drive({ version: 'v3', auth });
+}
+
+async function uploadFile(
+  drive: ReturnType<typeof google.drive>,
+  parentId: string,
+  name: string,
+  mimeType: string,
+  dataUrl: string,
+) {
+  const comma  = dataUrl.indexOf(',');
+  const b64    = comma !== -1 ? dataUrl.slice(comma + 1) : dataUrl;
+  const buffer = Buffer.from(b64, 'base64');
+
+  await drive.files.create({
+    requestBody: { name, parents: [parentId] },
+    media: { mimeType, body: Readable.from(buffer) },
+    fields: 'id',
+  });
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { studentName, imageBase64, blobImageBase64, blobVideoBase64, artisticDirection, scores } = body;
+    const {
+      studentName,
+      imageBase64,
+      blobImageBase64,
+      blobVideoBase64,
+      artisticDirection,
+      scores,
+    } = body;
 
     if (!studentName || typeof studentName !== 'string') {
       return NextResponse.json({ error: 'studentName is required' }, { status: 400 });
     }
 
-    const sanitized = studentName
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/gi, '-')
-      .replace(/^-+|-+$/g, '');
+    const drive    = getDriveClient();
+    const rootId   = process.env.GOOGLE_DRIVE_FOLDER_ID;
+    if (!rootId) throw new Error('GOOGLE_DRIVE_FOLDER_ID not set');
 
     const timestamp = Date.now();
-    const folderName = `${sanitized}-${timestamp}`;
-    const folderPath = path.join(submissionsBase, folderName);
+    const sanitized = studentName.trim().replace(/[^a-z0-9 ]/gi, '').trim();
+    const folderName = `${sanitized} — ${new Date(timestamp).toISOString().slice(0, 10)}`;
 
-    fs.mkdirSync(folderPath, { recursive: true });
+    // Create a subfolder for this student
+    const folderRes = await drive.files.create({
+      requestBody: {
+        name: folderName,
+        mimeType: 'application/vnd.google-apps.folder',
+        parents: [rootId],
+      },
+      fields: 'id',
+    });
+    const folderId = folderRes.data.id!;
+
+    // Upload files in parallel
+    const uploads: Promise<void>[] = [];
 
     if (imageBase64) {
-      saveBase64File(imageBase64, path.join(folderPath, 'space-photo.jpg'));
+      uploads.push(uploadFile(drive, folderId, 'space-photo.jpg', 'image/jpeg', imageBase64));
     }
     if (blobImageBase64) {
-      saveBase64File(blobImageBase64, path.join(folderPath, 'blob.png'));
+      uploads.push(uploadFile(drive, folderId, 'blob.png', 'image/png', blobImageBase64));
     }
     if (blobVideoBase64) {
-      saveBase64File(blobVideoBase64, path.join(folderPath, 'blob.webm'));
+      uploads.push(uploadFile(drive, folderId, 'blob.webm', 'video/webm', blobVideoBase64));
     }
 
-    // Store blobImageBase64 inline in data.json so the gallery can render
-    // it without needing a separate file-serving route (important on Vercel
-    // where /tmp files can't be served as static assets directly).
-    const data = {
+    // data.json with inline blob for gallery
+    const dataJson = JSON.stringify({
       studentName,
       artisticDirection: artisticDirection || '',
       scores: scores || [],
       timestamp,
       blobDataUrl: blobImageBase64 || null,
-    };
-    fs.writeFileSync(path.join(folderPath, 'data.json'), JSON.stringify(data));
+      driveFolderId: folderId,
+    });
+    uploads.push(
+      drive.files.create({
+        requestBody: { name: 'data.json', parents: [folderId] },
+        media: { mimeType: 'application/json', body: Readable.from(Buffer.from(dataJson)) },
+        fields: 'id',
+      }).then(() => undefined),
+    );
 
-    return NextResponse.json({ ok: true, folder: `submissions/${folderName}` });
+    await Promise.all(uploads);
+
+    return NextResponse.json({ ok: true, folder: folderName, driveFolderId: folderId });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
+    console.error('[submissions/save]', message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
