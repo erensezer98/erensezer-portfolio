@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+function saveBase64File(dataUrl: string, filePath: string) {
+  const comma = dataUrl.indexOf(',');
+  const base64 = comma !== -1 ? dataUrl.slice(comma + 1) : dataUrl;
+  fs.writeFileSync(filePath, Buffer.from(base64, 'base64'));
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -29,13 +35,6 @@ export async function POST(req: NextRequest) {
     }
 
     fs.mkdirSync(folderPath, { recursive: true });
-
-    // Helper to strip data URL prefix and write binary
-    function saveBase64File(dataUrl: string, filePath: string) {
-      const comma = dataUrl.indexOf(',');
-      const base64 = comma !== -1 ? dataUrl.slice(comma + 1) : dataUrl;
-      fs.writeFileSync(filePath, Buffer.from(base64, 'base64'));
-    }
 
     // Save space photo
     if (imageBase64) {
