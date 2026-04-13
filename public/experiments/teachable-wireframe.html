@@ -518,11 +518,14 @@ function animate() {
     t.line.material.opacity = (0.05 + current.flow * 0.4) * (1.0 - current.rest * 0.5);
   });
 
-  // Material updates (Stay DARK on white)
-  coreMaterial.color.setHSL(0.61, 0.9, 0.12 - (current.glass * 0.05)); 
-  // Map opacity from 1.0 (opaque) down to 0.4 (60% transparent) based on score
-  coreMaterial.opacity = 1.0 - (current.glass * 0.6); 
+  // Material updates (Proper Liquid Glass)
+  coreMaterial.color.setHSL(0.61, 0.9, 0.12 - (current.glass * 0.02)); 
   
+  // Dynamic Glassiness: Control transmission and thickness instead of disappearing via opacity
+  coreMaterial.transmission = 0.4 + (current.glass * 0.5); // Ranges from semi-opaque to high-refraction glass
+  coreMaterial.thickness = 1.0 + (current.glass * 5.0);    // More "depth" as it becomes glassier
+  coreMaterial.roughness = 0.05 + (current.glass * 0.15);  // Slightly more surface blur for glass
+  coreMaterial.opacity = 0.92; // Maintain base volume visibility  
   const pulse = 1.0 + (Math.sin(time * 4) * current.rhythm * 0.12);
   innerMesh.scale.set(pulse, pulse, pulse);
 
