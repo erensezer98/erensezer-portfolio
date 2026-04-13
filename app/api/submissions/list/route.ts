@@ -1,24 +1,34 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
-import { JWT } from 'google-auth-library';
 
+// ── Google Drive auth (Harmonized with save route) ─────────────────
 function getDriveClient() {
-  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (!raw) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON not set');
-
-  let creds: { client_email: string; private_key: string };
-  try {
-    creds = JSON.parse(raw);
-  } catch {
-    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON');
+  const serviceAccount = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (serviceAccount) {
+    try {
+      const creds = JSON.parse(serviceAccount);
+      const auth = new google.auth.JWT({
+        email: creds.client_email,
+        key: creds.private_key,
+        scopes: ['https://www.googleapis.com/auth/drive.file'],
+      });
+      return google.drive({ version: 'v3', auth });
+    } catch (e) {
+      console.error('Invalid GOOGLE_SERVICE_ACCOUNT_JSON', e);
+    }
   }
 
-  const auth = new JWT({
-    email: creds.client_email,
-    key:   creds.private_key,
-    scopes: ['https://www.googleapis.com/auth/drive.file'],
-  });
-  return google.drive({ version: 'v3', auth });
+  const clientId     = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+  
+  if (clientId && clientSecret && refreshToken) {
+    const oauth2 = new google.auth.OAuth2(clientId, clientSecret, 'https://developers.google.com/oauthplayground');
+    oauth2.setCredentials({ refresh_token: refreshToken });
+    return google.drive({ version: 'v3', auth: oauth2 });
+  }
+
+  throw new Error('Google Drive credentials not configured.');
 }
 
 export async function GET() {
@@ -27,22 +37,39 @@ export async function GET() {
     const rootId = process.env.GOOGLE_DRIVE_FOLDER_ID;
     if (!rootId) throw new Error('GOOGLE_DRIVE_FOLDER_ID not set');
 
-    // List subfolders in the root submissions folder
+    // 1. Try to load from master submissions.json first (FAST)
+    try {
+      const listRes = await drive.files.list({
+        q: `'${rootId}' in parents and name='submissions.json' and trashed=false`,
+        fields: 'files(id)',
+      });
+      const masterFile = listRes.data.files?.[0];
+
+      if (masterFile?.id) {
+        const content = await drive.files.get({ fileId: masterFile.id, alt: 'media' }, { responseType: 'text' });
+        const submissions = JSON.parse(content.data as string);
+        if (Array.isArray(submissions)) {
+          return NextResponse.json({ submissions, source: 'cache' });
+        }
+      }
+    } catch (e) {
+      console.warn('Master JSON load failed, falling back to scan:', e);
+    }
+
+    // 2. Fallback: Scan folders (SLOW)
     const foldersRes = await drive.files.list({
       q: `'${rootId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
       fields: 'files(id, name)',
       orderBy: 'createdTime desc',
-      pageSize: 100,
+      pageSize: 50, // Limit scan for safety
     });
 
     const folders = foldersRes.data.files || [];
-    const submissions: { timestamp: number; [key: string]: unknown }[] = [];
+    const submissions: any[] = [];
 
-    // Fetch data.json from each subfolder in parallel
     await Promise.all(
       folders.map(async (folder) => {
         try {
-          // Find data.json inside this folder
           const filesRes = await drive.files.list({
             q: `'${folder.id}' in parents and name='data.json' and trashed=false`,
             fields: 'files(id)',
@@ -50,33 +77,26 @@ export async function GET() {
           const dataFile = filesRes.data.files?.[0];
           if (!dataFile?.id) return;
 
-          // Download data.json content
-          const content = await drive.files.get(
-            { fileId: dataFile.id, alt: 'media' },
-            { responseType: 'text' },
-          );
+          const content = await drive.files.get({ fileId: dataFile.id, alt: 'media' }, { responseType: 'text' });
           const data = JSON.parse(content.data as string);
 
           submissions.push({
+            ...data,
             folder: folder.name,
             driveFolderId: folder.id,
-            studentName: data.studentName || '',
-            artisticDirection: data.artisticDirection || '',
-            scores: data.scores || [],
-            timestamp: data.timestamp || 0,
-            blobDataUrl: data.blobDataUrl || null,
           });
         } catch {
-          // Skip folders with missing or corrupt data
+          // Skip
         }
       }),
     );
 
     submissions.sort((a, b) => b.timestamp - a.timestamp);
-    return NextResponse.json({ submissions });
+    return NextResponse.json({ submissions, source: 'scan' });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
     console.error('[submissions/list]', message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+

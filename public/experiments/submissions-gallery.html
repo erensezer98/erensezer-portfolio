@@ -264,17 +264,31 @@ function buildCard(sub) {
   const imgWrap = document.createElement('div');
   imgWrap.className = 'card-image-wrap';
 
-  const blobSrc = sub.blobDataUrl || (sub.hasBlob ? `/submissions/${sub.folder}/blob.png` : null);
+  // Prefer Cloud ID for performance, fallback to local/dataURL
+  let blobSrc = null;
+  if (sub.blobImageId) {
+    blobSrc = `https://drive.google.com/uc?export=view&id=${sub.blobImageId}`;
+  } else if (sub.blobDataUrl && sub.blobDataUrl.length > 500) {
+    blobSrc = sub.blobDataUrl;
+  } else if (sub.hasBlob) {
+    blobSrc = `/submissions/${sub.folder}/blob.png`;
+  }
+
   if (blobSrc) {
     const img = document.createElement('img');
     img.src = blobSrc;
     img.alt = sub.studentName;
     img.loading = 'lazy';
+    img.onerror = () => {
+      // If Drive blocks hotlinking, we show a placeholder or link
+      img.style.display = 'none';
+      imgWrap.innerHTML = '<div class="no-img">View on Drive below</div>';
+    };
     imgWrap.appendChild(img);
   } else {
     const noImg = document.createElement('div');
     noImg.className = 'no-img';
-    noImg.textContent = 'No image';
+    noImg.textContent = 'Processing…';
     imgWrap.appendChild(noImg);
   }
 
@@ -282,9 +296,28 @@ function buildCard(sub) {
   const body = document.createElement('div');
   body.className = 'card-body';
 
+  const header = document.createElement('div');
+  header.style.display = 'flex';
+  header.style.justifyContent = 'space-between';
+  header.style.alignItems = 'flex-start';
+  header.style.gap = '8px';
+
   const name = document.createElement('div');
   name.className = 'card-name';
   name.textContent = sub.studentName;
+
+  const date = document.createElement('div');
+  date.style.fontSize = '9px';
+  date.style.color = 'rgba(0,0,0,0.3)';
+  date.style.textTransform = 'uppercase';
+  date.style.letterSpacing = '0.05em';
+  date.textContent = sub.timestamp ? new Date(sub.timestamp).toLocaleString(undefined, {
+    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+  }) : '';
+
+  header.appendChild(name);
+  header.appendChild(date);
+  body.appendChild(header);
 
   // Top 3 scores
   const scoresEl = document.createElement('div');
@@ -296,22 +329,36 @@ function buildCard(sub) {
     item.innerHTML = `<span class="score-name">${escHtml(s.className)}</span><span class="score-pct">${(s.probability * 100).toFixed(0)}%</span>`;
     scoresEl.appendChild(item);
   }
+  if (top3.length) body.appendChild(scoresEl);
 
   // Artistic direction
   const direction = document.createElement('div');
   direction.className = 'card-direction';
-  const maxChars = 200;
   const text = sub.artisticDirection || '';
-  direction.textContent = text.length > maxChars ? text.slice(0, maxChars) + '…' : text;
-
-  body.appendChild(name);
-  if (top3.length) body.appendChild(scoresEl);
+  direction.textContent = text;
   if (text) body.appendChild(direction);
+
+  // Drive Link
+  if (sub.driveFolderId) {
+    const link = document.createElement('a');
+    link.href = `https://drive.google.com/drive/folders/${sub.driveFolderId}`;
+    link.target = '_blank';
+    link.style.fontSize = '9px';
+    link.style.color = '#007aff';
+    link.style.textDecoration = 'none';
+    link.style.marginTop = '8px';
+    link.style.display = 'inline-block';
+    link.style.textTransform = 'uppercase';
+    link.style.letterSpacing = '0.05em';
+    link.innerHTML = 'View on Drive ↗';
+    body.appendChild(link);
+  }
 
   card.appendChild(imgWrap);
   card.appendChild(body);
   return card;
 }
+
 
 function escHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

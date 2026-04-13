@@ -1,35 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
-import { JWT } from 'google-auth-library';
 import { Readable } from 'stream';
 
-// ── Google Drive auth (service account) ─────────────────────────────────
-// Set ONE env var in Vercel / .env.local:
-//   GOOGLE_SERVICE_ACCOUNT_JSON   — paste the entire contents of the downloaded
-//                                   service account JSON file as the value.
-//   GOOGLE_DRIVE_FOLDER_ID        — the Drive folder ID from the URL.
-
+// ── Google Drive auth (Supports both Service Account and OAuth2) ─────────────────
 function getDriveClient() {
-  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (!raw) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON not set');
-
-  let creds: { client_email: string; private_key: string };
-  try {
-    creds = JSON.parse(raw);
-  } catch {
-    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON');
+  // Priority 1: Service Account (easier for shared folders)
+  const serviceAccount = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (serviceAccount) {
+    try {
+      const creds = JSON.parse(serviceAccount);
+      const auth = new google.auth.JWT({
+        email: creds.client_email,
+        key: creds.private_key,
+        scopes: ['https://www.googleapis.com/auth/drive.file'],
+      });
+      return google.drive({ version: 'v3', auth });
+    } catch (e) {
+      console.error('Invalid GOOGLE_SERVICE_ACCOUNT_JSON', e);
+    }
   }
 
-  const auth = new JWT({
-    email: creds.client_email,
-    key:   creds.private_key,   // already has real newlines inside the JSON
-    scopes: ['https://www.googleapis.com/auth/drive.file'],
-  });
-  return google.drive({ version: 'v3', auth });
+  // Priority 2: OAuth2 Refresh Token (standard user auth)
+  const clientId     = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+  
+  if (clientId && clientSecret && refreshToken) {
+    const oauth2 = new google.auth.OAuth2(clientId, clientSecret, 'https://developers.google.com/oauthplayground');
+    oauth2.setCredentials({ refresh_token: refreshToken });
+    return google.drive({ version: 'v3', auth: oauth2 });
+  }
+
+  throw new Error('Google Drive credentials not configured. Please set GOOGLE_SERVICE_ACCOUNT_JSON or (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN).');
 }
 
 async function uploadFile(
-  drive: ReturnType<typeof google.drive>,
+  drive: any,
   parentId: string,
   name: string,
   mimeType: string,
@@ -39,11 +45,12 @@ async function uploadFile(
   const b64    = comma !== -1 ? dataUrl.slice(comma + 1) : dataUrl;
   const buffer = Buffer.from(b64, 'base64');
 
-  await drive.files.create({
+  const res = await drive.files.create({
     requestBody: { name, parents: [parentId] },
     media: { mimeType, body: Readable.from(buffer) },
     fields: 'id',
   });
+  return res.data.id;
 }
 
 export async function POST(req: NextRequest) {
@@ -67,10 +74,11 @@ export async function POST(req: NextRequest) {
     if (!rootId) throw new Error('GOOGLE_DRIVE_FOLDER_ID not set');
 
     const timestamp = Date.now();
+    const dateStr = new Date(timestamp).toISOString().slice(0, 10);
     const sanitized = studentName.trim().replace(/[^a-z0-9 ]/gi, '').trim();
-    const folderName = `${sanitized} — ${new Date(timestamp).toISOString().slice(0, 10)}`;
+    const folderName = `${sanitized} — ${dateStr}`;
 
-    // Create a subfolder for this student
+    // 1. Create a subfolder for this student
     const folderRes = await drive.files.create({
       requestBody: {
         name: folderName,
@@ -81,37 +89,82 @@ export async function POST(req: NextRequest) {
     });
     const folderId = folderRes.data.id!;
 
-    // Upload files in parallel
-    const uploads: Promise<void>[] = [];
+    // 2. Upload files
+    // We do these sequentially or capture results to get IDs
+    const spacePhotoId = imageBase64 ? await uploadFile(drive, folderId, 'space-photo.jpg', 'image/jpeg', imageBase64) : null;
+    const blobImageId = blobImageBase64 ? await uploadFile(drive, folderId, 'blob.png', 'image/png', blobImageBase64) : null;
+    const blobVideoId = blobVideoBase64 ? await uploadFile(drive, folderId, 'blob.webm', 'video/webm', blobVideoBase64) : null;
 
-    if (imageBase64) {
-      uploads.push(uploadFile(drive, folderId, 'space-photo.jpg', 'image/jpeg', imageBase64));
-    }
-    if (blobImageBase64) {
-      uploads.push(uploadFile(drive, folderId, 'blob.png', 'image/png', blobImageBase64));
-    }
-    if (blobVideoBase64) {
-      uploads.push(uploadFile(drive, folderId, 'blob.webm', 'video/webm', blobVideoBase64));
-    }
-
-    // data.json with inline blob for gallery
-    const dataJson = JSON.stringify({
+    // Individual data.json for this student
+    const submissionData = {
       studentName,
       artisticDirection: artisticDirection || '',
       scores: scores || [],
       timestamp,
-      blobDataUrl: blobImageBase64 || null,
+      date: dateStr,
       driveFolderId: folderId,
-    });
-    uploads.push(
-      drive.files.create({
-        requestBody: { name: 'data.json', parents: [folderId] },
-        media: { mimeType: 'application/json', body: Readable.from(Buffer.from(dataJson)) },
-        fields: 'id',
-      }).then(() => undefined),
-    );
+      spacePhotoId,
+      blobImageId,
+      blobVideoId,
+      // We keep a small preview link for the gallery in the master log
+      blobDataUrl: blobImageBase64 ? blobImageBase64.slice(0, 100) + '...' : null // Placeholder for local compat, but we'll use IDs
+    };
 
-    await Promise.all(uploads);
+    await drive.files.create({
+      requestBody: { name: 'data.json', parents: [folderId] },
+      media: { mimeType: 'application/json', body: Readable.from(Buffer.from(JSON.stringify(submissionData))) },
+      fields: 'id',
+    });
+
+    // 3. Update master JSON log at the root folder
+    try {
+      const listRes = await drive.files.list({
+        q: `'${rootId}' in parents and name='submissions.json' and trashed=false`,
+        fields: 'files(id)',
+      });
+      const masterFile = listRes.data.files?.[0];
+
+      let masterData = [];
+      if (masterFile?.id) {
+        const content = await drive.files.get({ fileId: masterFile.id, alt: 'media' }, { responseType: 'text' });
+        try {
+          masterData = JSON.parse(content.data as string);
+          if (!Array.isArray(masterData)) masterData = [];
+        } catch (e) { masterData = []; }
+      }
+
+      // Add new submission to the top
+      // Store IDs, NOT the full base64 in the master log to keep it small!
+      masterData.unshift({
+        studentName,
+        artisticDirection: (artisticDirection || '').slice(0, 200),
+        scores: scores || [],
+        timestamp,
+        date: dateStr,
+        folder: folderName,
+        driveFolderId: folderId,
+        blobImageId,
+        blobVideoId
+      });
+
+      if (masterData.length > 500) masterData = masterData.slice(0, 500);
+
+      const media = {
+        mimeType: 'application/json',
+        body: Readable.from(Buffer.from(JSON.stringify(masterData))),
+      };
+
+      if (masterFile?.id) {
+        await drive.files.update({ fileId: masterFile.id, media });
+      } else {
+        await drive.files.create({
+          requestBody: { name: 'submissions.json', parents: [rootId] },
+          media,
+        });
+      }
+    } catch (e) {
+      console.error('Failed to update master JSON:', e);
+    }
 
     return NextResponse.json({ ok: true, folder: folderName, driveFolderId: folderId });
   } catch (e: unknown) {
@@ -120,3 +173,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+
