@@ -366,7 +366,7 @@ for (let i = 0; i < positionAttribute.count; i++) {
 }
 
 const coreMaterial = new THREE.MeshBasicMaterial({
-  color: 0x000000,
+  color: 0x0044ff,
   wireframe: true,
   transparent: true,
   opacity: 0.6,
@@ -376,7 +376,7 @@ scene.add(innerMesh);
 
 // Secondary Depth Wireframe
 const shadowMaterial = new THREE.MeshBasicMaterial({
-  color: 0x000000,
+  color: 0x0044ff,
   wireframe: true,
   transparent: true,
   opacity: 0.15,
@@ -402,7 +402,7 @@ scene.add(wireMesh);
 const TRAIL_COUNT = 12;
 const trails = [];
 const trailMat = new THREE.LineBasicMaterial({ 
-  color: 0x000000, // Black trails for white background
+  color: 0x0044ff, // Blueprint blue trails
   transparent: true, 
   opacity: 0.3,
   blending: THREE.NormalBlending 
