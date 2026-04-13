@@ -33,7 +33,7 @@ export async function POST(request: Request) {
             const pgData = await pgResponse.json();
             imageDescription = Array.isArray(pgData) ? (pgData[0].generated_text || pgData[0]) : pgData.generated_text;
         }
-      } catch (e) {
+      } catch {
         console.warn('PaliGemma failed');
       }
 
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
               const blipData = await blipResponse.json();
               imageDescription = Array.isArray(blipData) ? blipData[0].generated_text : blipData.generated_text;
           }
-        } catch (e) {
+        } catch {
           console.warn('BLIP fallback failed');
         }
       }
@@ -100,8 +100,9 @@ export async function POST(request: Request) {
     
     return NextResponse.json({ generated_text: resultText + (imageDescription ? "" : "\n\n(Note: Image analysis was limited, advice based on scores.)") });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('AI Proxy Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
