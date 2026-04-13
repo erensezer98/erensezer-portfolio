@@ -243,6 +243,62 @@
       animation: shimmer 1.2s infinite;
     }
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ── Video Gallery ─────────────────────────────────────────── */
+    .gallery-heading {
+      padding: 60px 40px 20px;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+
+    #video-gallery {
+      padding: 0 40px 60px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 1200px) { #video-gallery { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 900px) { #video-gallery { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { 
+      #video-gallery { grid-template-columns: 1fr; padding: 0 24px 40px; } 
+      .gallery-heading { padding: 40px 24px 16px; }
+    }
+
+    .video-card {
+      aspect-ratio: 1;
+      background: #000;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .video-card video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .video-card .overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 12px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.6));
+      color: #fff;
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .video-card:hover .overlay { opacity: 1; }
+
   </style>
 </head>
 <body>
@@ -260,9 +316,16 @@
 
 <div id="count-label"></div>
 
+<div class="gallery-heading">Static Archive</div>
 <div id="gallery">
   <div id="loading">Loading submissions…</div>
 </div>
+
+<div class="gallery-heading">Motion Archive</div>
+<div id="video-gallery">
+  <div id="video-loading" style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 11px; padding: 40px;">Waiting for data…</div>
+</div>
+
 
 <script>
 let allSubmissions = [];
@@ -285,18 +348,53 @@ async function loadSubmissions() {
     allSubmissions = submissions || [];
 
     gallery.innerHTML = '';
+    const videoGallery = document.getElementById('video-gallery');
+    videoGallery.innerHTML = '';
+
     if (allSubmissions.length === 0) {
       gallery.innerHTML = '<div id="empty">No submissions yet</div>';
+      videoGallery.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 11px;">No motion files found</div>';
       return;
     }
 
     countLabel.textContent = `${allSubmissions.length} submission${allSubmissions.length !== 1 ? 's' : ''}`;
-    for (const sub of allSubmissions) gallery.appendChild(buildCard(sub));
+    for (const sub of allSubmissions) {
+      gallery.appendChild(buildCard(sub));
+      if (sub.blobVideoId) {
+        videoGallery.appendChild(buildVideoCard(sub));
+      }
+    }
+    
+    if (videoGallery.childNodes.length === 0) {
+      videoGallery.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 11px;">No motion files found</div>';
+    }
+
     exportBtn.disabled = false;
   } catch (e) {
     gallery.innerHTML = `<div id="empty">Error: ${e.message}</div>`;
   }
 }
+
+// ── Build video card ─────────────────────────────────────────────────
+function buildVideoCard(sub) {
+  const card = document.createElement('div');
+  card.className = 'video-card';
+
+  const video = document.createElement('video');
+  video.src = `/api/submissions/video/${sub.blobVideoId}`;
+  video.autoplay = true;
+  video.loop = true;
+  video.muted = true;
+  video.playsInline = true;
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.textContent = sub.studentName;
+
+  card.append(video, overlay);
+  return card;
+}
+
 
 // ── Build card ───────────────────────────────────────────────────────
 function buildCard(sub) {
