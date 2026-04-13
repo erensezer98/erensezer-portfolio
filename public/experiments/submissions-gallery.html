@@ -527,7 +527,7 @@ document.getElementById('export-btn').addEventListener('click', async () => {
   btn.disabled = true;
   btn.textContent = 'Generating…';
 
-  const COLS = 3, CELL_W = 400, CELL_H = 520, PAD = 32, IMG_SIZE = 320, HEADER_H = 80;
+  const COLS = 3, CELL_W = 400, CELL_H = 620, PAD = 32, IMG_SIZE = 360, HEADER_H = 100;
   const rows = Math.ceil(allSubmissions.length / COLS);
   const canvas = document.createElement('canvas');
   canvas.width  = COLS * CELL_W + (COLS + 1) * PAD;
@@ -566,7 +566,23 @@ document.getElementById('export-btn').addEventListener('click', async () => {
     if (images[i]) {
       ctx.fillStyle = '#fff';
       ctx.fillRect(imgX, imgY, IMG_SIZE, IMG_SIZE);
-      ctx.drawImage(images[i], imgX, imgY, IMG_SIZE, IMG_SIZE);
+      
+      const img = images[i];
+      const ratio = img.width / img.height;
+      let drawW, drawH, drawX, drawY;
+
+      if (ratio > 1) { // Wide
+        drawW = IMG_SIZE;
+        drawH = IMG_SIZE / ratio;
+      } else { // Tall or Square
+        drawH = IMG_SIZE;
+        drawW = IMG_SIZE * ratio;
+      }
+      
+      drawX = imgX + (IMG_SIZE - drawW) / 2;
+      drawY = imgY + (IMG_SIZE - drawH) / 2;
+      
+      ctx.drawImage(img, drawX, drawY, drawW, drawH);
     } else {
       ctx.fillStyle = '#f0f0f0';
       ctx.fillRect(imgX, imgY, IMG_SIZE, IMG_SIZE);
@@ -580,7 +596,32 @@ document.getElementById('export-btn').addEventListener('click', async () => {
     const top3 = [...(sub.scores||[])].sort((a,b)=>b.probability-a.probability).slice(0,3);
     ctx.font = '11px Inter, system-ui, sans-serif';
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    top3.forEach((s, si) => ctx.fillText(`${s.className.toUpperCase()}  ${(s.probability*100).toFixed(0)}%`, x + 16, textY + 20 + si * 18));
+    top3.forEach((s, si) => ctx.fillText(`${s.className.toUpperCase()}  ${(s.probability*100).toFixed(0)}%`, x + 20, textY + 24 + si * 18));
+
+    // Artistic Direction (wrapped text)
+    if (sub.artisticDirection) {
+      ctx.font = 'italic 12px Inter, system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      const words = sub.artisticDirection.split(' ');
+      let line = '';
+      let lineCount = 0;
+      const maxWidth = CELL_W - 40;
+      const startY = textY + 80;
+
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          ctx.fillText(line, x + 20, startY + lineCount * 18);
+          line = words[n] + ' ';
+          lineCount++;
+        } else {
+          line = testLine;
+        }
+        if (lineCount >= 4) break; // Limit to 4 lines to avoid overflow
+      }
+      ctx.fillText(line, x + 20, startY + lineCount * 18);
+    }
   }
 
   const link = document.createElement('a');
