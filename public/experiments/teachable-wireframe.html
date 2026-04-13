@@ -358,7 +358,7 @@ pointLight.position.set(5, 5, 5);
 scene.add(pointLight);
 
 // ── GEOMETRY & MATERIALS ─────────────────────────────────────────────
-const baseGeometry = new THREE.IcosahedronGeometry(2, 64); 
+const baseGeometry = new THREE.SphereGeometry(2, 32, 32); 
 const positionAttribute = baseGeometry.attributes.position;
 const originalVertices = [];
 for (let i = 0; i < positionAttribute.count; i++) {
@@ -366,20 +366,20 @@ for (let i = 0; i < positionAttribute.count; i++) {
 }
 
 const coreMaterial = new THREE.MeshBasicMaterial({
-  color: 0x0044ff,
+  color: 0x0088ff,
   wireframe: true,
   transparent: true,
-  opacity: 0.6,
+  opacity: 0.35,
 });
 const innerMesh = new THREE.Mesh(baseGeometry, coreMaterial);
 scene.add(innerMesh);
 
 // Secondary Depth Wireframe
 const shadowMaterial = new THREE.MeshBasicMaterial({
-  color: 0x0044ff,
+  color: 0x0088ff,
   wireframe: true,
   transparent: true,
-  opacity: 0.15,
+  opacity: 0.1,
 });
 const shadowMesh = new THREE.Mesh(baseGeometry, shadowMaterial);
 shadowMesh.scale.setScalar(1.03);
