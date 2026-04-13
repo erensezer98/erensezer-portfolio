@@ -1,18 +1,23 @@
 import { NextResponse } from 'next/server';
 
 const SYSTEM_PROMPT = `You are an artistic director giving direct feedback to architecture and design students.
-Your response has two parts — keep the total under 40 words:
-1. One sentence describing what you see in the photo (or the space type if no image).
-2. One sentence describing a single physical installation that embodies the top three concept words — name all three explicitly.
-Only suggest always-visible sculptures, structures, or materials. No lighting, projection, screens, sensors, or electronics.`;
+Structure your response in exactly this format — no headers, no bullet points, just plain text paragraphs:
+
+First sentence: Describe what you see in the space (or space type if no image), in one sentence.
+
+Next three sentences: Each sentence focuses on exactly one of the top three concept words. Name the concept word explicitly in that sentence and explain how a specific physical element of the installation embodies it.
+
+Final sentence: Summarise what the complete installation looks like and how all three concepts come together as a unified piece.
+
+Only suggest always-visible physical installations — sculptures, structures, suspended objects, surfaces, materials. No lighting, projection, screens, sensors, or electronics. Be direct and specific, never poetic.`;
 
 // ── GEMINI (primary — vision capable) ────────────────────────────────
 const GEMINI_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash'];
 
 async function tryGemini(base64Data: string | null, scores: string, geminiKey: string): Promise<string> {
   const userPrompt = base64Data
-    ? `Concept scores:\n${scores}\n\nDescribe the space in one sentence, then propose one installation that embodies the top three concepts. Name all three concepts. Max 40 words total.`
-    : `Concept scores:\n${scores}\n\nDescribe the space type briefly in one sentence, then propose one installation that embodies the top three concepts. Name all three concepts. Max 40 words total.`;
+    ? `Concept scores:\n${scores}\n\nFollow the exact format in your instructions: (1) one sentence on what you see, (2) three sentences each dedicated to one of the top three concept words, (3) one summary sentence on the full installation.`
+    : `Concept scores:\n${scores}\n\nFollow the exact format in your instructions: (1) one sentence on the space type, (2) three sentences each dedicated to one of the top three concept words, (3) one summary sentence on the full installation.`;
 
   for (const model of GEMINI_MODELS) {
     const parts: object[] = [];
@@ -27,7 +32,7 @@ async function tryGemini(base64Data: string | null, scores: string, geminiKey: s
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
           contents: [{ parts }],
-          generationConfig: { maxOutputTokens: 200, thinkingConfig: { thinkingBudget: 0 } },
+          generationConfig: { maxOutputTokens: 400, thinkingConfig: { thinkingBudget: 0 } },
         }),
       }
     );
@@ -48,7 +53,7 @@ async function tryGemini(base64Data: string | null, scores: string, geminiKey: s
 
 // ── LLAMA FALLBACK (scores only, no vision) ───────────────────────────
 async function tryLlama(scores: string, hfKey: string): Promise<string> {
-  const prompt = `Concept scores:\n${scores}\n\nDescribe the space type briefly in one sentence, then propose one installation that embodies the top three concepts. Name all three concepts. Max 40 words total.`;
+  const prompt = `Concept scores:\n${scores}\n\nFollow the exact format in your instructions: (1) one sentence on the space type, (2) three sentences each dedicated to one of the top three concept words, (3) one summary sentence on the full installation.`;
 
   const res = await fetch('https://router.huggingface.co/novita/v1/chat/completions', {
     method: 'POST',
@@ -59,7 +64,7 @@ async function tryLlama(scores: string, hfKey: string): Promise<string> {
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: prompt },
       ],
-      max_tokens: 200,
+      max_tokens: 400,
       temperature: 0.7,
     }),
   });
