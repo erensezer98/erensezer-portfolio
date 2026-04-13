@@ -358,7 +358,7 @@ pointLight.position.set(5, 5, 5);
 scene.add(pointLight);
 
 // ── GEOMETRY & MATERIALS ─────────────────────────────────────────────
-const baseGeometry = new THREE.IcosahedronGeometry(2, 24); 
+const baseGeometry = new THREE.IcosahedronGeometry(2, 64); 
 const positionAttribute = baseGeometry.attributes.position;
 const originalVertices = [];
 for (let i = 0; i < positionAttribute.count; i++) {
@@ -375,18 +375,12 @@ const coreMaterial = new THREE.MeshPhysicalMaterial({
 const innerMesh = new THREE.Mesh(baseGeometry, coreMaterial);
 scene.add(innerMesh);
 
-// SURGICAL OUTLINE (Perfect Visibility)
-const edgeGeo = new THREE.EdgesGeometry(baseGeometry, 15);
-const edgeMat = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.15 });
-const edgeLines = new THREE.LineSegments(edgeGeo, edgeMat);
-scene.add(edgeLines);
-
 // VIBRANT WIREFRAME (Structural Layer)
 const wireMat = new THREE.MeshBasicMaterial({ 
-  color: 0xffffff, // Luminous White
+  color: 0xffffff, 
   wireframe: true, 
   transparent: true, 
-  opacity: 0.5, // Increased for visibility
+  opacity: 0.6,
   blending: THREE.NormalBlending
 });
 const wireMesh = new THREE.Mesh(baseGeometry, wireMat);
@@ -461,19 +455,27 @@ function animate() {
   
   for (let i = 0; i < positions.count; i++) {
     const v = originalVertices[i];
-    const noiseFreq = 1.0 + (current.mechanism * 6.0);
-    const noiseAmp = 0.25 * (1.0 - current.rest);
+    const noiseFreq = 0.8 + (current.mechanism * 4.0);
+    const noiseAmp = 0.6 * (1.0 - current.rest);
     
-    let displacement = Math.sin(v.x * noiseFreq + time) * 
-                       Math.cos(v.y * noiseFreq + time) * 
-                       Math.cos(v.z * noiseFreq + time) * noiseAmp;
+    // Smooth Spherical Displacement
+    let dist = Math.sin(v.x * noiseFreq + time) * 0.4 + 
+               Math.cos(v.y * noiseFreq * 0.8 + time * 1.2) * 0.3 + 
+               Math.sin(v.z * noiseFreq * 1.1 + time * 0.9) * 0.3;
     
-    let newX = v.x + displacement;
-    let newY = v.y + displacement;
-    let newZ = v.z + displacement;
+    let displacement = dist * noiseAmp;
+    
+    // Normal direction (vector from center)
+    const nx = v.x / 2;
+    const ny = v.y / 2;
+    const nz = v.z / 2;
+
+    let newX = v.x + nx * displacement;
+    let newY = v.y + ny * displacement;
+    let newZ = v.z + nz * displacement;
 
     // Fluid stretching (Flow)
-    if (v.y < 0) newY -= Math.abs(v.y) * current.flow * 1.5;
+    if (v.y < 0) newY -= Math.abs(v.y) * current.flow * 2.5;
     
     // Pressure elongation
     newY *= (1.0 - current.pressure * 0.5);
@@ -511,11 +513,9 @@ function animate() {
   
   const pulse = 1.0 + (Math.sin(time * 4) * current.rhythm * 0.12);
   innerMesh.scale.set(pulse, pulse, pulse);
-  edgeLines.scale.set(pulse, pulse, pulse); 
   wireMesh.scale.set(pulse * 1.01, pulse * 1.01, pulse * 1.01); // Slightly larger
 
   innerMesh.rotation.y = time * 0.15;
-  edgeLines.rotation.y = time * 0.15;
   wireMesh.rotation.y = time * 0.15;
   
   controls.update();
