@@ -295,21 +295,17 @@
     <!-- Status -->
     <div id="status">Connecting to AI engine…</div>
 
-    <!-- Classifications -->
-    <div id="classifications"></div>
+    <!-- Artistic Direction button + feedback — above percentages -->
+    <div id="llm-section" style="display:none">
+      <button id="llm-btn" disabled>Generate Artistic Direction</button>
+      <div id="llm-feedback" style="display:none"></div>
+      <button id="download-btn" style="display: none; width: 100%; padding: 12px; background: #0077cc; color: #fff; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; border-radius: 4px; margin-top: 8px;">Download Submission</button>
+    </div>
 
     <div class="divider" id="llm-divider" style="display:none"></div>
 
-    <!-- LLM Artistic Direction -->
-    <div id="llm-section" style="display:none">
-      <div id="llm-header">
-        <span id="llm-title">Artistic Direction · LLM</span>
-      </div>
-
-      <div id="llm-feedback">Analysis results will appear here after classification.</div>
-      <button id="llm-btn" disabled>Generate Artistic Direction</button>
-      <button id="download-btn" style="display: none; width: 100%; padding: 12px; background: #0081ff; color: #fff; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; border-radius: 4px; margin-top: 12px;">Download Submission</button>
-    </div>
+    <!-- Classifications -->
+    <div id="classifications"></div>
 
   </div><!-- /panel-body -->
 </div><!-- /panel -->
@@ -738,12 +734,14 @@ llmBtn.addEventListener('click', generateArtisticFeedback);
 
 async function generateArtisticFeedback() {
   if (!lastPrediction) {
+    llmFeedback.style.display = 'block';
     llmFeedback.textContent = 'Run classification first.';
     llmFeedback.className = 'error-msg';
     return;
   }
 
   llmBtn.disabled = true;
+  llmFeedback.style.display = 'block';
   llmFeedback.textContent = 'Generating artistic direction…';
   llmFeedback.className = 'thinking';
 
