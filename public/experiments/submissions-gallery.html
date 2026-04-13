@@ -198,6 +198,51 @@
       text-transform: uppercase;
       padding: 16px 40px 0;
     }
+
+    /* ── Delete button ──────────────────────────────────────────── */
+    .delete-btn {
+      margin-top: 4px;
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: transparent;
+      border: 1px solid rgba(255,60,60,0.3);
+      color: rgba(200,0,0,0.6);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.15s;
+      width: 100%;
+    }
+    .delete-btn:hover { background: rgba(255,0,0,0.06); border-color: rgba(200,0,0,0.5); color: rgba(200,0,0,0.9); }
+    .delete-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ── Card footer row ────────────────────────────────────────── */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .drive-link {
+      font-size: 9px;
+      color: rgba(0,0,0,0.35);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .drive-link:hover { color: #007aff; }
+
+    /* ── Image loading shimmer ──────────────────────────────────── */
+    .img-loading {
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
   </style>
 </head>
 <body>
@@ -222,143 +267,157 @@
 <script>
 let allSubmissions = [];
 
+// ── Load submissions ─────────────────────────────────────────────────
 async function loadSubmissions() {
-  const gallery = document.getElementById('gallery');
-  const exportBtn = document.getElementById('export-btn');
+  const gallery    = document.getElementById('gallery');
+  const exportBtn  = document.getElementById('export-btn');
   const countLabel = document.getElementById('count-label');
   gallery.innerHTML = '<div id="loading">Loading submissions…</div>';
   exportBtn.disabled = true;
   countLabel.textContent = '';
 
   try {
-    const res = await fetch('/api/submissions/list');
+    // Cache-bust so we always get fresh data
+    const res = await fetch('/api/submissions/list?t=' + Date.now());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { submissions } = await res.json();
+    const { submissions, error } = await res.json();
+    if (error) throw new Error(error);
     allSubmissions = submissions || [];
 
     gallery.innerHTML = '';
-
     if (allSubmissions.length === 0) {
       gallery.innerHTML = '<div id="empty">No submissions yet</div>';
       return;
     }
 
     countLabel.textContent = `${allSubmissions.length} submission${allSubmissions.length !== 1 ? 's' : ''}`;
-
-    for (const sub of allSubmissions) {
-      const card = buildCard(sub);
-      gallery.appendChild(card);
-    }
-
+    for (const sub of allSubmissions) gallery.appendChild(buildCard(sub));
     exportBtn.disabled = false;
   } catch (e) {
-    gallery.innerHTML = `<div id="empty">Error loading: ${e.message}</div>`;
+    gallery.innerHTML = `<div id="empty">Error: ${e.message}</div>`;
   }
 }
 
+// ── Build card ───────────────────────────────────────────────────────
 function buildCard(sub) {
   const card = document.createElement('div');
   card.className = 'card';
+  card.dataset.folderId = sub.driveFolderId || '';
 
-  // Image
+  // Image — use our server-side proxy to avoid Drive auth issues
   const imgWrap = document.createElement('div');
   imgWrap.className = 'card-image-wrap';
 
-  // Prefer Cloud ID for performance, fallback to local/dataURL
-  let blobSrc = null;
   if (sub.blobImageId) {
-    blobSrc = `https://drive.google.com/uc?export=view&id=${sub.blobImageId}`;
-  } else if (sub.blobDataUrl && sub.blobDataUrl.length > 500) {
-    blobSrc = sub.blobDataUrl;
-  } else if (sub.hasBlob) {
-    blobSrc = `/submissions/${sub.folder}/blob.png`;
-  }
+    // Shimmer placeholder while loading
+    const shimmer = document.createElement('div');
+    shimmer.className = 'img-loading';
+    imgWrap.appendChild(shimmer);
 
-  if (blobSrc) {
     const img = document.createElement('img');
-    img.src = blobSrc;
     img.alt = sub.studentName;
-    img.loading = 'lazy';
-    img.onerror = () => {
-      // If Drive blocks hotlinking, we show a placeholder or link
-      img.style.display = 'none';
-      imgWrap.innerHTML = '<div class="no-img">View on Drive below</div>';
-    };
+    img.style.display = 'none';
+    img.onload = () => { shimmer.remove(); img.style.display = 'block'; };
+    img.onerror = () => { shimmer.remove(); imgWrap.innerHTML = '<div class="no-img">Image unavailable</div>'; };
+    img.src = `/api/submissions/image/${sub.blobImageId}`;
     imgWrap.appendChild(img);
   } else {
-    const noImg = document.createElement('div');
-    noImg.className = 'no-img';
-    noImg.textContent = 'Processing…';
-    imgWrap.appendChild(noImg);
+    imgWrap.innerHTML = '<div class="no-img">No image</div>';
   }
 
   // Body
   const body = document.createElement('div');
   body.className = 'card-body';
 
-  const header = document.createElement('div');
-  header.style.display = 'flex';
-  header.style.justifyContent = 'space-between';
-  header.style.alignItems = 'flex-start';
-  header.style.gap = '8px';
-
+  // Name + date row
+  const headerRow = document.createElement('div');
+  headerRow.style.cssText = 'display:flex;justify-content:space-between;align-items:baseline;gap:8px;';
   const name = document.createElement('div');
   name.className = 'card-name';
   name.textContent = sub.studentName;
-
   const date = document.createElement('div');
-  date.style.fontSize = '9px';
-  date.style.color = 'rgba(0,0,0,0.3)';
-  date.style.textTransform = 'uppercase';
-  date.style.letterSpacing = '0.05em';
-  date.textContent = sub.timestamp ? new Date(sub.timestamp).toLocaleString(undefined, {
-    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-  }) : '';
-
-  header.appendChild(name);
-  header.appendChild(date);
-  body.appendChild(header);
+  date.style.cssText = 'font-size:9px;color:rgba(0,0,0,0.3);text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;';
+  date.textContent = sub.timestamp ? new Date(sub.timestamp).toLocaleString(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+  headerRow.append(name, date);
+  body.appendChild(headerRow);
 
   // Top 3 scores
-  const scoresEl = document.createElement('div');
-  scoresEl.className = 'card-scores';
   const top3 = [...(sub.scores || [])].sort((a, b) => b.probability - a.probability).slice(0, 3);
-  for (const s of top3) {
-    const item = document.createElement('div');
-    item.className = 'score-item';
-    item.innerHTML = `<span class="score-name">${escHtml(s.className)}</span><span class="score-pct">${(s.probability * 100).toFixed(0)}%</span>`;
-    scoresEl.appendChild(item);
+  if (top3.length) {
+    const scoresEl = document.createElement('div');
+    scoresEl.className = 'card-scores';
+    for (const s of top3) {
+      const item = document.createElement('div');
+      item.className = 'score-item';
+      item.innerHTML = `<span class="score-name">${escHtml(s.className)}</span><span class="score-pct">${(s.probability * 100).toFixed(0)}%</span>`;
+      scoresEl.appendChild(item);
+    }
+    body.appendChild(scoresEl);
   }
-  if (top3.length) body.appendChild(scoresEl);
 
   // Artistic direction
-  const direction = document.createElement('div');
-  direction.className = 'card-direction';
   const text = sub.artisticDirection || '';
-  direction.textContent = text;
-  if (text) body.appendChild(direction);
-
-  // Drive Link
-  if (sub.driveFolderId) {
-    const link = document.createElement('a');
-    link.href = `https://drive.google.com/drive/folders/${sub.driveFolderId}`;
-    link.target = '_blank';
-    link.style.fontSize = '9px';
-    link.style.color = '#007aff';
-    link.style.textDecoration = 'none';
-    link.style.marginTop = '8px';
-    link.style.display = 'inline-block';
-    link.style.textTransform = 'uppercase';
-    link.style.letterSpacing = '0.05em';
-    link.innerHTML = 'View on Drive ↗';
-    body.appendChild(link);
+  if (text) {
+    const dir = document.createElement('div');
+    dir.className = 'card-direction';
+    dir.textContent = text;
+    body.appendChild(dir);
   }
 
-  card.appendChild(imgWrap);
-  card.appendChild(body);
+  // Footer: Drive link + delete
+  const footer = document.createElement('div');
+  footer.className = 'card-footer';
+
+  if (sub.driveFolderId) {
+    const driveLink = document.createElement('a');
+    driveLink.className = 'drive-link';
+    driveLink.href = `https://drive.google.com/drive/folders/${sub.driveFolderId}`;
+    driveLink.target = '_blank';
+    driveLink.textContent = 'View on Drive ↗';
+    footer.appendChild(driveLink);
+  } else {
+    footer.appendChild(document.createElement('span'));
+  }
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'delete-btn';
+  delBtn.textContent = 'Delete';
+  delBtn.onclick = () => deleteSubmission(sub.driveFolderId, card, delBtn);
+  footer.appendChild(delBtn);
+  body.appendChild(footer);
+
+  card.append(imgWrap, body);
   return card;
 }
 
+// ── Delete ───────────────────────────────────────────────────────────
+async function deleteSubmission(driveFolderId, cardEl, btn) {
+  if (!driveFolderId) return;
+  if (!confirm('Delete this submission permanently from Drive?')) return;
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+  try {
+    const res = await fetch('/api/submissions/delete', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ driveFolderId }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    cardEl.style.transition = 'opacity 0.3s';
+    cardEl.style.opacity = '0';
+    setTimeout(() => { cardEl.remove(); updateCount(); }, 300);
+  } catch (e) {
+    alert('Delete failed: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Delete';
+  }
+}
+
+function updateCount() {
+  const cards = document.querySelectorAll('.card').length;
+  document.getElementById('count-label').textContent = `${cards} submission${cards !== 1 ? 's' : ''}`;
+  if (cards === 0) document.getElementById('gallery').innerHTML = '<div id="empty">No submissions yet</div>';
+}
 
 function escHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -370,95 +429,62 @@ document.getElementById('export-btn').addEventListener('click', async () => {
   btn.disabled = true;
   btn.textContent = 'Generating…';
 
-  const COLS = 3;
-  const CELL_W = 400;
-  const CELL_H = 520;
-  const PAD = 32;
-  const IMG_SIZE = 320;
-  const HEADER_H = 80;
-
+  const COLS = 3, CELL_W = 400, CELL_H = 520, PAD = 32, IMG_SIZE = 320, HEADER_H = 80;
   const rows = Math.ceil(allSubmissions.length / COLS);
-  const canvasW = COLS * CELL_W + (COLS + 1) * PAD;
-  const canvasH = HEADER_H + rows * (CELL_H + PAD) + PAD;
-
   const canvas = document.createElement('canvas');
-  canvas.width = canvasW;
-  canvas.height = canvasH;
+  canvas.width  = COLS * CELL_W + (COLS + 1) * PAD;
+  canvas.height = HEADER_H + rows * (CELL_H + PAD) + PAD;
   const ctx = canvas.getContext('2d');
 
-  // Background
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvasW, canvasH);
-
-  // Header
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = '#0a0a0a';
   ctx.font = '500 28px Inter, system-ui, sans-serif';
   ctx.fillText('Workshop · Spatial Fingerprints', PAD, 52);
 
-  // Load all images first, in parallel
-  const imagePromises = allSubmissions.map(sub => {
-    return new Promise(resolve => {
-      const src = sub.blobDataUrl || (sub.hasBlob ? `/submissions/${sub.folder}/blob.png` : null);
-      if (!src) { resolve(null); return; }
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
-      img.src = src;
-    });
-  });
-
-  const images = await Promise.all(imagePromises);
+  // Load images via proxy
+  const images = await Promise.all(allSubmissions.map(sub => new Promise(resolve => {
+    if (!sub.blobImageId) return resolve(null);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = `/api/submissions/image/${sub.blobImageId}`;
+  })));
 
   for (let i = 0; i < allSubmissions.length; i++) {
     const sub = allSubmissions[i];
-    const col = i % COLS;
-    const row = Math.floor(i / COLS);
+    const col = i % COLS, row = Math.floor(i / COLS);
     const x = PAD + col * (CELL_W + PAD);
     const y = HEADER_H + PAD + row * (CELL_H + PAD);
 
-    // Cell background + border
     ctx.fillStyle = '#fafafa';
     ctx.fillRect(x, y, CELL_W, CELL_H);
     ctx.strokeStyle = 'rgba(0,0,0,0.08)';
     ctx.lineWidth = 1;
     ctx.strokeRect(x, y, CELL_W, CELL_H);
 
-    // Blob image (centered in cell)
-    const imgX = x + (CELL_W - IMG_SIZE) / 2;
-    const imgY = y + 16;
+    const imgX = x + (CELL_W - IMG_SIZE) / 2, imgY = y + 16;
     if (images[i]) {
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = '#fff';
       ctx.fillRect(imgX, imgY, IMG_SIZE, IMG_SIZE);
       ctx.drawImage(images[i], imgX, imgY, IMG_SIZE, IMG_SIZE);
     } else {
       ctx.fillStyle = '#f0f0f0';
       ctx.fillRect(imgX, imgY, IMG_SIZE, IMG_SIZE);
-      ctx.fillStyle = 'rgba(0,0,0,0.3)';
-      ctx.font = '11px Inter, system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('No Image', imgX + IMG_SIZE / 2, imgY + IMG_SIZE / 2);
-      ctx.textAlign = 'left';
     }
 
-    const textStartY = y + 16 + IMG_SIZE + 16;
-
-    // Student name
+    const textY = y + 16 + IMG_SIZE + 20;
     ctx.fillStyle = '#0a0a0a';
     ctx.font = '500 15px Inter, system-ui, sans-serif';
-    ctx.fillText(sub.studentName, x + 16, textStartY);
+    ctx.fillText(sub.studentName, x + 16, textY);
 
-    // Top 3 scores
-    const top3 = [...(sub.scores || [])].sort((a, b) => b.probability - a.probability).slice(0, 3);
+    const top3 = [...(sub.scores||[])].sort((a,b)=>b.probability-a.probability).slice(0,3);
     ctx.font = '11px Inter, system-ui, sans-serif';
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    top3.forEach((s, si) => {
-      const lineY = textStartY + 22 + si * 18;
-      ctx.fillText(`${s.className.toUpperCase()}  ${(s.probability * 100).toFixed(0)}%`, x + 16, lineY);
-    });
+    top3.forEach((s, si) => ctx.fillText(`${s.className.toUpperCase()}  ${(s.probability*100).toFixed(0)}%`, x + 16, textY + 20 + si * 18));
   }
 
-  // Trigger download
   const link = document.createElement('a');
   link.download = 'spatial-fingerprints-gallery.png';
   link.href = canvas.toDataURL('image/png', 1.0);
@@ -469,7 +495,6 @@ document.getElementById('export-btn').addEventListener('click', async () => {
 });
 
 document.getElementById('refresh-btn').addEventListener('click', loadSubmissions);
-
 loadSubmissions();
 </script>
 </body>
