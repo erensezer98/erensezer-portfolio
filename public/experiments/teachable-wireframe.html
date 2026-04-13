@@ -367,15 +367,18 @@ for (let i = 0; i < positionAttribute.count; i++) {
 
 const coreMaterial = new THREE.MeshPhysicalMaterial({
   color: 0x011333,
-  metalness: 0.2,
-  roughness: 0.1,
+  metalness: 0.1,
+  roughness: 0.05,
+  transmission: 0.6, // Liquid transparency
+  thickness: 3.0,    // Interior depth
   transparent: true,
-  opacity: 0.95,
+  opacity: 0.8,
 });
 const innerMesh = new THREE.Mesh(baseGeometry, coreMaterial);
 scene.add(innerMesh);
 
-// VIBRANT WIREFRAME (Structural Layer)
+// Wireframe removed as requested
+/* 
 const wireMat = new THREE.MeshBasicMaterial({ 
   color: 0xffffff, 
   wireframe: true, 
@@ -384,7 +387,8 @@ const wireMat = new THREE.MeshBasicMaterial({
   blending: THREE.NormalBlending
 });
 const wireMesh = new THREE.Mesh(baseGeometry, wireMat);
-scene.add(wireMesh);
+scene.add(wireMesh); 
+*/
 
 // VORTEX TRAILS
 const TRAIL_COUNT = 12;
@@ -455,13 +459,21 @@ function animate() {
   
   for (let i = 0; i < positions.count; i++) {
     const v = originalVertices[i];
-    const noiseFreq = 0.8 + (current.mechanism * 4.0);
-    const noiseAmp = 0.6 * (1.0 - current.rest);
+    const noiseFreq = 1.2 + (current.mechanism * 6.0); // Higher frequency for radical distortion
+    const noiseAmp = 0.5 * (1.0 - current.rest);
     
-    // Smooth Spherical Displacement
-    let dist = Math.sin(v.x * noiseFreq + time) * 0.4 + 
-               Math.cos(v.y * noiseFreq * 0.8 + time * 1.2) * 0.3 + 
-               Math.sin(v.z * noiseFreq * 1.1 + time * 0.9) * 0.3;
+    // Layered Radical Distortion
+    let dist1 = Math.sin(v.x * noiseFreq + time) * 0.4 + 
+                Math.cos(v.y * (noiseFreq * 1.5) + time * 1.2) * 0.3 + 
+                Math.sin(v.z * (noiseFreq * 0.8) + time * 0.9) * 0.3;
+    
+    // Higher order interference for more "radical" liquid movement
+    let dist2 = Math.sin(v.x * (noiseFreq * 2.5) - time * 0.5) * 0.15;
+    
+    let dist = dist1 + dist2;
+    
+    // Non-linear power to sharpen the peaks of the distortion
+    dist = Math.sign(dist) * Math.pow(Math.abs(dist), 0.85);
     
     let displacement = dist * noiseAmp;
     
@@ -513,10 +525,8 @@ function animate() {
   
   const pulse = 1.0 + (Math.sin(time * 4) * current.rhythm * 0.12);
   innerMesh.scale.set(pulse, pulse, pulse);
-  wireMesh.scale.set(pulse * 1.01, pulse * 1.01, pulse * 1.01); // Slightly larger
 
   innerMesh.rotation.y = time * 0.15;
-  wireMesh.rotation.y = time * 0.15;
   
   controls.update();
   composer.render(); 
