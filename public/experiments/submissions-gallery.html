@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workshop · Spatial Fingerprints</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --text-primary: #0a0a0a;
+      --text-muted: rgba(0,0,0,0.5);
+      --border: rgba(0,0,0,0.08);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    #page-header {
+      padding: 40px 40px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    #page-header .eyebrow {
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    #page-header h1 {
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    #header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .action-btn {
+      padding: 9px 16px;
+      font-family: inherit;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: opacity 0.15s;
+    }
+
+    #refresh-btn {
+      background: transparent;
+      border: 1px solid rgba(0,0,0,0.15);
+      color: var(--text-primary);
+    }
+    #refresh-btn:hover { background: rgba(0,0,0,0.04); }
+
+    #export-btn {
+      background: #000;
+      border: none;
+      color: #fff;
+    }
+    #export-btn:hover { opacity: 0.8; }
+    #export-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ── Grid ───────────────────────────────────────────────────── */
+    #gallery {
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+
+    @media (max-width: 900px) {
+      #gallery { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      #gallery { grid-template-columns: 1fr; }
+      #page-header { padding: 24px; }
+      #gallery { padding: 24px; }
+    }
+
+    /* ── Card ───────────────────────────────────────────────────── */
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .card-image-wrap {
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .card-image-wrap .no-img {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .card-body {
+      padding: 16px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-name {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .card-scores {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .score-item {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .score-name {
+      text-transform: uppercase;
+    }
+
+    .score-pct {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-direction {
+      font-size: 11px;
+      font-style: italic;
+      color: var(--text-muted);
+      line-height: 1.65;
+      border-left: 2px solid rgba(0,0,0,0.08);
+      padding-left: 10px;
+    }
+
+    /* ── States ─────────────────────────────────────────────────── */
+    #loading, #empty {
+      grid-column: 1 / -1;
+      padding: 80px 0;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    #count-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 16px 40px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div id="page-header">
+  <div>
+    <div class="eyebrow">Workshop</div>
+    <h1>Spatial Fingerprints</h1>
+  </div>
+  <div id="header-actions">
+    <button class="action-btn" id="refresh-btn">Refresh</button>
+    <button class="action-btn" id="export-btn" disabled>Generate Gallery PNG</button>
+  </div>
+</div>
+
+<div id="count-label"></div>
+
+<div id="gallery">
+  <div id="loading">Loading submissions…</div>
+</div>
+
+<script>
+let allSubmissions = [];
+
+async function loadSubmissions() {
+  const gallery = document.getElementById('gallery');
+  const exportBtn = document.getElementById('export-btn');
+  const countLabel = document.getElementById('count-label');
+  gallery.innerHTML = '<div id="loading">Loading submissions…</div>';
+  exportBtn.disabled = true;
+  countLabel.textContent = '';
+
+  try {
+    const res = await fetch('/api/submissions/list');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { submissions } = await res.json();
+    allSubmissions = submissions || [];
+
+    gallery.innerHTML = '';
+
+    if (allSubmissions.length === 0) {
+      gallery.innerHTML = '<div id="empty">No submissions yet</div>';
+      return;
+    }
+
+    countLabel.textContent = `${allSubmissions.length} submission${allSubmissions.length !== 1 ? 's' : ''}`;
+
+    for (const sub of allSubmissions) {
+      const card = buildCard(sub);
+      gallery.appendChild(card);
+    }
+
+    exportBtn.disabled = false;
+  } catch (e) {
+    gallery.innerHTML = `<div id="empty">Error loading: ${e.message}</div>`;
+  }
+}
+
+function buildCard(sub) {
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  // Image
+  const imgWrap = document.createElement('div');
+  imgWrap.className = 'card-image-wrap';
+
+  if (sub.hasBlob) {
+    const img = document.createElement('img');
+    img.src = `/submissions/${sub.folder}/blob.png`;
+    img.alt = sub.studentName;
+    img.loading = 'lazy';
+    imgWrap.appendChild(img);
+  } else {
+    const noImg = document.createElement('div');
+    noImg.className = 'no-img';
+    noImg.textContent = 'No image';
+    imgWrap.appendChild(noImg);
+  }
+
+  // Body
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  const name = document.createElement('div');
+  name.className = 'card-name';
+  name.textContent = sub.studentName;
+
+  // Top 3 scores
+  const scoresEl = document.createElement('div');
+  scoresEl.className = 'card-scores';
+  const top3 = [...(sub.scores || [])].sort((a, b) => b.probability - a.probability).slice(0, 3);
+  for (const s of top3) {
+    const item = document.createElement('div');
+    item.className = 'score-item';
+    item.innerHTML = `<span class="score-name">${escHtml(s.className)}</span><span class="score-pct">${(s.probability * 100).toFixed(0)}%</span>`;
+    scoresEl.appendChild(item);
+  }
+
+  // Artistic direction
+  const direction = document.createElement('div');
+  direction.className = 'card-direction';
+  const maxChars = 200;
+  const text = sub.artisticDirection || '';
+  direction.textContent = text.length > maxChars ? text.slice(0, maxChars) + '…' : text;
+
+  body.appendChild(name);
+  if (top3.length) body.appendChild(scoresEl);
+  if (text) body.appendChild(direction);
+
+  card.appendChild(imgWrap);
+  card.appendChild(body);
+  return card;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ── Gallery PNG Export ───────────────────────────────────────────────
+document.getElementById('export-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('export-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+
+  const COLS = 3;
+  const CELL_W = 400;
+  const CELL_H = 520;
+  const PAD = 32;
+  const IMG_SIZE = 320;
+  const HEADER_H = 80;
+
+  const rows = Math.ceil(allSubmissions.length / COLS);
+  const canvasW = COLS * CELL_W + (COLS + 1) * PAD;
+  const canvasH = HEADER_H + rows * (CELL_H + PAD) + PAD;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = canvasW;
+  canvas.height = canvasH;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  // Header
+  ctx.fillStyle = '#0a0a0a';
+  ctx.font = '500 28px Inter, system-ui, sans-serif';
+  ctx.fillText('Workshop · Spatial Fingerprints', PAD, 52);
+
+  // Load all images first, in parallel
+  const imagePromises = allSubmissions.map(sub => {
+    return new Promise(resolve => {
+      if (!sub.hasBlob) { resolve(null); return; }
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = `/submissions/${sub.folder}/blob.png`;
+    });
+  });
+
+  const images = await Promise.all(imagePromises);
+
+  for (let i = 0; i < allSubmissions.length; i++) {
+    const sub = allSubmissions[i];
+    const col = i % COLS;
+    const row = Math.floor(i / COLS);
+    const x = PAD + col * (CELL_W + PAD);
+    const y = HEADER_H + PAD + row * (CELL_H + PAD);
+
+    // Cell background + border
+    ctx.fillStyle = '#fafafa';
+    ctx.fillRect(x, y, CELL_W, CELL_H);
+    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, CELL_W, CELL_H);
+
+    // Blob image (centered in cell)
+    const imgX = x + (CELL_W - IMG_SIZE) / 2;
+    const imgY = y + 16;
+    if (images[i]) {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(imgX, imgY, IMG_SIZE, IMG_SIZE);
+      ctx.drawImage(images[i], imgX, imgY, IMG_SIZE, IMG_SIZE);
+    } else {
+      ctx.fillStyle = '#f0f0f0';
+      ctx.fillRect(imgX, imgY, IMG_SIZE, IMG_SIZE);
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.font = '11px Inter, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('No Image', imgX + IMG_SIZE / 2, imgY + IMG_SIZE / 2);
+      ctx.textAlign = 'left';
+    }
+
+    const textStartY = y + 16 + IMG_SIZE + 16;
+
+    // Student name
+    ctx.fillStyle = '#0a0a0a';
+    ctx.font = '500 15px Inter, system-ui, sans-serif';
+    ctx.fillText(sub.studentName, x + 16, textStartY);
+
+    // Top 3 scores
+    const top3 = [...(sub.scores || [])].sort((a, b) => b.probability - a.probability).slice(0, 3);
+    ctx.font = '11px Inter, system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    top3.forEach((s, si) => {
+      const lineY = textStartY + 22 + si * 18;
+      ctx.fillText(`${s.className.toUpperCase()}  ${(s.probability * 100).toFixed(0)}%`, x + 16, lineY);
+    });
+  }
+
+  // Trigger download
+  const link = document.createElement('a');
+  link.download = 'spatial-fingerprints-gallery.png';
+  link.href = canvas.toDataURL('image/png', 1.0);
+  link.click();
+
+  btn.textContent = 'Generate Gallery PNG';
+  btn.disabled = false;
+});
+
+document.getElementById('refresh-btn').addEventListener('click', loadSubmissions);
+
+loadSubmissions();
+</script>
+</body>
+</html>
