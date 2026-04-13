@@ -1,19 +1,18 @@
 import { NextResponse } from 'next/server';
 
-const SYSTEM_PROMPT = `You are an artistic director for interactive installations, giving direct feedback to architecture and design students.
-Be concise and practical. No poetry, no metaphors — just clear, specific ideas grounded in the actual space.
-Suggest physical, always-visible installations: sculptures, hung objects, surfaces, structures, materials — things that exist in daylight without any power source.
-Never suggest lighting, projection, screens, sensors, or electronics.
-The student's space has been scored against a set of concepts. You MUST reference the highest-scoring concept words by name in your response, explaining how they are embodied in the installation idea.
-Give 2–3 short sentences maximum.`;
+const SYSTEM_PROMPT = `You are an artistic director giving direct feedback to architecture and design students.
+Your response has two parts — keep the total under 40 words:
+1. One sentence describing what you see in the photo (or the space type if no image).
+2. One sentence describing a single physical installation that embodies the top three concept words — name all three explicitly.
+Only suggest always-visible sculptures, structures, or materials. No lighting, projection, screens, sensors, or electronics.`;
 
 // ── GEMINI (primary — vision capable) ────────────────────────────────
 const GEMINI_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash'];
 
 async function tryGemini(base64Data: string | null, scores: string, geminiKey: string): Promise<string> {
   const userPrompt = base64Data
-    ? `Concept scores from the student's Teachable Machine analysis:\n${scores}\n\nLook at this photo of the student's space. Suggest a physical installation that reflects the highest-scoring concepts above — name those concepts explicitly in your response. Be brief and direct. End with one concrete action the student can take.`
-    : `Concept scores from the student's Teachable Machine analysis:\n${scores}\n\nSuggest a physical installation that reflects the highest-scoring concepts — name those concepts explicitly in your response. Be brief and direct. End with one concrete action the student can take.`;
+    ? `Concept scores:\n${scores}\n\nDescribe the space in one sentence, then propose one installation that embodies the top three concepts. Name all three concepts. Max 40 words total.`
+    : `Concept scores:\n${scores}\n\nDescribe the space type briefly in one sentence, then propose one installation that embodies the top three concepts. Name all three concepts. Max 40 words total.`;
 
   for (const model of GEMINI_MODELS) {
     const parts: object[] = [];
@@ -28,7 +27,7 @@ async function tryGemini(base64Data: string | null, scores: string, geminiKey: s
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
           contents: [{ parts }],
-          generationConfig: { maxOutputTokens: 800, thinkingConfig: { thinkingBudget: 0 } },
+          generationConfig: { maxOutputTokens: 200, thinkingConfig: { thinkingBudget: 0 } },
         }),
       }
     );
@@ -49,7 +48,7 @@ async function tryGemini(base64Data: string | null, scores: string, geminiKey: s
 
 // ── LLAMA FALLBACK (scores only, no vision) ───────────────────────────
 async function tryLlama(scores: string, hfKey: string): Promise<string> {
-  const prompt = `Concept scores from the student's Teachable Machine analysis:\n${scores}\n\nSuggest a physical installation that reflects the highest-scoring concepts — name those concepts explicitly in your response. Be brief and direct. End with one concrete action the student can take.`;
+  const prompt = `Concept scores:\n${scores}\n\nDescribe the space type briefly in one sentence, then propose one installation that embodies the top three concepts. Name all three concepts. Max 40 words total.`;
 
   const res = await fetch('https://router.huggingface.co/novita/v1/chat/completions', {
     method: 'POST',
@@ -60,7 +59,7 @@ async function tryLlama(scores: string, hfKey: string): Promise<string> {
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: prompt },
       ],
-      max_tokens: 800,
+      max_tokens: 200,
       temperature: 0.7,
     }),
   });
