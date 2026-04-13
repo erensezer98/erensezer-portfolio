@@ -365,17 +365,25 @@ for (let i = 0; i < positionAttribute.count; i++) {
   originalVertices.push(new THREE.Vector3().fromBufferAttribute(positionAttribute, i));
 }
 
-const coreMaterial = new THREE.MeshPhysicalMaterial({
-  color: 0x011333,
-  metalness: 0.1,
-  roughness: 0.05,
-  transmission: 0.6, // Liquid transparency
-  thickness: 3.0,    // Interior depth
+const coreMaterial = new THREE.MeshBasicMaterial({
+  color: 0x000000,
+  wireframe: true,
   transparent: true,
-  opacity: 0.8,
+  opacity: 0.6,
 });
 const innerMesh = new THREE.Mesh(baseGeometry, coreMaterial);
 scene.add(innerMesh);
+
+// Secondary Depth Wireframe
+const shadowMaterial = new THREE.MeshBasicMaterial({
+  color: 0x000000,
+  wireframe: true,
+  transparent: true,
+  opacity: 0.15,
+});
+const shadowMesh = new THREE.Mesh(baseGeometry, shadowMaterial);
+shadowMesh.scale.setScalar(1.03);
+scene.add(shadowMesh);
 
 // Wireframe removed as requested
 /* 
@@ -416,14 +424,9 @@ for (let i = 0; i < TRAIL_COUNT; i++) {
 
 // ── POST-PROCESSING (BLOOM) ──────────────────────────────────────────
 const renderScene = new THREE.RenderPass(scene, camera);
-const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-bloomPass.threshold = 0.5; // Only bloom the brightest spots
-bloomPass.strength = 0.45; // Slightly higher for white wire glow
-bloomPass.radius = 0.4;
-
 const composer = new THREE.EffectComposer(renderer);
 composer.addPass(renderScene);
-composer.addPass(bloomPass);
+// Bloom disabled for white background visibility
 
 // ── TARGET PARAMS (mapped from AI) ───────────────────────────────────
 const target = {
@@ -518,18 +521,16 @@ function animate() {
     t.line.material.opacity = (0.05 + current.flow * 0.4) * (1.0 - current.rest * 0.5);
   });
 
-  // Material updates (Proper Liquid Glass)
-  coreMaterial.color.setHSL(0.61, 0.9, 0.12 - (current.glass * 0.02)); 
+  // Material updates (High Contrast Wireframe)
+  coreMaterial.opacity = 0.4 + (current.rest * 0.3); 
+  shadowMaterial.opacity = 0.05 + (current.rest * 0.1);
   
-  // Dynamic Glassiness: Control transmission and thickness instead of disappearing via opacity
-  coreMaterial.transmission = 0.4 + (current.glass * 0.5); // Ranges from semi-opaque to high-refraction glass
-  coreMaterial.thickness = 1.0 + (current.glass * 5.0);    // More "depth" as it becomes glassier
-  coreMaterial.roughness = 0.05 + (current.glass * 0.15);  // Slightly more surface blur for glass
-  coreMaterial.opacity = 0.92; // Maintain base volume visibility  
   const pulse = 1.0 + (Math.sin(time * 4) * current.rhythm * 0.12);
   innerMesh.scale.set(pulse, pulse, pulse);
+  shadowMesh.scale.set(pulse * 1.03, pulse * 1.03, pulse * 1.03);
 
   innerMesh.rotation.y = time * 0.15;
+  shadowMesh.rotation.y = time * 0.15;
   
   controls.update();
   composer.render(); 
