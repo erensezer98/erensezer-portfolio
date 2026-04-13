@@ -65,7 +65,7 @@ export async function GET() {
     });
 
     const folders = foldersRes.data.files || [];
-    const submissions: any[] = [];
+    const submissions: Record<string, any>[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     await Promise.all(
       folders.map(async (folder) => {

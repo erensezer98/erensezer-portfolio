@@ -35,7 +35,7 @@ function getDriveClient() {
 }
 
 async function uploadFile(
-  drive: any,
+  drive: any, // eslint-disable-line @typescript-eslint/no-explicit-any
   parentId: string,
   name: string,
   mimeType: string,
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
         try {
           masterData = JSON.parse(content.data as string);
           if (!Array.isArray(masterData)) masterData = [];
-        } catch (e) { masterData = []; }
+        } catch { masterData = []; }
       }
 
       // Add new submission to the top
