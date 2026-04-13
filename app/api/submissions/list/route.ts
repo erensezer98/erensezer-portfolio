@@ -3,6 +3,16 @@ import { google } from 'googleapis';
 
 // ── Google Drive auth (Harmonized with save route) ─────────────────
 function getDriveClient() {
+  const clientId     = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+  
+  if (clientId && clientSecret && refreshToken) {
+    const oauth2 = new google.auth.OAuth2(clientId, clientSecret, 'https://developers.google.com/oauthplayground');
+    oauth2.setCredentials({ refresh_token: refreshToken });
+    return google.drive({ version: 'v3', auth: oauth2 });
+  }
+
   const serviceAccount = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   if (serviceAccount) {
     try {
@@ -16,16 +26,6 @@ function getDriveClient() {
     } catch (e) {
       console.error('Invalid GOOGLE_SERVICE_ACCOUNT_JSON', e);
     }
-  }
-
-  const clientId     = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
-  
-  if (clientId && clientSecret && refreshToken) {
-    const oauth2 = new google.auth.OAuth2(clientId, clientSecret, 'https://developers.google.com/oauthplayground');
-    oauth2.setCredentials({ refresh_token: refreshToken });
-    return google.drive({ version: 'v3', auth: oauth2 });
   }
 
   throw new Error('Google Drive credentials not configured.');

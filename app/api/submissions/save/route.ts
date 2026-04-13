@@ -4,7 +4,18 @@ import { Readable } from 'stream';
 
 // ── Google Drive auth (Supports both Service Account and OAuth2) ─────────────────
 function getDriveClient() {
-  // Priority 1: Service Account (easier for shared folders)
+  // Priority 1: OAuth2 Refresh Token (Always use personal account if configured)
+  const clientId     = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+  
+  if (clientId && clientSecret && refreshToken) {
+    const oauth2 = new google.auth.OAuth2(clientId, clientSecret, 'https://developers.google.com/oauthplayground');
+    oauth2.setCredentials({ refresh_token: refreshToken });
+    return google.drive({ version: 'v3', auth: oauth2 });
+  }
+
+  // Priority 2: Service Account (Backup)
   const serviceAccount = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   if (serviceAccount) {
     try {
@@ -20,18 +31,7 @@ function getDriveClient() {
     }
   }
 
-  // Priority 2: OAuth2 Refresh Token (standard user auth)
-  const clientId     = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
-  
-  if (clientId && clientSecret && refreshToken) {
-    const oauth2 = new google.auth.OAuth2(clientId, clientSecret, 'https://developers.google.com/oauthplayground');
-    oauth2.setCredentials({ refresh_token: refreshToken });
-    return google.drive({ version: 'v3', auth: oauth2 });
-  }
-
-  throw new Error('Google Drive credentials not configured. Please set GOOGLE_SERVICE_ACCOUNT_JSON or (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN).');
+  throw new Error('Google Drive credentials not configured.');
 }
 
 async function uploadFile(
