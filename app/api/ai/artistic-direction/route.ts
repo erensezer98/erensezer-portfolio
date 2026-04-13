@@ -1,23 +1,20 @@
 import { NextResponse } from 'next/server';
 
-const SYSTEM_PROMPT = `You are an artistic director giving direct feedback to architecture and design students.
-Structure your response in exactly this format — no headers, no bullet points, just plain text paragraphs:
+const SYSTEM_PROMPT = `You are an architectural artistic director suggesting a physical installation to the inside of the given image's space.
+Structure your response exactly as follows:
+1. One sentence commenting on what you see in the space.
+2. For each of the top three prominent concept words provided, spend exactly one sentence describing a specific physical installation idea that embodies that word.
+3. One sentence that sums up all the installation ideas, describing how the final design should look like.
 
-First sentence: Describe what you see in the space (or space type if no image), in one sentence.
-
-Next three sentences: Each sentence focuses on exactly one of the top three concept words. Name the concept word explicitly in that sentence and explain how a specific physical element of the installation embodies it.
-
-Final sentence: Summarise what the complete installation looks like and how all three concepts come together as a unified piece.
-
-Only suggest always-visible physical installations — sculptures, structures, suspended objects, surfaces, materials. No lighting, projection, screens, sensors, or electronics. Be direct and specific, never poetic.`;
+Constraints: Only suggest physical, always-visible installations (sculptures, structures, suspended objects, surfaces, materials). No lighting, projection, screens, or electronics. Be direct and specific, never poetic.`;
 
 // ── GEMINI (primary — vision capable) ────────────────────────────────
 const GEMINI_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash'];
 
 async function tryGemini(base64Data: string | null, scores: string, geminiKey: string): Promise<string> {
-  const userPrompt = base64Data
-    ? `Concept scores:\n${scores}\n\nFollow the exact format in your instructions: (1) one sentence on what you see, (2) three sentences each dedicated to one of the top three concept words, (3) one summary sentence on the full installation.`
-    : `Concept scores:\n${scores}\n\nFollow the exact format in your instructions: (1) one sentence on the space type, (2) three sentences each dedicated to one of the top three concept words, (3) one summary sentence on the full installation.`;
+  const userPrompt = `Concept scores: ${scores}
+
+Follow the exact instructions: (1) one sentence commenting on what you see in the image, (2) three sentences (one for each of the top 3 words) describing installation ideas, (3) one summary sentence on the final design layout.`;
 
   for (const model of GEMINI_MODELS) {
     const parts: object[] = [];
@@ -53,7 +50,9 @@ async function tryGemini(base64Data: string | null, scores: string, geminiKey: s
 
 // ── LLAMA FALLBACK (scores only, no vision) ───────────────────────────
 async function tryLlama(scores: string, hfKey: string): Promise<string> {
-  const prompt = `Concept scores:\n${scores}\n\nFollow the exact format in your instructions: (1) one sentence on the space type, (2) three sentences each dedicated to one of the top three concept words, (3) one summary sentence on the full installation.`;
+  const prompt = `Concept scores: ${scores}
+
+Follow the exact instructions: (1) one sentence commenting on what you see in the image (or general space type based on concepts), (2) three sentences (one for each of the top 3 words) describing installation ideas, (3) one summary sentence on the final design layout.`;
 
   const res = await fetch('https://router.huggingface.co/novita/v1/chat/completions', {
     method: 'POST',
