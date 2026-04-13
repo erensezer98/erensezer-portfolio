@@ -3,13 +3,19 @@ import { google } from 'googleapis';
 import { JWT } from 'google-auth-library';
 
 function getDriveClient() {
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const key   = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-  if (!email || !key) throw new Error('Google credentials not configured');
+  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (!raw) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON not set');
+
+  let creds: { client_email: string; private_key: string };
+  try {
+    creds = JSON.parse(raw);
+  } catch {
+    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON');
+  }
 
   const auth = new JWT({
-    email,
-    key,
+    email: creds.client_email,
+    key:   creds.private_key,
     scopes: ['https://www.googleapis.com/auth/drive.file'],
   });
   return google.drive({ version: 'v3', auth });

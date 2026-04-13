@@ -4,19 +4,25 @@ import { JWT } from 'google-auth-library';
 import { Readable } from 'stream';
 
 // ── Google Drive auth (service account) ─────────────────────────────────
-// Set these in Vercel env vars / .env.local:
-//   GOOGLE_SERVICE_ACCOUNT_EMAIL   e.g. workshop@my-project.iam.gserviceaccount.com
-//   GOOGLE_PRIVATE_KEY             the private key from the JSON (with \n for newlines)
-//   GOOGLE_DRIVE_FOLDER_ID         the ID of the shared Drive folder
+// Set ONE env var in Vercel / .env.local:
+//   GOOGLE_SERVICE_ACCOUNT_JSON   — paste the entire contents of the downloaded
+//                                   service account JSON file as the value.
+//   GOOGLE_DRIVE_FOLDER_ID        — the Drive folder ID from the URL.
 
 function getDriveClient() {
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const key   = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-  if (!email || !key) throw new Error('Google credentials not configured');
+  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (!raw) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON not set');
+
+  let creds: { client_email: string; private_key: string };
+  try {
+    creds = JSON.parse(raw);
+  } catch {
+    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON');
+  }
 
   const auth = new JWT({
-    email,
-    key,
+    email: creds.client_email,
+    key:   creds.private_key,   // already has real newlines inside the JSON
     scopes: ['https://www.googleapis.com/auth/drive.file'],
   });
   return google.drive({ version: 'v3', auth });
