@@ -48,9 +48,9 @@ export const EXPERIMENTS: Experiment[] = [
     year: 2026,
     location: 'Browser-based / Teachable Machine',
     shortDescription:
-      'A Three.js wireframe sculpture that shapeshifts based on Teachable Machine image classifications.',
+      'A workshop study from Işık University that translates AI-detected water phenomena into generative architectural form factors.',
     description:
-      'This experiment bridges AI-driven vision and generative geometry. By uploading images against a pre-trained Teachable Machine model, the resulting classification probabilities directly manipulate the form factor, noise distortion, color interpolation, and kinetic behavior of a high-density 3D wireframe mesh in real time.',
+      "Conceived for a student workshop at Işık University, this experiment investigates the intersection of machine intelligence and architectural imagination. The study explores how students engage with AI-driven design prompts within a live generative environment. The system analyzes spatial scenes, identifies student-defined water phenomena, and synthesizes these inputs into architectural concepts, translating environmental 'tags' into shifting 3D geometries.",
     embedPath: '/experiments/teachable-wireframe.html',
     notes: [
       'This study uses an onboard AI engine hosted directly within the portfolio.',
