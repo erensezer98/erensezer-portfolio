@@ -112,10 +112,10 @@ export default async function RootLayout({
             ])
           }}
         />
-      </head>
-      <body className="min-h-screen flex flex-col font-sans" suppressHydrationWarning>
         {/* Secure Privacy */}
         <Script src="https://app.secureprivacy.ai/script/69de1a4e01329e2e2fffa17f.js" strategy="beforeInteractive" />
+      </head>
+      <body className="min-h-screen flex flex-col font-sans" suppressHydrationWarning>
         
         {/* Google Analytics */}
         <Script
