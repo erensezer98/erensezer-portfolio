@@ -10,10 +10,46 @@ interface ContactInput {
   email: string
   subject: string
   message: string
+  website?: string // Honeypot field
+  recaptchaToken?: string
+}
+
+async function verifyRecaptcha(token: string) {
+  const secret = process.env.RECAPTCHA_SECRET_KEY
+  if (!secret) {
+    console.error('RECAPTCHA_SECRET_KEY not found in environment.')
+    return { success: false, score: 0 }
+  }
+
+  const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `secret=${secret}&response=${token}`,
+  })
+
+  const data = await response.json()
+  return data
 }
 
 export async function submitContactForm(input: ContactInput) {
   try {
+    // 1. Honeypot check: if website is filled, it's likely a bot
+    if (input.website) {
+      console.warn('Honeypot triggered')
+      return { success: true } // Silently ignore bot submission
+    }
+
+    // 2. Google reCAPTCHA v3 check
+    if (!input.recaptchaToken) {
+      return { error: 'Security verification failed. Please try again.' }
+    }
+
+    const verification = await verifyRecaptcha(input.recaptchaToken)
+    if (!verification.success || verification.score < 0.5) {
+      console.warn('reCAPTCHA failed:', verification)
+      return { error: 'Security systems identified this message as potential spam.' }
+    }
+
     const payload = {
       name: input.name.trim(),
       email: input.email.trim(),

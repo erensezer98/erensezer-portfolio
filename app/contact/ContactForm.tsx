@@ -1,11 +1,44 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { submitContactForm } from './actions'
+import { motion, AnimatePresence } from 'framer-motion'
+
+declare global {
+  interface Window {
+    grecaptcha: any
+  }
+}
 
 export default function ContactForm() {
-  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
+  const [form, setForm] = useState({ 
+    name: '', 
+    email: '', 
+    subject: '', 
+    message: '',
+    website: '', // Honeypot
+  })
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    // Load reCAPTCHA script
+    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+    if (!siteKey) return
+
+    const script = document.createElement('script')
+    script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`
+    script.async = true
+    document.body.appendChild(script)
+
+    return () => {
+      // Cleanup script & badge
+      const badges = document.querySelectorAll('.grecaptcha-badge')
+      badges.forEach(b => b.remove())
+      const scripts = document.querySelectorAll(`script[src*="${siteKey}"]`)
+      scripts.forEach(s => s.remove())
+    }
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -13,16 +46,53 @@ export default function ContactForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setStatus('sending')
+    setErrorMessage('')
+
     try {
-      const result = await submitContactForm(form)
-      if (result.error) {
+      const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+      if (!siteKey) {
         setStatus('error')
+        setErrorMessage('reCAPTCHA site key is missing.')
         return
       }
+
+      // 1. Wait for grecaptcha to be ready and get token
+      let token = ''
+      try {
+        await new Promise((resolve, reject) => {
+          if (!window.grecaptcha) {
+            reject(new Error('reCAPTCHA not loaded'))
+            return
+          }
+          window.grecaptcha.ready(async () => {
+            token = await window.grecaptcha.execute(siteKey, { action: 'submit' })
+            resolve(token)
+          })
+        })
+      } catch (err) {
+        console.error('reCAPTCHA execution error:', err)
+        setStatus('error')
+        setErrorMessage('Security verification failed to load.')
+        return
+      }
+
+      // 2. Submit form with token
+      const result = await submitContactForm({
+        ...form,
+        recaptchaToken: token
+      })
+
+      if (result.error) {
+        setStatus('error')
+        setErrorMessage(result.error)
+        return
+      }
+
       setStatus('sent')
-      setForm({ name: '', email: '', subject: '', message: '' })
+      setForm({ name: '', email: '', subject: '', message: '', website: '' })
     } catch {
       setStatus('error')
+      setErrorMessage('Unable to send message right now.')
     }
   }
 
@@ -45,9 +115,25 @@ export default function ContactForm() {
       </p>
 
       {status === 'sent' ? (
-        <p className="text-sm text-muted">Message sent — I&apos;ll be in touch shortly.</p>
+        <motion.p 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-sm text-muted"
+        >
+          Message sent — I&apos;ll be in touch shortly.
+        </motion.p>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-10">
+          <div className="sr-only opacity-0 absolute pointer-events-none" aria-hidden="true">
+            <input 
+              tabIndex={-1} 
+              autoComplete="off" 
+              name="website" 
+              value={form.website} 
+              onChange={handleChange} 
+            />
+          </div>
+
           <div className="grid sm:grid-cols-2 gap-8">
             <div>
               <label className={labelClass}>name</label>
@@ -69,17 +155,45 @@ export default function ContactForm() {
             <textarea required name="message" value={form.message} onChange={handleChange} rows={6} placeholder="Your message…" className={`${inputClass} resize-none`} />
           </div>
 
-          {status === 'error' && (
-            <p className="text-xs text-muted">Something went wrong — please email directly.</p>
-          )}
+          <div className="flex items-center gap-6 pt-2">
+            <div className="flex-grow">
+              <button
+                type="submit"
+                disabled={status === 'sending'}
+                className="text-[13px] text-ink border-b border-ink pb-1 hover:text-muted hover:border-muted transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed group relative"
+              >
+                <span className="flex items-center gap-2">
+                  {status === 'sending' ? 'sending…' : 'send message'}
+                  <motion.span 
+                    animate={status === 'sending' ? { rotate: 360 } : {}}
+                    transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                    className={status === 'sending' ? 'inline-block' : 'hidden'}
+                  >
+                    ◌
+                  </motion.span>
+                </span>
+              </button>
+            </div>
+          </div>
 
-          <button
-            type="submit"
-            disabled={status === 'sending'}
-            className="text-[13px] text-ink border-b border-ink pb-0.5 hover:text-muted hover:border-muted transition-colors duration-200 disabled:opacity-50"
-          >
-            {status === 'sending' ? 'sending…' : 'send message'}
-          </button>
+          <AnimatePresence>
+            {status === 'error' && (
+              <motion.p 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="text-xs text-ink/70"
+              >
+                {errorMessage || 'Something went wrong — please email directly.'}
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          <p className="text-[10px] text-muted/50 leading-tight">
+            This site is protected by reCAPTCHA and the Google{' '}
+            <a href="https://policies.google.com/privacy" className="underline">Privacy Policy</a> and{' '}
+            <a href="https://policies.google.com/terms" className="underline">Terms of Service</a> apply.
+          </p>
         </form>
       )}
     </div>
