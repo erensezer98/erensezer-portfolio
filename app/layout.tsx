@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Script from 'next/script'
+import { Analytics } from '@vercel/analytics/react'
 import Navbar from '@/components/nav/Navbar'
 import ContentProtection from '@/components/ui/ContentProtection'
 import Footer from '@/components/ui/Footer'
@@ -132,6 +133,7 @@ export default async function RootLayout({
             window.dataLayer.push({event: "gtm.init", "gtm.uniqueEventId": 2});
           `}
         </Script>
+        <Analytics />
         <ContentProtection />
         <Navbar />
         <main className="flex-1" data-protect-content="true">{children}</main>

@@ -14,6 +14,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@supabase/supabase-js": "^2.44.4",
     "@types/three": "^0.165.0",
+    "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
     "framer-motion": "^11.3.8",
     "googleapis": "^171.4.0",
