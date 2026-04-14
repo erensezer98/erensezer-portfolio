@@ -58,12 +58,19 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       studentName,
+      website,
       imageBase64,
       blobImageBase64,
       blobVideoBase64,
       artisticDirection,
       scores,
     } = body;
+
+    // Honeypot check
+    if (website) {
+      console.warn('Honeypot triggered for submission:', studentName);
+      return NextResponse.json({ error: 'Bot detected' }, { status: 400 });
+    }
 
     if (!studentName || typeof studentName !== 'string') {
       return NextResponse.json({ error: 'studentName is required' }, { status: 400 });

@@ -348,6 +348,7 @@
     <!-- Submission -->
     <div id="submit-section" style="display:none; flex-direction:column; gap:12px;">
       <div style="font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(0,0,0,0.4);">Submit Work</div>
+      <div style="display:none;"><input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></div>
       <input id="student-name" type="text" placeholder="Your full name" style="width:100%; padding:10px 12px; border:1px solid rgba(0,0,0,0.15); border-radius:4px; font-family:inherit; font-size:13px; outline:none; background:#fff;">
       <div id="recording-indicator" style="display:none; font-size:10px; color:rgba(0,0,0,0.5); letter-spacing:0.06em; text-transform:uppercase;">
         <span id="recording-dot" style="display:inline-block; width:6px; height:6px; background:#ff3b30; border-radius:50%; margin-right:6px; animation: pulse 1s infinite;"></span>
@@ -902,6 +903,7 @@ submitBtn.addEventListener('click', async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         studentName: name,
+        website: document.getElementById('website').value,
         imageBase64: lastImageDataURL,
         blobImageBase64: blobImageDataUrl,
         blobVideoBase64: videoDataUrl,
