@@ -128,6 +128,7 @@ export default async function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-RHZWJSG8M3');
+            window.dataLayer.push({event: "gtm.init_consent", "gtm.uniqueEventId": 1});
             window.dataLayer.push({event: "gtm.init", "gtm.uniqueEventId": 2});
           `}
         </Script>
