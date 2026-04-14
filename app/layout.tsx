@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import Script from 'next/script'
 import Navbar from '@/components/nav/Navbar'
 import ContentProtection from '@/components/ui/ContentProtection'
 import Footer from '@/components/ui/Footer'
@@ -113,6 +114,22 @@ export default async function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col font-sans" suppressHydrationWarning>
+        {/* Secure Privacy */}
+        <Script src="https://app.secureprivacy.ai/script/69de1a4e01329e2e2fffa17f.js" strategy="beforeInteractive" />
+        
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-RHZWJSG8M3"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-RHZWJSG8M3');
+          `}
+        </Script>
         <ContentProtection />
         <Navbar />
         <main className="flex-1" data-protect-content="true">{children}</main>
