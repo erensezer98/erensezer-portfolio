@@ -95,12 +95,17 @@
                     const poses = await detector.estimatePoses(videoEl, { flipHorizontal: false });
                     if (poses.length > 0) {
                       const pose = poses[0];
-                      // TFJS BlazePose puts x,y in video coordinates. Let's normalize it to 0-1 for the desktop.
-                      const pts = pose.keypoints.slice(0, 33).map(kp => ({ 
-                        x: kp.x / videoEl.videoWidth, 
-                        y: kp.y / videoEl.videoHeight, 
-                        z: kp.z / Math.max(videoEl.videoWidth, videoEl.videoHeight)
-                      }));
+                      const vw = videoEl.videoWidth || 640;
+                      const vh = videoEl.videoHeight || 480;
+                      const pts = pose.keypoints.slice(0, 33).map((kp, i) => { 
+                        let zVal = 0;
+                        if (pose.keypoints3D && pose.keypoints3D[i] && typeof pose.keypoints3D[i].z === 'number') {
+                          zVal = pose.keypoints3D[i].z;
+                        } else if (typeof kp.z === 'number') {
+                          zVal = kp.z / Math.max(vw, vh);
+                        }
+                        return { x: kp.x / vw, y: kp.y / vh, z: zVal };
+                      });
 
                       conn.send({ pose: pts });
                       statusEl.innerText = 'Tracking active... look at the TV!';
