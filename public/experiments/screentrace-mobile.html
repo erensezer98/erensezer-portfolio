@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScreenTrace Remote</title>
+  <style>
+    body {
+      margin: 0; background: #03020f; color: white; font-family: -apple-system, sans-serif;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden;
+    }
+    .container { text-align: center; padding: 20px; width: 100%; box-sizing: border-box; }
+    h2 { font-weight: 300; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; font-size: 16px; }
+    p { color: rgba(120,220,255,0.6); font-size: 12px; letter-spacing: 1px; margin-bottom: 24px; line-height: 1.6; }
+    #status { color: #7df9ff; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
+    button {
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(120,220,255,0.25); color: rgba(120,220,255,0.8);
+      padding: 16px 32px; font-size: 14px; text-transform: uppercase; letter-spacing: 3px;
+      cursor: pointer; border-radius: 20px; transition: all 0.2s; backdrop-filter: blur(8px);
+    }
+    button:hover { border-color: rgba(120,220,255,0.8); color: #7df9ff; box-shadow: 0 0 12px rgba(125,249,255,0.2); }
+    video { position: absolute; width: 10px; height: 10px; opacity: 0.01; pointer-events: none; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675205865/pose.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="init-container" class="container">
+    <h2>ScreenTrace</h2>
+    <p>Prop your phone up facing you. It will silently motion-sense your pose</p>
+    <button id="start-btn">Start Tracking</button>
+  </div>
+
+  <div id="tracking-container" class="container" style="display: none;">
+    <div id="status">Connecting to TV...</div>
+    <video id="preview" autoplay playsinline muted></video>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search)
+    const roomId = params.get('room')
+    const startBtn = document.getElementById('start-btn')
+    const statusEl = document.getElementById('status')
+    const videoEl = document.getElementById('preview')
+
+    if (!roomId) {
+      startBtn.innerText = 'Invalid link'
+      startBtn.disabled = true
+    }
+
+    startBtn.addEventListener('click', async () => {
+      document.getElementById('init-container').style.display = 'none'
+      document.getElementById('tracking-container').style.display = 'block'
+
+      const peer = new window.Peer()
+      peer.on('open', () => {
+        const conn = peer.connect(roomId)
+
+        conn.on('open', async () => {
+          statusEl.innerText = 'Loading Pose Engine...'
+
+          const pose = new Pose({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675205865/${file}`;
+          }});
+          
+          pose.setOptions({
+            modelComplexity: 1, 
+            smoothLandmarks: true,
+            enableSegmentation: false,
+            smoothSegmentation: false,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+          });
+
+          pose.onResults((results) => {
+            if (results.poseLandmarks) {
+              const pts = results.poseLandmarks.map(lm => ({ x: lm.x, y: lm.y, z: lm.z }));
+              conn.send({ pose: pts });
+              statusEl.innerText = 'Tracking active... look at the TV!'
+            } else {
+              statusEl.innerText = 'No person detected in frame.'
+            }
+          });
+
+          const camera = new Camera(videoEl, {
+            onFrame: async () => {
+              await pose.send({image: videoEl});
+            },
+            width: 640,
+            height: 480,
+            facingMode: 'user'
+          });
+          
+          camera.start();
+        });
+
+        conn.on('error', () => {
+          statusEl.innerText = 'Connection lost.'
+        });
+      });
+    });
+  </script>
+</body>
+</html>

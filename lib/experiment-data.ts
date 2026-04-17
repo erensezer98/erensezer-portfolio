@@ -51,10 +51,10 @@ export const EXPERIMENTS: Experiment[] = [
       'A Delaunay triangulation mesh that maps the body as a living wireframe — joints become vertices, movement becomes geometry.',
     description:
       'ScreenTrace turns a human pose into a dynamic triangulated mesh. Using the 33-point MediaPipe skeleton as vertices, Bowyer-Watson Delaunay triangulation is computed each frame, filling the space between joints with depth-tinted triangles that shift and breathe with the body. The experiment explores the body as data structure — a moving point cloud that generates its own topology in real time.',
-    embedPath: '/experiments/screentrace.html',
+    embedPath: '/experiments/screentrace-desktop.html',
     notes: [
       'Four visual modes: Mesh, Edges, Depth, and Aurora — switchable at the bottom of the screen.',
-      'The animation simulates a live pose stream; the full interactive version connects an iPhone camera via WebSocket.',
+      'The animation simulates a live pose stream; the full interactive version connects an iPhone camera via PeerJS.',
     ],
   },
   {
