@@ -256,10 +256,13 @@ function getPose(t) {
 
 // Landmark → canvas pixel
 function toScreen(lm) {
-  // Map x/y to span the entire screen directly so it literally "reaches" the movement
-  // When using user-facing camera, x=0 is screen's right, x=1 is screen's left (mirrored)
-  // We flip x so it behaves like a mirror:
-  const mirrorX = 1 - lm.x;
+  // We flip x so it behaves like a mirror. 
+  // We explicitly add a micro-jitter (1/10000th variance) to x and y 
+  // to avoid collinear/overlapping AI points which break the Delaunay triangulation matrix algorithm natively.
+  const jitterX = (Math.random() - 0.5) * 0.0001;
+  const jitterY = (Math.random() - 0.5) * 0.0001;
+  const mirrorX = 1 - lm.x + jitterX;
+  const safeY = lm.y + jitterY;
   
   // Stretch them slightly outside the screen to reach corners more easily
   const paddingX = -0.05; // 5% overscan
@@ -272,7 +275,7 @@ function toScreen(lm) {
   
   return {
     x: width * paddingX + mirrorX * width * spanX,
-    y: height * paddingY + lm.y * height * spanY,
+    y: height * paddingY + safeY * height * spanY,
     z: lm.z,
   };
 }
@@ -527,38 +530,53 @@ function loop() {
   requestAnimationFrame(loop);
   t += 0.008;
 
-  drawBg(t);
+  try {
+    drawBg(t);
 
-  let pose;
-  if (livePose && (Date.now() - lastLiveTime < 1000)) {
-    // If we have live data, use it!
-    // Optional smoothing could go here, but MediaPipe has its own smoothing if smoothLandmarks=true
-    pose = livePose;
-  } else {
-    // Fall back to animated pose if disconnected/waiting
-    pose = getPose(t);
-  }
-
-  // Map to screen coordinates
-  const pts = pose.map(lm => toScreen(lm));
-
-  // Triangulate
-  const meshTris = delaunay(pts);
-  
-  if (meshTris.length > 0) {
-    const tris = meshTris.map(tri => [
-      { ...tri[0], z: pose[pts.indexOf(tri[0])]?.z ?? 0 },
-      { ...tri[1], z: pose[pts.indexOf(tri[1])]?.z ?? 0 },
-      { ...tri[2], z: pose[pts.indexOf(tri[2])]?.z ?? 0 },
-    ]);
-
-    // Render
-    switch (mode) {
-      case 'mesh':   drawMesh(tris, pts, t);   break;
-      case 'edges':  drawEdges(tris, pts, t);  break;
-      case 'depth':  drawDepth(tris, pts, t);  break;
-      case 'aurora': drawAurora(tris, pts, t); break;
+    let pose;
+    let usingLive = false;
+    
+    // Safely check live payload freshness
+    if (livePose && (Date.now() - lastLiveTime < 1000)) {
+      pose = livePose;
+      usingLive = true;
+    } else {
+      pose = getPose(t);
     }
+
+    // Map to screen coordinates
+    const pts = pose.map(lm => toScreen(lm));
+
+    // Triangulate
+    const meshTris = delaunay(pts);
+    
+    if (meshTris && meshTris.length > 0) {
+      const tris = meshTris.map(tri => [
+        { ...tri[0], z: pose[pts.indexOf(tri[0])]?.z ?? 0 },
+        { ...tri[1], z: pose[pts.indexOf(tri[1])]?.z ?? 0 },
+        { ...tri[2], z: pose[pts.indexOf(tri[2])]?.z ?? 0 },
+      ]);
+
+      // Render
+      switch (mode) {
+        case 'mesh':   drawMesh(tris, pts, t);   break;
+        case 'edges':  drawEdges(tris, pts, t);  break;
+        case 'depth':  drawDepth(tris, pts, t);  break;
+        case 'aurora': drawAurora(tris, pts, t); break;
+      }
+    } else {
+      // Fallback rendering if Triangulation fails (e.g. collinearity)
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      for (const p of pts) {
+         ctx.beginPath();
+         ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+         ctx.fill();
+      }
+    }
+  } catch (err) {
+    // Failsafe so the loop never fully crashes the UI thread
+    console.error("Render loop error: ", err);
+    livePose = null; // Purge bad payload to trigger fallback next frame
   }
 }
 
