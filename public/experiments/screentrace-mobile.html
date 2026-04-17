@@ -21,7 +21,8 @@
     button:hover { border-color: rgba(120,220,255,0.8); color: #7df9ff; box-shadow: 0 0 12px rgba(125,249,255,0.2); }
     video { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0.001; pointer-events: none; object-fit: cover; z-index: -1; }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675205865/pose.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -72,59 +73,58 @@
       peer.on('open', () => {
         const conn = peer.connect(roomId);
 
-        conn.on('open', () => {
-          statusEl.innerText = 'Camera synced. Loading AI...';
+        conn.on('open', async () => {
+          statusEl.innerText = 'Camera synced. Loading AI Engine...';
 
-          // 3. Initialize Pose Tracker lazily
-          const pose = new Pose({locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
-          }});
-          
-          pose.setOptions({
-            modelComplexity: 1, 
-            smoothLandmarks: true,
-            enableSegmentation: false,
-            smoothSegmentation: false,
-            minDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5
-          });
+          try {
+            await tf.ready();
+            const detector = await poseDetection.createDetector(poseDetection.SupportedModels.BlazePose, {
+              runtime: 'tfjs',
+              modelType: 'lite'
+            });
 
-          pose.onResults((results) => {
-            if (results.poseLandmarks) {
-              const pts = results.poseLandmarks.map(lm => ({ x: lm.x, y: lm.y, z: lm.z }));
-              conn.send({ pose: pts });
-              statusEl.innerText = 'Tracking active... look at the TV!';
-            } else {
-              if (Math.random() < 0.05) statusEl.innerText = 'No person detected in frame...';
-            }
-          });
+            statusEl.innerText = 'AI Loaded. Beginning tracking...';
 
-          // 4. Start tracking loop
-          videoEl.onloadeddata = () => {
-            let lastVideoTime = -1;
-            let isProcessing = false;
-            
-            async function trackFrame() {
-              if (videoEl.readyState >= 2 && !isProcessing && videoEl.currentTime !== lastVideoTime) {
-                isProcessing = true;
-                lastVideoTime = videoEl.currentTime;
-                try {
-                  await pose.send({ image: videoEl });
-                } catch (e) {
-                  // Ignore initial loading errors
+            videoEl.onloadeddata = () => {
+              let isProcessing = false;
+              
+              async function trackFrame() {
+                if (videoEl.readyState >= 2 && !isProcessing) {
+                  isProcessing = true;
+                  try {
+                    const poses = await detector.estimatePoses(videoEl, { flipHorizontal: false });
+                    if (poses.length > 0) {
+                      const pose = poses[0];
+                      // TFJS BlazePose puts x,y in video coordinates. Let's normalize it to 0-1 for the desktop.
+                      const pts = pose.keypoints.slice(0, 33).map(kp => ({ 
+                        x: kp.x / videoEl.videoWidth, 
+                        y: kp.y / videoEl.videoHeight, 
+                        z: kp.z / Math.max(videoEl.videoWidth, videoEl.videoHeight)
+                      }));
+
+                      conn.send({ pose: pts });
+                      statusEl.innerText = 'Tracking active... look at the TV!';
+                    } else {
+                      if (Math.random() < 0.05) statusEl.innerText = 'No person detected in frame...';
+                    }
+                  } catch (e) {
+                    // Ignore transient tracking errors
+                  }
+                  isProcessing = false;
                 }
-                isProcessing = false;
+                requestAnimationFrame(trackFrame);
               }
-              requestAnimationFrame(trackFrame);
+              trackFrame();
+            };
+            
+            if (videoEl.readyState >= 2 && videoEl.onloadeddata) {
+               videoEl.onloadeddata();
             }
-            trackFrame();
-          };
-          
-          // Trigger if already loaded
-          if (videoEl.readyState >= 2 && videoEl.onloadeddata) {
-             videoEl.onloadeddata();
-          }
 
+          } catch (e) {
+            statusEl.innerText = 'Error loading AI engine. Please refresh.';
+            console.error(e);
+          }
         });
 
         conn.on('error', () => {
